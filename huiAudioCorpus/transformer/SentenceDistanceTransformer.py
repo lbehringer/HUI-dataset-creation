@@ -13,8 +13,8 @@ class SentenceDistanceTransformer:
         if sentence1.wordsCount == 0 or sentence2.wordsCount == 0:
             return 1
         
-        sentenceString1 = "".join(sentence1.wordsWithoutChars)
-        sentenceString2 = "".join(sentence2.wordsWithoutChars)
+        sentenceString1 = "".join(sentence1.wordsWithoutPunct)
+        sentenceString2 = "".join(sentence2.wordsWithoutPunct)
 
         countCharsMax = max(len(sentenceString1) , len(sentenceString2))
         diff = LevensteinDistance(sentenceString1, sentenceString2)

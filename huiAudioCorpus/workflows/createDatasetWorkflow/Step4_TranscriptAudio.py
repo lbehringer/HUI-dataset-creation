@@ -27,19 +27,33 @@ class Step4_TranscriptAudio:
     
     def script(self):
         ids = self.audioPersistenz.getIds()
-        chunks = np.array_split(ids, self.numberWorker)
+        # TODO: Parallel crashes here
+        # chunks = np.array_split(ids, self.numberWorker)
+        # print(f"Starting parallel ASR with {self.numberWorker} jobs.")
+        # parallelResult = Parallel(n_jobs=self.numberWorker)(delayed(self.loadOneChunk)(audioIds, chunkId) for chunkId, audioIds in enumerate(chunks))
 
-        parallelResult = Parallel(n_jobs=self.numberWorker)(delayed(self.loadOneChunk)(audioIds, chunkId) for chunkId, audioIds in enumerate(chunks))
+        # results = [[sentence.id, sentence.sentence] for level in parallelResult for sentence in level]
+        results = self.loadIds(ids)
+        results = [[sentence.id, sentence.sentence] for sentence in results]
 
-        results = [[sentence.id, sentence.sentence] for level in parallelResult for sentence in level]
 
-        csv =  DataFrame(results)
-        transcripts = Transcripts(csv, 'transcripts', 'transcripts')
+        df =  DataFrame(results)
+        transcripts = Transcripts(df, 'transcripts', 'transcripts')
         self.transcriptsPersistenz.save(transcripts)
 
     def loadOneChunk(self, ids: List[str], chunkId: int):
+        print("loading one chunk")
         sentences = []
         for id in tqdm(ids, desc="Chunk " + str(chunkId) + ": "):
+            audio = self.audioPersistenz.load(id)
+            sentence = self.audioToSentenceConverter.convert(audio)
+            sentences.append(sentence)
+            print(f"Transcript for id {id}: {sentence.sentence}")
+        return sentences
+
+    def loadIds(self, ids: List[str]):
+        sentences = []
+        for id in tqdm(ids):
             audio = self.audioPersistenz.load(id)
             sentence = self.audioToSentenceConverter.convert(audio)
             sentences.append(sentence)

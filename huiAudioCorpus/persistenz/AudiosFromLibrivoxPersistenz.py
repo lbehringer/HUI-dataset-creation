@@ -21,7 +21,7 @@ class AudiosFromLibrivoxPersistenz:
 
     def save(self):
         chapters, chapterDownloadLinks = self.getChapter(self.bookName)
-        Parallel(n_jobs=-2)(delayed(self.pathUtil.copyFileFromUrl)(link ,self.savePath+ '/' + link.split('/')[-1]) for link in chapterDownloadLinks)
+        Parallel(n_jobs=4)(delayed(self.pathUtil.copyFileFromUrl)(link ,self.savePath+ '/' + link.split('/')[-1]) for link in chapterDownloadLinks)
         chapters.to_csv(self.chapterPath)
         
 

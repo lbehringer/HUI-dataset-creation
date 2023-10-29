@@ -18,6 +18,8 @@ class AudioToSentenceConverter:
     def __init__(self, use_whisper=True, whisper_decode_lang="de"):
         self.use_whisper = use_whisper
         if self.use_whisper:
+            self.whisper_sr = 16000
+            self.whisper_sr_transformer = AudioSamplingRateTransformer(targetSamplingRate=self.whisper_sr)
             self.decode_lang = whisper_decode_lang
             print("Loading Whisper model")
             self.model = whisper.load_model("small")
@@ -28,8 +30,10 @@ class AudioToSentenceConverter:
 
     def convert(self, audio: Audio, samplingRate:int = 15000):
         if self.use_whisper:
+            audioSamplingRateTransformer = self.whisper_sr_transformer
+            audioSampled = audioSamplingRateTransformer.transform(audio)
             decode_options = {"language": self.decode_lang} # set the language which Whisper should use for ASR
-            transcript = self.model.transcribe(audio.timeSeries, decode_options)["text"]
+            transcript = self.model.transcribe(audioSampled.timeSeries, **decode_options)["text"]
         else:
             if self.model is None:
                 self.model, self.samplingRate = self.loadDeepspeech(self.modelPath)

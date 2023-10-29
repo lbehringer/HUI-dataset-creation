@@ -30,7 +30,7 @@ class Step9_GenerateCleanDataset:
         except:
             pass
 
-        print('Audios bevore: ', df.shape[0])
+        print('Audios before: ', df.shape[0])
         filteredAudios = self.filter(df)
         print('Audios after: ', filteredAudios.shape[0])
         audiosAllowed = filteredAudios.index.tolist()

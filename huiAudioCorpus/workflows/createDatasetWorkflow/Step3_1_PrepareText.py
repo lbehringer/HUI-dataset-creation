@@ -85,26 +85,37 @@ class Step3_1_PrepareText:
             '"': ' ',
             '_': ' ',
             '-': ' ',
-            '–': ' ',
-            ';': ',',
             ':': ':',
             '’': ' ',
             '‘': ' ',
             '<': ' ',
             '>': ' ',
-            '(': ' ',
-            ')': ' ',
             '›': ' ',
             '‹': ' ',
-            'é': 'e',
-            'ê': 'e',
             '^': ' ',
-            'è': 'e',
-            'à': 'a',
-            'á': 'a'
+            '|': ' ',
+            # replace em-dash by dash
+            '–': '-',
+
+            # omit punctuation replacments
+            # '-': ' ',
+            # ';': ',',
+            #'(': ' ',
+            #')': ' ',
+
+            # omit French char replacements
+            # 'é': 'e',
+            # 'ê': 'e',
+            # 'è': 'e',
+            # 'à': 'a',
+            # 'á': 'a',
+            # 'œ': 'oe',
+            # 'Ç': 'C',
+            # 'ç': 'c
 
         }
         
+        # Replacement rules for abbreviations
         abbreviations = {
             ' H. v.': ' Herr von ',
             '†': ' gestorben ',
@@ -230,6 +241,7 @@ class Step3_1_PrepareText:
 
         self.pathUtil.writeFile(text, self.saveFile)
 
+        ###  Check for remaining numbers, abbreviations, and unwanted characters ###
         remainingNumbers = [s for s in text.split() if bool(re.search(r'\d', s))]
         if len(remainingNumbers)>0:
             print('there are remaining number inside the text')
@@ -252,18 +264,28 @@ class Step3_1_PrepareText:
             raise Exception('there are remaining abbreviations inside the text')
 
         aToZ = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
-        possibleAbberviations = [' '+char+'.' for char in 'abcdefghijklmnopqrstuvwxyz' if ' '+char+'.' in text] + [' '+char+char2+'.' for char in aToZ for char2 in aToZ if ' '+char+char2+'.' in text]
-        shortWorts = [' Co.', ' go.', ' Da.',' na.',' ab.', ' an.', ' da.', ' du.', ' er.', ' es.', ' ja.', ' so.', ' um.', ' zu.', ' Ja.', ' Ad.', ' je.', ' Es.', ' ob.', ' is.', ' tu.', ' Hm.', ' So.', ' wo.', ' ha.', ' he.', ' Du.', ' du.', ' Nu.', ' in.']
-        possibleAbberviations = [ab for ab in possibleAbberviations if ab not in shortWorts]
-        if len(possibleAbberviations)>0:
+        possibleAbbreviations = [' '+char+'.' for char in 'abcdefghijklmnopqrstuvwxyz' if ' '+char+'.' in text] + [' '+char+char2+'.' for char in aToZ for char2 in aToZ if ' '+char+char2+'.' in text]
+        shortWords = [' Co.', ' go.', ' Da.',' na.',' ab.', ' an.', ' da.', ' du.', ' er.', ' es.', ' ja.', ' so.', ' um.', ' zu.', ' Ja.', ' Ad.', ' je.', ' Es.', ' ob.', ' is.', ' tu.', ' Hm.', ' So.', ' wo.', ' ha.', ' he.', ' Du.', ' du.', ' Nu.', ' in.']
+        possibleAbbreviations = [ab for ab in possibleAbbreviations if ab not in shortWords]
+        if len(possibleAbbreviations)>0:
             print('there are remaining possible abberviations inside the text')
-            print(possibleAbberviations)
+            print(possibleAbbreviations)
             raise Exception('there are remaining possible abberviations inside the text')
         
-        allowedChars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ äöüßÖÄÜ .,;?!:" \n'
+        #allowedChars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ äöüßÖÄÜ .,;?!:" \n'
+        # allow French chars
+                    # 'é': 'e',
+            # 'ê': 'e',
+            # 'è': 'e',
+            # 'à': 'a',
+            # 'á': 'a',
+            # 'œ': 'oe',
+            # 'Ç': 'C'
+
+        allowedChars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ äöüßÖÄÜ .,;?!: ;-() éèàáœÇç" \n'
         remaininNotAllowedChars = [char for char in text if char not in allowedChars]
         if len(remaininNotAllowedChars)>0:
-            print('there are remaining chars inside the text')
+            print('there are remaining unallowed chars inside the text')
             print(remaininNotAllowedChars)
-            raise Exception('there are remaining chars inside the text')
+            raise Exception('there are remaining unallowed chars inside the text')
         return text

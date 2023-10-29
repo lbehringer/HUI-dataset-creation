@@ -26,7 +26,7 @@ class Step8_DatasetStatistic:
     def script(self):
         rawData = pd.read_csv(self.loadPath, sep='|', index_col='id')
 
-        print('Audios bevore: ', rawData.shape[0])
+        print('Audios before: ', rawData.shape[0])
         infoText = " - full"
         if self.filter is not None:
             infoText = " - clean"

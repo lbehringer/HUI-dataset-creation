@@ -5,6 +5,9 @@
         "GutenbergId": "przybysz/schrei/schrei.html",
         "GutenbergStart": "",
         "GutenbergEnd": "",
-        "textReplacement": {}
+        "textReplacement": {
+            " z. B.": " zum Beispiel ",
+            " usw.": "  und so weiter"
+        }
     }
 }

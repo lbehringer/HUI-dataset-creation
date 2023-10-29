@@ -123,7 +123,7 @@ class GuttenbergProjektDownload():
                 for footnote in paragraph.select('span'):
                     footnote.extract()
 
-                if len(paragraph.text) > 0 and len(paragraph.contents) == 1 and paragraph.text != "\xa0":
+                if len(paragraph.text) > 0 and len(paragraph.contents) == 1:
                     # Remove extra spaces, tabs, and newlines, and replace them with a single space
                     extractedParagraph = re.sub(r" +",r" ",paragraph.text.replace("\t"," ").replace("\n", " "))
 

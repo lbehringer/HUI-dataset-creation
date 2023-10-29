@@ -14,6 +14,6 @@ class AudioSamplingRateTransformer():
             return audio
         audioTimeSeries = audio.timeSeries
         samplingRate = audio.samplingRate
-        resampledTimeSeries = librosa.core.resample(audioTimeSeries, samplingRate, self.targetSamplingRate)
+        resampledTimeSeries = librosa.core.resample(y=audioTimeSeries, orig_sr=samplingRate, target_sr=self.targetSamplingRate)
         resampledAudio = Audio(resampledTimeSeries, self.targetSamplingRate, audio.id, audio.name) # type:ignore
         return resampledAudio

@@ -33,7 +33,7 @@ class AudioStatisticComponent:
         return statistics, rawData
 
     def loadAudioFiles(self):
-        result = Parallel(n_jobs=12, verbose=10, batch_size=100)(delayed(self.loadAudio)(audio) for audio in self.audioPersistenz.getIds())
+        result = Parallel(n_jobs=4, verbose=10, batch_size=100)(delayed(self.loadAudio)(audio) for audio in self.audioPersistenz.getIds())
         rawData = DataFrame(result, columns  = self.columns)
         rawData = rawData.set_index('id')
         return rawData

@@ -21,7 +21,7 @@ class AlignSentencesIntoTextCalculator:
         return alignments
 
     def calculateAlignments(self, originalText: Sentence, textToAlign: List[Sentence]):
-        with Parallel(n_jobs=15, batch_size=500) as parallel:
+        with Parallel(n_jobs=4, batch_size=500) as parallel:
             alignments:List[SentenceAlignment] = []
             start=0
             text: Sentence
