@@ -6,6 +6,7 @@ import json
 from tqdm import tqdm
 from joblib import Parallel, delayed
 from time import sleep
+from urllib.parse import quote
 
 class AudiosFromLibrivoxPersistenz:
 
@@ -15,21 +16,23 @@ class AudiosFromLibrivoxPersistenz:
         self.savePath = savePath
         self.chapterPath = chapterPath
         self.pathUtil = PathUtil()
-        self.limitChapters = 1000
-        self.rangeCapters = 20
-        self.minimumUploadTimestamp = 1625672626 # 7 July 2021 (which is the date of the last change in the HUI repo)
+        self.limitPerIteration = 1000
+        self.numberOfIterations = 20
+        # self.minimumUploadTimestamp = 1625672626 # 7 July 2021 (which is the date of the last change in the HUI repo)
+        # self.minimumUploadTimestamp = 1672527600 # 1 January 2023
+        # self.minimumUploadTimestamp = 1698184800 # 25 October 2023
 
     def save(self):
-        chapters, chapterDownloadLinks = self.getChapter(self.bookName)
+        chapters, chapterDownloadLinks = self.getChapter(self.bookName, get_download_links=True)
         Parallel(n_jobs=4)(delayed(self.pathUtil.copyFileFromUrl)(link ,self.savePath+ '/' + link.split('/')[-1]) for link in chapterDownloadLinks)
         chapters.to_csv(self.chapterPath)
         
 
-    def getChapter(self, bookName:str):
+    def getChapter(self, bookName:str, get_download_links):
         searchUrl = self.getSearchUrl(bookName, self.url)
         response = self.loadSearchBook(searchUrl)
         chapterUrl = self.extractChapterUrl(response)
-        chapterDownloadLinks = self.getChapterLinks(chapterUrl)
+        chapterDownloadLinks = self.getChapterLinks(chapterUrl) if get_download_links else None
         chapters = pd.read_html(chapterUrl)
         return chapters[0], chapterDownloadLinks
 
@@ -38,7 +41,7 @@ class AudiosFromLibrivoxPersistenz:
         return searchResult.text
 
     def getSearchUrl(self, bookName: str, url:str):
-        searchUrl = url + 'api/feed/audiobooks/?format=json&title=' + bookName 
+        searchUrl = url + 'api/feed/audiobooks/?format=json&title=' + quote(bookName)
         return searchUrl
 
     def extractChapterUrl(self, response: str):
@@ -67,10 +70,11 @@ class AudiosFromLibrivoxPersistenz:
 
 
     def getIds(self):
+        """Retrieves raw metadata of book IDs and returns a corresponding dictionary."""
         books = []
-        limit = self.limitChapters
+        limit = self.limitPerIteration
         minimum_upload_timestamp = self.minimumUploadTimestamp  # we only want to retrieve books released AFTER this date
-        for i in tqdm(range(self.rangeCapters)):
+        for i in tqdm(range(self.numberOfIterations)):
             requestUrl = f'https://librivox.org/api/feed/audiobooks/?limit={limit}&offset={i*limit}&since={minimum_upload_timestamp}&format=json'
             page = requests.get(requestUrl)
             page.encoding = "UTF-8"
@@ -80,8 +84,10 @@ class AudiosFromLibrivoxPersistenz:
                     books.extend(result['books'])
                 else:
                     print(result)
+                    print("Stopping download of overview metadata.")
                     break
-            except ValueError: # includes JSONDecodeError
-                print(f"No results retrieved for iteration {i}.")
-            sleep(2)
+            except ValueError as e: # includes JSONDecodeError
+                print(f"Error in iteration {i}: {e}")
+                print("Stopping download of overview metadata.")
+                break
         return books
