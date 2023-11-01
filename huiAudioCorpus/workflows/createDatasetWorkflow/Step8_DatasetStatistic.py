@@ -44,7 +44,8 @@ class Step8_DatasetStatistic:
 
         # others
         others = rawData[~rawData['speacker'].isin(self.specialSpeackers)]
-        self.saveSummary(others, self.savePath + '/others', "Other speakers" + infoText)
+        if not others.empty:
+            self.saveSummary(others, self.savePath + '/others', "Other speakers" + infoText)
 
 
     def saveSummary(self, rawData, savePath: str, title: str):

@@ -3,6 +3,7 @@ from huiAudioCorpus.model.Transcripts import Transcripts
 from huiAudioCorpus.utils.FileListUtil import FileListUtil
 from huiAudioCorpus.utils.PathUtil import PathUtil
 import pandas as pd
+import os
 
 class TranscriptsPersistenz:
     def __init__(self, loadPath:str, savePath: str = None, fileExtension:str = 'csv'):
@@ -13,16 +14,16 @@ class TranscriptsPersistenz:
         self.pathUtil = PathUtil()
 
     def getIds(self):
+        """Gets all transcript filenames without the file extension."""
         transcriptsFiles = self.fileListUtil.getFiles(self.loadPath, self.fileExtension)
-        transcriptsFiles = [file.replace(self.loadPath,'')[1:-len(self.fileExtension)-1] for file in transcriptsFiles]
+        transcriptsFiles = [os.path.basename(file).split(".")[0] for file in transcriptsFiles]
         return transcriptsFiles
     
     def load(self, id: str):
         targetPath = self.loadPath +'/' +  id + '.' + self.fileExtension
-        csv: DataFrame
-        csv = pd.read_csv(targetPath, sep='|', header=None) # type: ignore
+        df = pd.read_csv(targetPath, sep='|', header=None) # type: ignore
         name = self.pathUtil.filenameWithoutExtension(targetPath)
-        transcripts = Transcripts(csv, id, name)
+        transcripts = Transcripts(df, id, name)
         return transcripts
     
     def save(self, transcripts: Transcripts):

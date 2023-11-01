@@ -16,20 +16,21 @@ from huiAudioCorpus.sttInference import deepspeechModel
 
 class AudioToSentenceConverter:
     def __init__(self, use_whisper=True, whisper_decode_lang="de"):
+        self.model = None
         self.use_whisper = use_whisper
         if self.use_whisper:
             self.whisper_sr = 16000
             self.whisper_sr_transformer = AudioSamplingRateTransformer(targetSamplingRate=self.whisper_sr)
             self.decode_lang = whisper_decode_lang
-            print("Loading Whisper model")
-            self.model = whisper.load_model("small")
         else:
             self.modelPath = deepspeechModel.__path__[0]
-            self.model = None
         
 
     def convert(self, audio: Audio, samplingRate:int = 15000):
         if self.use_whisper:
+            if self.model is None:
+                print("Loading Whisper model")
+                self.model = whisper.load_model("small")
             audioSamplingRateTransformer = self.whisper_sr_transformer
             audioSampled = audioSamplingRateTransformer.transform(audio)
             decode_options = {"language": self.decode_lang} # set the language which Whisper should use for ASR
