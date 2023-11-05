@@ -209,7 +209,7 @@ class Step0_Overview:
         readers = self.pathUtil.loadJson(readerPath)
         return readers
 
-    def generateSpeakerShort(self, speackerOverview, gutenberg=True):
+    def generateSpeakerShort(self, speakerOverview, gutenberg=True):
         """Generates a dictionary containing the rounded recording time (in HOURS) of each speaker, sorted from longest to shortest time.
         Writes the dict to a JSON file and returns the dict."""
         filename = "readerShort.json" if gutenberg else "readerShort_non_gutenberg.json"
@@ -217,10 +217,10 @@ class Step0_Overview:
         
         if not self.pathUtil.fileExists(readerPath):
             readers = []
-            for speacker in speackerOverview:
+            for speaker in speakerOverview:
                 readers.append({
-                    'name': speacker,
-                    'time': round(sum([chapter['time'] for chapter in speackerOverview[speacker]])/60/60,1) # time in hours
+                    'name': speaker,
+                    'time': round(sum([chapter['time'] for chapter in speakerOverview[speaker]])/60/60,1) # time in hours
                 })
             readers.sort(key=lambda x: x['time'], reverse=True)
             self.pathUtil.saveJson(readerPath, readers)

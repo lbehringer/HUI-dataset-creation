@@ -8,11 +8,11 @@ from huiAudioCorpus.ui.Plot import Plot
 from pandas_profiling import ProfileReport
 
 class Step8_DatasetStatistic:
-    def __init__(self, savePath: str, loadPath: str, specialSpeackers: List[str], filter,  pathUtil: PathUtil, audioStatisticComponent:AudioStatisticComponent, textStatisticComponent:TextStatisticComponent, plot: Plot):
+    def __init__(self, savePath: str, loadPath: str, specialSpeakers: List[str], filter,  pathUtil: PathUtil, audioStatisticComponent:AudioStatisticComponent, textStatisticComponent:TextStatisticComponent, plot: Plot):
         self.savePath = savePath
         self.pathUtil = pathUtil
         self.loadPath = loadPath
-        self.specialSpeackers = specialSpeackers
+        self.specialSpeakers = specialSpeakers
         self.filter = filter
         self.audioStatisticComponent =audioStatisticComponent
         self.textStatisticComponent = textStatisticComponent
@@ -38,12 +38,12 @@ class Step8_DatasetStatistic:
         # all Speakers
         self.saveSummary(rawData, self.savePath  + '/complete', "All speakers" + infoText)
 
-        # every Speacker
-        for speackerId, data in rawData.groupby('speacker'):
-            self.saveSummary(data, self.savePath + '/speacker/' + speackerId, "Speaker: " + speackerId + infoText)
+        # every Speaker
+        for speakerId, data in rawData.groupby('speaker'):
+            self.saveSummary(data, self.savePath + '/speaker/' + speakerId, "Speaker: " + speakerId + infoText)
 
         # others
-        others = rawData[~rawData['speacker'].isin(self.specialSpeackers)]
+        others = rawData[~rawData['speaker'].isin(self.specialSpeakers)]
         if not others.empty:
             self.saveSummary(others, self.savePath + '/others', "Other speakers" + infoText)
 

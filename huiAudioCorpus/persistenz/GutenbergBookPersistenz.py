@@ -12,18 +12,18 @@ class GutenbergBookPersistenz:
         self.textId = textId
         self.savePath = savePath
         self.pathUtil = PathUtil()
-        self.guttenbergProjektDownload = GuttenbergProjektDownload()
-        self.guttenbergDownload = GuttenbergDownload()
+        self.gutenbergProjektDownload = GutenbergProjektDownload()
+        self.gutenbergDownload = GutenbergDownload()
 
     def save(self):
         if isinstance(self.textId, str) :
-            text = self.guttenbergProjektDownload.downloadText(self.textId)
+            text = self.gutenbergProjektDownload.downloadText(self.textId)
         else:
-            text = self.guttenbergDownload.downloadText(self.textId)
+            text = self.gutenbergDownload.downloadText(self.textId)
         self.pathUtil.writeFile(text, self.savePath)
 
 
-class GuttenbergProjektDownload():
+class GutenbergProjektDownload():
     """
     This class downloads a book from www.projekt-gutenberg.org
     The id has to be searched manually with the link https://www.projekt-gutenberg.org/info/texte/allworka.html
@@ -132,10 +132,10 @@ class GuttenbergProjektDownload():
         return extractedParagraphs
 
 
-class GuttenbergDownload:
+class GutenbergDownload:
     """
-    This class downloads a book from www.projekt-gutenberg.org
-    The id has to be searched manual with the link http://gutendex.com/books/?search=ThisIsTheSearchText
+    This class downloads a book from www.gutenberg.org
+    The id has to be searched manually with the link http://gutendex.com/books/?search=ThisIsTheSearchText
     """
     def downloadText(self, textId: int):
         text = strip_headers(load_etext(textId, mirror='http://eremita.di.uminho.pt/gutenberg/')).strip()

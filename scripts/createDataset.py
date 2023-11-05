@@ -46,13 +46,13 @@ if len(duplicatIds) > 0:
 
 
 # configure this object to only create a single speaker
-allConfigs = {**bernd, **hokuspokus, **friedrich, **eva, **karlsson, **sonja}
+# allConfigs = {**bernd, **hokuspokus, **friedrich, **eva, **karlsson, **sonja}
 allConfigs = sonja
-allConfigs = friedrich
+# allConfigs = friedrich
 #allConfigs = redaer
 
 # this is needed for the statistic and split into others
-specialSpeackers = ['Bernd_Ungerer', 'Eva_K', 'Friedrich', 'Hokuspokus', 'Karlsson']
+specialSpeakers = ['Bernd_Ungerer', 'Eva_K', 'Friedrich', 'Hokuspokus', 'Karlsson']
 
 workflowConfig = {
     'continueOnError': False,
@@ -90,6 +90,7 @@ setp8Path_clean = dataBasePath + '/datasetStatisticClean'
 
 
 def cleanFilter(input):
+    """Described in the HUI paper in section 4.2"""
     input = input[input['minSilenceDB'] < -50]
     input = input[input['silencePercent'] < 45]
     input = input[input['silencePercent'] > 10]
@@ -280,7 +281,7 @@ if __name__ == "__main__":
             'step8_DatasetStatistic': {
                 'savePath': setp8Path,
                 'loadPath': step7Path + '/overview.csv',
-                'specialSpeackers': specialSpeackers,
+                'specialSpeakers': specialSpeakers,
                 'filter': None
             },
             'audioPersistenz': {
@@ -301,7 +302,7 @@ if __name__ == "__main__":
             'step8_DatasetStatistic': {
                 'savePath': setp8Path_clean,
                 'loadPath': step7Path + '/overview.csv',
-                'specialSpeackers': specialSpeackers,
+                'specialSpeakers': specialSpeakers,
                 'filter': cleanFilter
             },
             'audioPersistenz': {

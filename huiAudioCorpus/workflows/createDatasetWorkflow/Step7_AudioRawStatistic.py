@@ -17,14 +17,14 @@ class Step7_AudioRawStatistic:
 
     def script(self):
         from huiAudioCorpus.dependencyInjection.DependencyInjection import DependencyInjection
-        speackers = os.listdir(self.loadPath)
+        speakers = os.listdir(self.loadPath)
         audioInfos = []
-        for speacker in speackers:
-            if speacker == '.done':
+        for speaker in speakers:
+            if speaker == '.done':
                 continue
-            print('finalSummary: ' + speacker)
-            loadPath = self.loadPath  + '/' + speacker
-            savePath = self.savePath + '/' + speacker
+            print('finalSummary: ' + speaker)
+            loadPath = self.loadPath  + '/' + speaker
+            savePath = self.savePath + '/' + speaker
             saveFile = savePath + '/overview.csv'
             self.pathUtil.createFolderForFile(saveFile)
             localDoneMarker = DoneMarker(savePath)
@@ -37,7 +37,7 @@ class Step7_AudioRawStatistic:
                     }
                 }
                 rawDataAudio = DependencyInjection(diConfig).audioStatisticComponent.loadAudioFiles()
-                rawDataAudio['speacker'] = speacker
+                rawDataAudio['speaker'] = speaker
 
                 diConfig = {
                     'transcriptsPersistenz': {
