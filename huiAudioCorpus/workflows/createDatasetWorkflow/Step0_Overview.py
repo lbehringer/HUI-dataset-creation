@@ -4,23 +4,28 @@ from huiAudioCorpus.utils.PathUtil import PathUtil
 from huiAudioCorpus.persistenz.AudiosFromLibrivoxPersistenz import AudiosFromLibrivoxPersistenz
 from huiAudioCorpus.utils.DoneMarker import DoneMarker
 from tqdm import tqdm
+import os
 
 class Step0_Overview:
 
-    def __init__(self, audiosFromLibrivoxPersistenz: AudiosFromLibrivoxPersistenz, savePath: str, pathUtil: PathUtil):
+    def __init__(self, audiosFromLibrivoxPersistenz: AudiosFromLibrivoxPersistenz, savePath: str, pathUtil: PathUtil, requestUrl: str = None):
         self.savePath = savePath
         self.audiosFromLibrivoxPersistenz = audiosFromLibrivoxPersistenz
         self.pathUtil = pathUtil
+        self.requestUrl = requestUrl
 
     def run(self):
         return DoneMarker(self.savePath).run(self.script, deleteFolder=False)
     
     def script(self):
-        booksLibrivox = self.downloadOverviewLibrivox()
+        booksLibrivox = self.downloadOverviewLibrivox(requestUrl=self.requestUrl)
         usableBooks = self.downloadChapters(booksLibrivox)
-        speackerOverview = self.generateSpeackerOverview(usableBooks["gutenberg_books"])
-        speackerShort = self.generateSpeackerShort(speackerOverview)
-        self.generateSpeackerTemplate(usableBooks["gutenberg_books"])
+        speakerOverview_gutenberg = self.generateSpeakerOverview(usableBooks["gutenberg_books"], gutenberg=True)
+        speakerOverview_non_gutenberg = self.generateSpeakerOverview(usableBooks["non_gutenberg_books"], gutenberg=False)
+        speakerShort_gutenberg = self.generateSpeakerShort(speakerOverview_gutenberg, gutenberg=True)
+        speakerShort_non_gutenberg = self.generateSpeakerShort(speakerOverview_non_gutenberg, gutenberg=False)
+        self.generateSpeakerTemplate(usableBooks["gutenberg_books"], gutenberg=True)
+        self.generateSpeakerTemplate(usableBooks["non_gutenberg_books"], gutenberg=False)
         #TODO add speaker_overview, speaker_short, and generate_speaker_template for non-gutenberg books
 
         total_hours_gutenberg = sum([book['time'] for book in usableBooks["gutenberg_books"]])/60/60
@@ -29,16 +34,24 @@ class Step0_Overview:
         print(f'Total hours (Gutenberg): {total_hours_gutenberg}')
         print(f'Total hours (others): {total_hours_others}')
         print(f'Total hours (combined): {total_hours_gutenberg + total_hours_others}')
-        print('Count of Speakers (Gutenberg):', len(speackerShort))
-        print('bestSpeaker (longest recording duration) (Gutenberg):', speackerShort[0])
 
-    def downloadOverviewLibrivox(self):
+        num_gb_speakers = len(speakerShort_gutenberg)
+        print('Count of Speakers (Gutenberg):', num_gb_speakers)
+        if num_gb_speakers > 0:
+            print('bestSpeaker (longest recording duration) (Gutenberg):', speakerShort_gutenberg[0])
+
+        num_non_gp_speakers = len(speakerShort_non_gutenberg)
+        print('Count of Speakers (others):', num_non_gp_speakers)
+        if num_non_gp_speakers > 0:
+            print('bestSpeaker (longest recording duration) (others):', speakerShort_non_gutenberg[0])        
+
+    def downloadOverviewLibrivox(self, requestUrl=None):
         """Downloads Librivox metadata and generates a corresponding dictionary. 
         Writes the dictionary to a JSON file and returns the dict."""
         librivoxPath = self.savePath + '/booksLibrivox.json'
         if not self.pathUtil.fileExists(librivoxPath):
             print('Download Overview from Librivox')
-            booksLibrivox  = self.audiosFromLibrivoxPersistenz.getIds()
+            booksLibrivox  = self.audiosFromLibrivoxPersistenz.getIds(requestUrl=requestUrl)
             self.pathUtil.saveJson(librivoxPath, booksLibrivox)
 
         booksLibrivox = self.pathUtil.loadJson(librivoxPath)
@@ -127,12 +140,13 @@ class Step0_Overview:
             return False
         return True
     
-    def generateSpeackerTemplate(self, usableBooks):
+    def generateSpeakerTemplate(self, usableBooks, gutenberg=True):
         """Generates a dict containing the books read by each speaker and where the corresponding text can be found.
         Writes the dictionary to a JSON file and returns the dict."""
 
         print("Generate speaker template")
-        readerPath = self.savePath + '/readerTemplate.json'
+        filename = "readerTemplate.json" if gutenberg else "readerTemplate_non_gutenberg.json"
+        readerPath = os.path.join(self.savePath, filename)
         if not self.pathUtil.fileExists(readerPath):
             reader = {}
             for book in usableBooks:
@@ -142,19 +156,26 @@ class Step0_Overview:
                         reader[chapter['reader']] = {}
 
                     title = ''.join([i for i in bookTitle.lower().replace(' ','_') if (i in 'abcdefghijklmonpqrstuvwxyz_' or i.isnumeric())])
-                    guttenbergId = book['url'].replace('www.projekt-gutenberg.org/', '').replace('https://','').replace('http://','')
-                    if 'www.gutenberg.org/' in guttenbergId:
-                        if "/cache/epub/" in guttenbergId:
-                            guttenbergId = int(guttenbergId.split("/")[3])
-                        elif "/files/" in guttenbergId:
-                            guttenbergId = int(guttenbergId.split("/")[2])
-                        else:
-                            guttenbergId = int(guttenbergId.replace('www.gutenberg.org/ebooks/', '').replace('www.gutenberg.org/etext/', '').rstrip("/"))
+
+                    # Gutenberg-hosted books
+                    if gutenberg:
+                        gutenbergId = book['url'].replace('https://','').replace('http://','').replace('www.', '').replace('projekt-gutenberg.org/', '')
+                        if gutenbergId.startswith('gutenberg.org/'):
+                            if "/cache/epub/" in gutenbergId:
+                                gutenbergId = int(gutenbergId.split("/")[3])
+                            elif "/files/" in gutenbergId:
+                                gutenbergId = int(gutenbergId.split("/")[2])
+                            else:
+                                gutenbergId = int(gutenbergId.replace('gutenberg.org/ebooks/', '').replace('gutenberg.org/etext/', '').rstrip("/"))
+
+                    # non-Gutenberg-hosted books
+                    else:
+                        gutenbergId = book["url"].replace("https://", "").replace("http://", "")
 
                     reader[chapter['reader']][title] = {
                         'title': title,
                         'LibrivoxBookName': bookTitle,
-                        'GutenbergId': guttenbergId,
+                        'GutenbergId': gutenbergId,
                         'GutenbergStart': '',
                         'GutenbergEnd': '',
                         'textReplacement':{}
@@ -166,10 +187,11 @@ class Step0_Overview:
         reader = self.pathUtil.loadJson(readerPath)
         return reader
 
-    def generateSpeackerOverview(self, usableBooks):
+    def generateSpeakerOverview(self, usableBooks, gutenberg=True):
         """Generates a dictionary containing chapter-wise recording time (in SECONDS) of each speaker.
         Writes the dictionary to a JSON file and returns the dict."""        
-        readerPath = self.savePath + '/readerLong.json'
+        filename = "readerLong.json" if gutenberg else "readerLong_non_gutenberg.json"
+        readerPath = os.path.join(self.savePath, filename)
         if not self.pathUtil.fileExists(readerPath):
             readers = {}
             for book in usableBooks:
@@ -187,10 +209,12 @@ class Step0_Overview:
         readers = self.pathUtil.loadJson(readerPath)
         return readers
 
-    def generateSpeackerShort(self, speackerOverview):
+    def generateSpeakerShort(self, speackerOverview, gutenberg=True):
         """Generates a dictionary containing the rounded recording time (in HOURS) of each speaker, sorted from longest to shortest time.
         Writes the dict to a JSON file and returns the dict."""
-        readerPath = self.savePath + '/readerShort.json'
+        filename = "readerShort.json" if gutenberg else "readerShort_non_gutenberg.json"
+        readerPath = os.path.join(self.savePath, filename)
+        
         if not self.pathUtil.fileExists(readerPath):
             readers = []
             for speacker in speackerOverview:

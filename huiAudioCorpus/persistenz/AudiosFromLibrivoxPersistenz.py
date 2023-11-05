@@ -5,7 +5,6 @@ import requests
 import json
 from tqdm import tqdm
 from joblib import Parallel, delayed
-from time import sleep
 from urllib.parse import quote
 
 class AudiosFromLibrivoxPersistenz:
@@ -18,7 +17,7 @@ class AudiosFromLibrivoxPersistenz:
         self.pathUtil = PathUtil()
         self.limitPerIteration = 1000
         self.numberOfIterations = 20
-        # self.minimumUploadTimestamp = 1625672626 # 7 July 2021 (which is the date of the last change in the HUI repo)
+        self.minimumUploadTimestamp = 1625672626 # 7 July 2021 (which is the date of the last change in the HUI repo)
         # self.minimumUploadTimestamp = 1672527600 # 1 January 2023
         # self.minimumUploadTimestamp = 1698184800 # 25 October 2023
 
@@ -69,25 +68,44 @@ class AudiosFromLibrivoxPersistenz:
         return downloadLinks
 
 
-    def getIds(self):
-        """Retrieves raw metadata of book IDs and returns a corresponding dictionary."""
+    def getIds(self, requestUrl=None):
+        """Retrieves raw metadata of book IDs (either with a specified or a default requestUrl) 
+        and returns a corresponding dictionary."""
         books = []
-        limit = self.limitPerIteration
-        minimum_upload_timestamp = self.minimumUploadTimestamp  # we only want to retrieve books released AFTER this date
-        for i in tqdm(range(self.numberOfIterations)):
-            requestUrl = f'https://librivox.org/api/feed/audiobooks/?limit={limit}&offset={i*limit}&since={minimum_upload_timestamp}&format=json'
+        if requestUrl:
+            print("Using custom request URL for retrieval.")
+            print(requestUrl)
             page = requests.get(requestUrl)
+            print(page)
             page.encoding = "UTF-8"
             try:
                 result = json.loads(page.text)
+                print(result)
                 if 'books' in result:
                     books.extend(result['books'])
                 else:
                     print(result)
                     print("Stopping download of overview metadata.")
-                    break
             except ValueError as e: # includes JSONDecodeError
-                print(f"Error in iteration {i}: {e}")
+                print(f"Error: {e}")
                 print("Stopping download of overview metadata.")
-                break
+        else:
+            limit = self.limitPerIteration
+            minimum_upload_timestamp = self.minimumUploadTimestamp  # we only want to retrieve books released AFTER this date
+            for i in tqdm(range(self.numberOfIterations)):
+                requestUrl = f'https://librivox.org/api/feed/audiobooks/?limit={limit}&offset={i*limit}&since={minimum_upload_timestamp}&format=json'
+                page = requests.get(requestUrl)
+                page.encoding = "UTF-8"
+                try:
+                    result = json.loads(page.text)
+                    if 'books' in result:
+                        books.extend(result['books'])
+                    else:
+                        print(result)
+                        print("Stopping download of overview metadata.")
+                        break
+                except ValueError as e: # includes JSONDecodeError
+                    print(f"Error in iteration {i}: {e}")
+                    print("Stopping download of overview metadata.")
+                    break
         return books
