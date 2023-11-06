@@ -35,6 +35,18 @@ class AudiosFromLibrivoxPersistenz:
         chapters = pd.read_html(chapterUrl)
         return chapters[0], chapterDownloadLinks
 
+    def get_catalog_date(self, search_url: str):
+        """Returns catalog date as YYYYMMDD formatted int"""
+
+        search_result = requests.get(search_url)
+        search_result.encoding = "UTF-8"
+        soup = bs.BeautifulSoup(search_result.text, 'html.parser')
+        # get the production details in the sidebar
+        production_details = soup.find("dl", class_="product-details")
+        # catalog date is the third dd element in the production details
+        catalog_date = production_details.find_all("dd")[2].text
+        return int(catalog_date.replace("-", ""))
+
     def loadSearchBook(self, url:str ):
         searchResult = requests.get(url)
         return searchResult.text
@@ -73,15 +85,14 @@ class AudiosFromLibrivoxPersistenz:
         and returns a corresponding dictionary."""
         books = []
         if requestUrl:
-            print("Using custom request URL for retrieval.")
-            print(requestUrl)
+            print("Using custom request URL for metadata retrieval.")
             page = requests.get(requestUrl)
-            print(page)
             page.encoding = "UTF-8"
             try:
                 result = json.loads(page.text)
-                print(result)
                 if 'books' in result:
+                    # add catalog date
+                    result['books'][0]['catalog_date'] = self.get_catalog_date(result['books'][0]['url_librivox'])
                     books.extend(result['books'])
                 else:
                     print(result)
@@ -99,6 +110,8 @@ class AudiosFromLibrivoxPersistenz:
                 try:
                     result = json.loads(page.text)
                     if 'books' in result:
+                        # add catalog date
+                        result['books'][0]['catalog_date'] = self.get_catalog_date(result['books'][0]['url_librivox'])                        
                         books.extend(result['books'])
                     else:
                         print(result)

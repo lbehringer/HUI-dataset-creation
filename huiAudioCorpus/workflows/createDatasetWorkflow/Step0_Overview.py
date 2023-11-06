@@ -26,7 +26,6 @@ class Step0_Overview:
         speakerShort_non_gutenberg = self.generateSpeakerShort(speakerOverview_non_gutenberg, gutenberg=False)
         self.generateSpeakerTemplate(usableBooks["gutenberg_books"], gutenberg=True)
         self.generateSpeakerTemplate(usableBooks["non_gutenberg_books"], gutenberg=False)
-        #TODO add speaker_overview, speaker_short, and generate_speaker_template for non-gutenberg books
 
         total_hours_gutenberg = sum([book['time'] for book in usableBooks["gutenberg_books"]])/60/60
         total_hours_others = sum([book['time'] for book in usableBooks["non_gutenberg_books"]])/60/60
@@ -77,10 +76,10 @@ class Step0_Overview:
                 if self.isBookUseable(book):
                     # retrieve books with gutenberg-hosted texts
                     if self.text_hosted_by_gutenberg(book):
-                        gutenberg_books.append({'time': book['totaltimesecs'], 'title':book['title'], 'url': book['url_text_source']})
+                        gutenberg_books.append({'time': book['totaltimesecs'], 'title':book['title'], 'url': book['url_text_source'], 'catalog_date': book['catalog_date']})
                     # if specified, also retrieve books with texts hosted by other websites
                     elif not only_use_gutenberg_books:
-                        non_gutenberg_books.append({'time': book['totaltimesecs'], 'title':book['title'], 'url': book['url_text_source']})
+                        non_gutenberg_books.append({'time': book['totaltimesecs'], 'title':book['title'], 'url': book['url_text_source'], 'catalog_date': book['catalog_date']})
 
             print(f"Retrieved {len(gutenberg_books)} books with Gutenberg-hosted texts.")
             print(f"Retrieved {len(non_gutenberg_books)} books with texts from other hosts.")
@@ -88,7 +87,7 @@ class Step0_Overview:
             # write gutenberg-hosted books to file
             print("Processing books with Gutenberg-hosted texts.")
             for book in tqdm(gutenberg_books):
-                chapters, chapterDownloadLinks = self.audiosFromLibrivoxPersistenz.getChapter(book['title'], get_download_links=False)
+                chapters, _ = self.audiosFromLibrivoxPersistenz.getChapter(book['title'], get_download_links=False)
                 book['chapters'] = []
                 for _, chapter in chapters.iterrows():
                     book['chapters'].append({
@@ -151,6 +150,7 @@ class Step0_Overview:
             reader = {}
             for book in usableBooks:
                 bookTitle = book['title']
+                catalog_date = book['catalog_date']
                 for chapter in book['chapters']:
                     if chapter['reader'] not in reader:
                         reader[chapter['reader']] = {}
@@ -176,6 +176,7 @@ class Step0_Overview:
                         'title': title,
                         'LibrivoxBookName': bookTitle,
                         'GutenbergId': gutenbergId,
+                        'CatalogDate': catalog_date,
                         'GutenbergStart': '',
                         'GutenbergEnd': '',
                         'textReplacement':{}
