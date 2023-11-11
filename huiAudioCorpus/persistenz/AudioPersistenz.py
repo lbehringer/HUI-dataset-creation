@@ -15,6 +15,7 @@ class AudioPersistenz:
         self.pathUtil = PathUtil()
 
     def load(self, id: str):
+        """Load an audio file and return it as an Audio object"""
         audioTimeSeries: NDArray
         samplingRate: int
         targetPath = self.loadPath +'/' +  id + '.' + self.fileExtension
@@ -24,6 +25,7 @@ class AudioPersistenz:
         return audio
 
     def save(self, audio: Audio):
+        """Save an Audio object to file"""
         targetPath = self.savePath + '/' + audio.id + '.wav'
         self.pathUtil.createFolderForFile(targetPath)
         audioTimeSeries = audio.timeSeries
@@ -31,7 +33,7 @@ class AudioPersistenz:
         soundfile.write(targetPath, audioTimeSeries, samplingRate)
 
     def getNames(self):
-        names = [self.transformIdToName(id) for id in self.getIds()]
+        names = [self.pathUtil.filenameWithoutExtension(id) for id in self.getIds()]
         return names
 
     def getIds(self):
@@ -45,6 +47,3 @@ class AudioPersistenz:
         ids = self.getIds()
         for id in ids:
             yield self.load(id)
-
-    def transformIdToName(self, id: str):
-        return self.pathUtil.filenameWithoutExtension(id)

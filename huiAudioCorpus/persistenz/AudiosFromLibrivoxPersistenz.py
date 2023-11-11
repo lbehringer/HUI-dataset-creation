@@ -19,7 +19,8 @@ class AudiosFromLibrivoxPersistenz:
         self.numberOfIterations = 20
         # self.minimumUploadTimestamp = 1625672626 # 7 July 2021 (which is the date of the last change in the HUI repo)
         # self.minimumUploadTimestamp = 1672527600 # 1 January 2023
-        self.minimumUploadTimestamp = 1698184800 # 25 October 2023
+        # self.minimumUploadTimestamp = 1698184800 # 25 October 2023
+        self.minimumUploadTimestamp = 1699225200 # 6 November 2023
 
     def save(self):
         chapters, chapterDownloadLinks = self.getChapter(self.bookName, get_download_links=True)
@@ -92,7 +93,9 @@ class AudiosFromLibrivoxPersistenz:
                 result = json.loads(page.text)
                 if 'books' in result:
                     # add catalog date
-                    result['books'][0]['catalog_date'] = self.get_catalog_date(result['books'][0]['url_librivox'])
+                    for idx, book in enumerate(result['books']):
+                        result['books'][idx]['catalog_date'] = self.get_catalog_date(book['url_librivox'])
+                    # result['books'][0]['catalog_date'] = self.get_catalog_date(result['books'][0]['url_librivox'])
                     books.extend(result['books'])
                 else:
                     print(result)
@@ -111,8 +114,13 @@ class AudiosFromLibrivoxPersistenz:
                     result = json.loads(page.text)
                     if 'books' in result:
                         # add catalog date
-                        result['books'][0]['catalog_date'] = self.get_catalog_date(result['books'][0]['url_librivox'])                        
+                        for idx, book in enumerate(result['books']):
+                            result['books'][idx]['catalog_date'] = self.get_catalog_date(book['url_librivox'])
+                        # result['books'][0]['catalog_date'] = self.get_catalog_date(result['books'][0]['url_librivox'])
+                        # if "catalog_date" not in result["books"][0]:
+                        #     raise KeyError
                         books.extend(result['books'])
+                
                     else:
                         print(result)
                         print("Stopping download of overview metadata.")

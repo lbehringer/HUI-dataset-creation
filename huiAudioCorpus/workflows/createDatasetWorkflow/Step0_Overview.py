@@ -20,12 +20,14 @@ class Step0_Overview:
     def script(self):
         booksLibrivox = self.downloadOverviewLibrivox(requestUrl=self.requestUrl)
         usableBooks = self.downloadChapters(booksLibrivox)
-        speakerOverview_gutenberg = self.generateSpeakerOverview(usableBooks["gutenberg_books"], gutenberg=True)
-        speakerOverview_non_gutenberg = self.generateSpeakerOverview(usableBooks["non_gutenberg_books"], gutenberg=False)
-        speakerShort_gutenberg = self.generateSpeakerShort(speakerOverview_gutenberg, gutenberg=True)
-        speakerShort_non_gutenberg = self.generateSpeakerShort(speakerOverview_non_gutenberg, gutenberg=False)
-        self.generateSpeakerTemplate(usableBooks["gutenberg_books"], gutenberg=True)
-        self.generateSpeakerTemplate(usableBooks["non_gutenberg_books"], gutenberg=False)
+        speakerOverview_gb = self.generateSpeakerOverview(usableBooks["gutenberg_books"], gutenberg=True)
+        speakerOverview_non_gb = self.generateSpeakerOverview(usableBooks["non_gutenberg_books"], gutenberg=False)
+        speakerShort_gb = self.generateSpeakerShort(speakerOverview_gb, gutenberg=True)
+        speakerShort_non_gb = self.generateSpeakerShort(speakerOverview_non_gb, gutenberg=False)
+        speaker_template_gb = self.generateSpeakerTemplate(usableBooks["gutenberg_books"], gutenberg=True)
+        speaker_template_non_gb = self.generateSpeakerTemplate(usableBooks["non_gutenberg_books"], gutenberg=False)
+        self.generate_reader_template_latest_book(speaker_template_gb, gutenberg=True)
+        self.generate_reader_template_latest_book(speaker_template_non_gb, gutenberg=False)
 
         total_hours_gutenberg = sum([book['time'] for book in usableBooks["gutenberg_books"]])/60/60
         total_hours_others = sum([book['time'] for book in usableBooks["non_gutenberg_books"]])/60/60
@@ -34,21 +36,39 @@ class Step0_Overview:
         print(f'Total hours (others): {total_hours_others}')
         print(f'Total hours (combined): {total_hours_gutenberg + total_hours_others}')
 
-        num_gb_speakers = len(speakerShort_gutenberg)
+        num_gb_speakers = len(speakerShort_gb)
         print('Count of Speakers (Gutenberg):', num_gb_speakers)
         if num_gb_speakers > 0:
-            print('bestSpeaker (longest recording duration) (Gutenberg):', speakerShort_gutenberg[0])
+            print('bestSpeaker (longest recording duration) (Gutenberg):', speakerShort_gb[0])
 
-        num_non_gp_speakers = len(speakerShort_non_gutenberg)
+        num_non_gp_speakers = len(speakerShort_non_gb)
         print('Count of Speakers (others):', num_non_gp_speakers)
         if num_non_gp_speakers > 0:
-            print('bestSpeaker (longest recording duration) (others):', speakerShort_non_gutenberg[0])        
+            print('bestSpeaker (longest recording duration) (others):', speakerShort_non_gb[0])        
+
+    def generate_reader_template_latest_book(self, speaker_template: dict, gutenberg=True):
+        """Generates a dict containing only the most recently added book by each speaker and where the corresponding text can be found.
+        Writes the dictionary to a JSON file and returns the dict."""
+        non_gb_suffix = "" if gutenberg else "_non_gutenberg"
+        latest_books_path = os.path.join(self.savePath, f'readerLatestBook{non_gb_suffix}.json')
+        latest_books = {}
+        for reader, books in speaker_template.items():
+            latest_catalog_date = 0
+            latest_book = None
+            for book, details in books.items():
+                catalog_date = details.get("catalog_date")
+                if catalog_date > latest_catalog_date:
+                    latest_catalog_date = catalog_date
+                    latest_book = book
+            latest_books[reader] = speaker_template[reader][latest_book]
+        self.pathUtil.saveJson(latest_books_path, latest_books)            
+        return latest_books
 
     def downloadOverviewLibrivox(self, requestUrl=None):
         """Downloads Librivox metadata and generates a corresponding dictionary. 
         Writes the dictionary to a JSON file and returns the dict."""
         librivoxPath = self.savePath + '/booksLibrivox.json'
-        if not self.pathUtil.fileExists(librivoxPath):
+        if not os.path.isfile(librivoxPath):
             print('Download Overview from Librivox')
             booksLibrivox  = self.audiosFromLibrivoxPersistenz.getIds(requestUrl=requestUrl)
             self.pathUtil.saveJson(librivoxPath, booksLibrivox)
@@ -63,8 +83,8 @@ class Step0_Overview:
 
         gutenberg_books_path = self.savePath + '/usable_gutenberg_books.json'
         non_gutenberg_books_path = self.savePath + '/usable_non_gutenberg_books.json'
-        files_already_exist = self.pathUtil.fileExists(gutenberg_books_path) or \
-            (not only_use_gutenberg_books and self.pathUtil.fileExists(non_gutenberg_books_path))
+        files_already_exist = os.path.isfile(gutenberg_books_path) or \
+            (not only_use_gutenberg_books and os.path.isfile(non_gutenberg_books_path))
         
         gutenberg_books = []
         non_gutenberg_books = []
@@ -74,12 +94,13 @@ class Step0_Overview:
 
             for book in booksLibrivox:
                 if self.isBookUseable(book):
+                    book_metadata = {'time': book['totaltimesecs'], 'title':book['title'], 'url': book['url_text_source'], 'catalog_date': book['catalog_date']}
                     # retrieve books with gutenberg-hosted texts
                     if self.text_hosted_by_gutenberg(book):
-                        gutenberg_books.append({'time': book['totaltimesecs'], 'title':book['title'], 'url': book['url_text_source'], 'catalog_date': book['catalog_date']})
+                        gutenberg_books.append(book_metadata)
                     # if specified, also retrieve books with texts hosted by other websites
                     elif not only_use_gutenberg_books:
-                        non_gutenberg_books.append({'time': book['totaltimesecs'], 'title':book['title'], 'url': book['url_text_source'], 'catalog_date': book['catalog_date']})
+                        non_gutenberg_books.append(book_metadata)
 
             print(f"Retrieved {len(gutenberg_books)} books with Gutenberg-hosted texts.")
             print(f"Retrieved {len(non_gutenberg_books)} books with texts from other hosts.")
@@ -113,9 +134,9 @@ class Step0_Overview:
 
         else:
             print("Loading existing files.")
-            if not self.pathUtil.fileExists(gutenberg_books_path):
+            if not os.path.isfile(gutenberg_books_path):
                 gutenberg_books = self.pathUtil.loadJson(gutenberg_books_path)
-            if not only_use_gutenberg_books and not self.pathUtil.fileExists(non_gutenberg_books_path):
+            if not only_use_gutenberg_books and not os.path.isfile(non_gutenberg_books_path):
                 non_gutenberg_books = self.pathUtil.loadJson(gutenberg_books_path)
                 
         return {"gutenberg_books": gutenberg_books, "non_gutenberg_books": non_gutenberg_books}
@@ -146,7 +167,7 @@ class Step0_Overview:
         print("Generate speaker template")
         filename = "readerTemplate.json" if gutenberg else "readerTemplate_non_gutenberg.json"
         readerPath = os.path.join(self.savePath, filename)
-        if not self.pathUtil.fileExists(readerPath):
+        if not os.path.isfile(readerPath):
             reader = {}
             for book in usableBooks:
                 bookTitle = book['title']
@@ -174,12 +195,12 @@ class Step0_Overview:
 
                     reader[chapter['reader']][title] = {
                         'title': title,
-                        'LibrivoxBookName': bookTitle,
-                        'GutenbergId': gutenbergId,
-                        'CatalogDate': catalog_date,
-                        'GutenbergStart': '',
-                        'GutenbergEnd': '',
-                        'textReplacement':{}
+                        'librivox_book_name': bookTitle,
+                        'gutenberg_id': gutenbergId,
+                        'catalog_date': catalog_date,
+                        'gutenberg_start': '',
+                        'gutenberg_end': '',
+                        'text_replacement':{}
                     }
 
 
@@ -193,7 +214,7 @@ class Step0_Overview:
         Writes the dictionary to a JSON file and returns the dict."""        
         filename = "readerLong.json" if gutenberg else "readerLong_non_gutenberg.json"
         readerPath = os.path.join(self.savePath, filename)
-        if not self.pathUtil.fileExists(readerPath):
+        if not os.path.isfile(readerPath):
             readers = {}
             for book in usableBooks:
                 bookTitle = book['title']
@@ -216,7 +237,7 @@ class Step0_Overview:
         filename = "readerShort.json" if gutenberg else "readerShort_non_gutenberg.json"
         readerPath = os.path.join(self.savePath, filename)
         
-        if not self.pathUtil.fileExists(readerPath):
+        if not os.path.isfile(readerPath):
             readers = []
             for speaker in speakerOverview:
                 readers.append({

@@ -37,7 +37,7 @@ eva = pathUtil.loadJson(basePath + '/Eva.json')
 karlsson = pathUtil.loadJson(basePath + '/Karlsson.json')
 sonja = pathUtil.loadJson(basePath + '/Sonja.json')
 
-allLibriboxIds = [author[key]['LibrivoxBookName'] for author in [
+allLibriboxIds = [author[key]['librivox_book_name'] for author in [
     bernd, hokuspokus, friedrich, eva, karlsson, redaer] for key in author]
 duplicatIds = set([x for x in allLibriboxIds if allLibriboxIds.count(x) > 1])
 
@@ -106,7 +106,7 @@ def runWorkflow(params: Dict, workflowConfig: Dict):
         logStep('Step1_DowloadAudio')
         config = {
             'audiosFromLibrivoxPersistenz': {
-                'bookName': params['LibrivoxBookName'],
+                'bookName': params['librivox_book_name'],
                 'savePath': step1PathAudio + '/',
                 'chapterPath': step1PathChapter
             },
@@ -157,7 +157,7 @@ def runWorkflow(params: Dict, workflowConfig: Dict):
         logStep('Step3_DowloadText')
         config = {
             'GutenbergBookPersistenz': {
-                'textId': params['GutenbergId'],
+                'textId': params['gutenberg_id'],
                 'savePath': step3PathText
             },
             'step3_DowloadText': {
@@ -172,9 +172,9 @@ def runWorkflow(params: Dict, workflowConfig: Dict):
                 'savePath': step3_1_Path,
                 'loadFile': step3PathText,
                 'saveFile': step3_1_PathText,
-                'textReplacement': params['textReplacement'],
-                'startSentence': params['GutenbergStart'],
-                'endSentence': params['GutenbergEnd'],
+                'textReplacement': params['text_replacement'],
+                'startSentence': params['gutenberg_start'],
+                'endSentence': params['gutenberg_end'],
                 'moves': params['moves'] if 'moves' in params else [],
                 'remove': params['remove'] if 'remove' in params else []
             }
