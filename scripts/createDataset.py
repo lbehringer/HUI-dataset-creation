@@ -9,12 +9,12 @@ pathUtil = PathUtil()
 basePath = createDatasetConfig.__path__[0]  # type: ignore
 
 # set external path where database should be created
-externalPaths = ["/mnt/c/Users/lyone/Documents/_ComputationalLinguistics/HUI_accent/HUI-Audio-Corpus-German/huiAudioCorpus/database"
+externalPaths = ["/mnt/c/Users/lyone/Documents/_ComputationalLinguistics/HUI_accent/HUI-Audio-Corpus-German/database"
 ]
 
 # dataBasePath = datasetWorkflow.__path__[0]  # type: ignore
 for path in externalPaths:
-    if pathUtil.fileExists(path):
+    if os.path.exists(path):
         dataBasePath = path
 
 def logStep(name):
@@ -67,20 +67,6 @@ workflowConfig = {
     'generateClean': True
 }
 
-
-step0Path = dataBasePath + '/overview'
-logStep('Step0_Overview')
-config = {
-    'audiosFromLibrivoxPersistenz': {
-        'bookName': '',
-        'savePath': '',
-        'chapterPath': ''
-    },
-    'step0_Overview': {
-        'savePath': step0Path
-    }
-}
-DependencyInjection(config).step0_Overview.run()
 
 finalDatasetPath = dataBasePath + '/finalDataset'
 finalDatasetPathClean = dataBasePath + '/finalDatasetClean'
