@@ -27,7 +27,7 @@ class Step2_SplitAudio:
             audios = list(audios)
             audios = [audios[i] for i in self.remapSort]
 
-        Parallel(n_jobs=1, verbose=10, batch_size= 100)(delayed(self.splitOneAudio)(audio, index) for index, audio in enumerate(audios))
+        Parallel(n_jobs=1, verbose=10, batch_size= "auto")(delayed(self.splitOneAudio)(audio, index) for index, audio in enumerate(audios))
 
 
     def splitOneAudio(self, audio: Audio, index:int):
