@@ -21,7 +21,7 @@ class PathUtil:
         Path(file).parent.mkdir(parents=True, exist_ok=True)
 
     def deleteFolder(self, folder):
-        if self.fileExists(folder):
+        if os.path.isdir(folder):
             for filename in os.listdir(folder):
                 file_path = os.path.join(folder, filename)
                 if os.path.isfile(file_path) or os.path.islink(file_path):
@@ -73,7 +73,7 @@ class PathUtil:
     def unzip(self, inputZip:str, outputFolder:str):
         with ZipFile(inputZip, 'r') as zipReference:
             for file in zipReference.namelist():
-                if not self.fileExists(outputFolder + '/' + file):
+                if not os.path.isfile(os.path.join(outputFolder, file)):
                     print('start unzipping because file ', file, 'does not exist.')
                     self.deleteFolder(outputFolder)
                     zipReference.extractall(outputFolder)
@@ -89,10 +89,6 @@ class PathUtil:
         with open(filename, encoding='utf8') as jsonFile:
             data = json.load(jsonFile)
         return data
-
-    def fileExists(self, filename):
-        exists = os.path.exists(filename)
-        return exists
 
     def writeFile(self, text: str, filename: str):
         self.createFolderForFile(filename)

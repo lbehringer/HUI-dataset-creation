@@ -17,9 +17,9 @@ class AudiosFromLibrivoxPersistenz:
         self.pathUtil = PathUtil()
         self.limitPerIteration = 1000
         self.numberOfIterations = 20
-        self.minimumUploadTimestamp = 1625672626 # 7 July 2021 (which is the date of the last change in the HUI repo)
+        # self.minimumUploadTimestamp = 1625672626 # 7 July 2021 (which is the date of the last change in the HUI repo)
         # self.minimumUploadTimestamp = 1672527600 # 1 January 2023
-        # self.minimumUploadTimestamp = 1698184800 # 25 October 2023
+        self.minimumUploadTimestamp = 1698184800 # 25 October 2023
 
     def save(self):
         chapters, chapterDownloadLinks = self.getChapter(self.bookName, get_download_links=True)
