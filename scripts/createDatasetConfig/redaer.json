@@ -1,7 +1,7 @@
 {
     "rmische_geschichte_buch_1": {
         "title": "rmische_geschichte_buch_1",
-        "LibrivoxBookName": "Römische Geschichte Buch 1",
+        "librivox_book_name": "Römische Geschichte Buch 1",
         "GutenbergId": 3060,
         "GutenbergStart": "Vorrede zu der zweiten Auflage\n\n\n",
         "GutenbergEnd": "",
@@ -15,7 +15,7 @@
     },
     "rmische_geschichte_buch_2": {
         "title": "rmische_geschichte_buch_2",
-        "LibrivoxBookName": "Römische Geschichte Buch 2",
+        "librivox_book_name": "Römische Geschichte Buch 2",
         "GutenbergId": 3061,
         "GutenbergStart": "",
         "GutenbergEnd": "",
@@ -23,7 +23,7 @@
     },
     "rmische_geschichte_buch_3": {
         "title": "rmische_geschichte_buch_3",
-        "LibrivoxBookName": "Römische Geschichte Buch 3",
+        "librivox_book_name": "Römische Geschichte Buch 3",
         "GutenbergId": 3062,
         "GutenbergStart": "",
         "GutenbergEnd": "",
@@ -31,7 +31,7 @@
     },
     "rmische_geschichte_buch_4": {
         "title": "rmische_geschichte_buch_4",
-        "LibrivoxBookName": "Römische Geschichte Buch 4",
+        "librivox_book_name": "Römische Geschichte Buch 4",
         "GutenbergId": 3063,
         "GutenbergStart": "",
         "GutenbergEnd": "",
@@ -39,7 +39,7 @@
     },
     "rmische_geschichte_buch_5": {
         "title": "rmische_geschichte_buch_5",
-        "LibrivoxBookName": "Römische Geschichte Buch 5",
+        "librivox_book_name": "Römische Geschichte Buch 5",
         "GutenbergId": 3064,
         "GutenbergStart": "",
         "GutenbergEnd": "",
@@ -47,7 +47,7 @@
     },
     "rmische_geschichte_buch_8": {
         "title": "rmische_geschichte_buch_8",
-        "LibrivoxBookName": "Römische Geschichte Buch 8",
+        "librivox_book_name": "Römische Geschichte Buch 8",
         "GutenbergId": 3065,
         "GutenbergStart": "",
         "GutenbergEnd": "",
@@ -55,7 +55,7 @@
     },
     "reineke_fuchs": {
         "title": "reineke_fuchs",
-        "LibrivoxBookName": "Reineke Fuchs",
+        "librivox_book_name": "Reineke Fuchs",
         "GutenbergId": 2228,
         "GutenbergStart": "",
         "GutenbergEnd": "",
@@ -63,7 +63,7 @@
     },
     "hermann_und_dorothea": {
         "title": "hermann_und_dorothea",
-        "LibrivoxBookName": "Hermann und Dorothea",
+        "librivox_book_name": "Hermann und Dorothea",
         "GutenbergId": 2312,
         "GutenbergStart": "",
         "GutenbergEnd": "",
@@ -71,7 +71,7 @@
     },
     "fabeln": {
         "title": "fabeln",
-        "LibrivoxBookName": "Fabeln",
+        "librivox_book_name": "Fabeln",
         "GutenbergId": "lichtwer/lichtfab/lichtfab.html",
         "GutenbergStart": "",
         "GutenbergEnd": "",

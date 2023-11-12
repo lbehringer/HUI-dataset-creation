@@ -1,7 +1,7 @@
 {
     "balladen": {
         "title": "balladen",
-        "LibrivoxBookName": "Balladen",
+        "librivox_book_name": "Balladen",
         "GutenbergId": "spittelr/balladen/balladen.html",
         "GutenbergStart": "In finstrer Nacht, auf steilen Wolkenpfaden,",
         "GutenbergEnd": "",
@@ -16,7 +16,7 @@
     },
     "ligeia_und_andere_novellen": {
         "title": "ligeia_und_andere_novellen",
-        "LibrivoxBookName": "Ligeia und Andere Novellen",
+        "librivox_book_name": "Ligeia und Andere Novellen",
         "GutenbergId": 50887,
         "GutenbergStart": "Und es liegt darin der Wille, der",
         "GutenbergEnd": "Genien und Gnomen.",
@@ -48,7 +48,7 @@
     },
     "fabeln_und_erzhlungen": {
         "title": "fabeln_und_erzhlungen",
-        "LibrivoxBookName": "Fabeln und Erzählungen",
+        "librivox_book_name": "Fabeln und Erzählungen",
         "GutenbergId": 9335,
         "GutenbergStart": "",
         "GutenbergEnd": "",
@@ -58,7 +58,7 @@
     },
     "toten_seelen": {
         "title": "toten_seelen",
-        "LibrivoxBookName": "toten Seelen",
+        "librivox_book_name": "toten Seelen",
         "GutenbergId": "gogol/toteseel/toteseel.html",
         "GutenbergStart": "",
         "GutenbergEnd": "irdischen Amtes zu achten, weil wir es schon alle dunkel ahnen und weil wir kaum",
@@ -93,7 +93,7 @@
     },
     "wir_fanden_einen_pfad_neue_gedichte": {
         "title": "wir_fanden_einen_pfad_neue_gedichte",
-        "LibrivoxBookName": "Wir fanden einen Pfad: Neue Gedichte",
+        "librivox_book_name": "Wir fanden einen Pfad: Neue Gedichte",
         "GutenbergId": 9623,
         "GutenbergStart": "",
         "GutenbergEnd": "",
@@ -106,7 +106,7 @@
     },
     "werde_die_du_bist": {
         "title": "werde_die_du_bist",
-        "LibrivoxBookName": "Werde, die Du bist",
+        "librivox_book_name": "Werde, die Du bist",
         "GutenbergId": "dohm/wiedu/wiedu.html",
         "GutenbergStart": "In der Irrenanstalt des Doktor Behrend,",
         "GutenbergEnd": "",
@@ -128,7 +128,7 @@
     },
     "kleine_lord_version_2": {
         "title": "kleine_lord_version_2",
-        "LibrivoxBookName": "kleine Lord (version 2)",
+        "librivox_book_name": "kleine Lord (version 2)",
         "GutenbergId": "burnett/lord/lord.html",
         "GutenbergStart": "Cedrik selbst wußte kein Sterbenswörtchen davon,",
         "GutenbergEnd": "",
