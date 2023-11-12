@@ -27,7 +27,6 @@ class QA2_HifiSNR:
         self.audio_sr_transformer = audio_sr_transformer
         self.audio_loudness_transformer = audio_loudness_transformer
         self.target_sr = target_sr
-        self.audio_sr_transformer.targetSamplingRate = target_sr # silero requires 8kHz or 16kHz
         self.vad_model, utils = torch.hub.load(repo_or_dir='snakers4/silero-vad',
                                 model='silero_vad',
                                 force_reload=False,

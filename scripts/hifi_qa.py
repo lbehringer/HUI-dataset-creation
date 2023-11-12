@@ -132,9 +132,6 @@ def runWorkflow(params: Dict, workflowConfig: Dict):
                 "savePath": qa1_path_audio,
                 "fileExtension": "mp3"
             },
-            "audio_sr_transformer": {
-                "targetSamplingRate": 16000
-            },
             "audio_loudness_transformer": {
                 "loudness": -20
             },
@@ -156,6 +153,9 @@ def runWorkflow(params: Dict, workflowConfig: Dict):
             },
             "audio_loudness_transformer": {
                 "loudness": -20
+            },
+            "audio_sr_transformer": {
+                "targetSamplingRate": 16000
             },            
             "QA2_HifiSNR": {
                 "save_path": qa2_path_audio,

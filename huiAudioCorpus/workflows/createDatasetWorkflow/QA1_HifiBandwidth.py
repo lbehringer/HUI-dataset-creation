@@ -1,7 +1,6 @@
 from huiAudioCorpus.persistenz.AudioPersistenz import AudioPersistenz
 from huiAudioCorpus.utils.DoneMarker import DoneMarker
 from huiAudioCorpus.model.Audio import Audio
-from huiAudioCorpus.transformer.AudioSamplingRateTransformer import AudioSamplingRateTransformer
 from huiAudioCorpus.transformer.AudioLoudnessTransformer import AudioLoudnessTransformer
 import librosa
 import numpy as np
@@ -11,7 +10,6 @@ class QA1_HifiBandwidth:
     def __init__(
             self, 
             audio_persistenz: AudioPersistenz, 
-            audio_sr_transformer: AudioSamplingRateTransformer,
             audio_loudness_transformer: AudioLoudnessTransformer,
             save_path: str, 
             book_name: str,
@@ -22,7 +20,6 @@ class QA1_HifiBandwidth:
         self.save_path = save_path
         self.book_name = book_name
         self.seconds_to_analyze = seconds_to_analyze
-        self.audio_sr_transformer = audio_sr_transformer
         self.audio_loudness_transformer = audio_loudness_transformer
         self.bandwidth_hz_threshold = bandwidth_hz_threshold
 
@@ -32,8 +29,6 @@ class QA1_HifiBandwidth:
     def script(self):
         audios = self.audio_persistenz.loadAll(duration=self.seconds_to_analyze)
         for idx, audio in enumerate(audios):
-            # resample to lower sampling rate for bandwidth and SNR analysis
-            #audio = self.audio_sr_transformer.transform(audio=audio)
             audio = self.audio_loudness_transformer.transform(audio)
             audio.bandwidth = self.get_bandwidth(audio)
             # filter out audios which don't meet the minimum bandwidth threshold
