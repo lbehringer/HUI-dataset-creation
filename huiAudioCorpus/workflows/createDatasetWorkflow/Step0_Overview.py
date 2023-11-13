@@ -108,10 +108,11 @@ class Step0_Overview:
             # write gutenberg-hosted books to file
             print("Processing books with Gutenberg-hosted texts.")
             for book in tqdm(gutenberg_books):
-                chapters, _ = self.audiosFromLibrivoxPersistenz.getChapter(book['title'], get_download_links=False)
+                chapters, _ = self.audiosFromLibrivoxPersistenz.getChapters(book['title'], get_download_links=False)
                 book['chapters'] = []
-                for _, chapter in chapters.iterrows():
+                for idx, chapter in chapters.iterrows():
                     book['chapters'].append({
+                        'section': idx+1,
                         'title': chapter['Chapter'],
                         'reader': chapter['Reader'],
                         'time': convertToSeconds(chapter['Time'])
@@ -122,10 +123,11 @@ class Step0_Overview:
             if not only_use_gutenberg_books:
                 print("Processing books with texts from other hosts.")
                 for book in tqdm(non_gutenberg_books):
-                    chapters, _ = self.audiosFromLibrivoxPersistenz.getChapter(book['title'], get_download_links=False)
+                    chapters, _ = self.audiosFromLibrivoxPersistenz.getChapters(book['title'], get_download_links=False)
                     book['chapters'] = []
-                    for _, chapter in chapters.iterrows():
+                    for idx, chapter in chapters.iterrows():
                         book['chapters'].append({
+                            'section': idx+1,
                             'title': chapter['Chapter'],
                             'reader': chapter['Reader'],
                             'time': convertToSeconds(chapter['Time'])
@@ -172,6 +174,9 @@ class Step0_Overview:
             for book in usableBooks:
                 bookTitle = book['title']
                 catalog_date = book['catalog_date']
+                # determine if book is solo or collaborative reading
+                readers = set([chapter['reader'] for chapter in book['chapters']])
+                solo_reading = len(readers) == 1
                 for chapter in book['chapters']:
                     if chapter['reader'] not in reader:
                         reader[chapter['reader']] = {}
@@ -193,15 +198,21 @@ class Step0_Overview:
                     else:
                         gutenbergId = book["url"].replace("https://", "").replace("http://", "")
 
-                    reader[chapter['reader']][title] = {
-                        'title': title,
-                        'librivox_book_name': bookTitle,
-                        'gutenberg_id': gutenbergId,
-                        'catalog_date': catalog_date,
-                        'gutenberg_start': '',
-                        'gutenberg_end': '',
-                        'text_replacement':{}
-                    }
+                    if title not in reader[chapter['reader']]:
+                        reader[chapter['reader']][title] = {
+                            'solo_reading': solo_reading,
+                            'sections': 'all' if solo_reading else [chapter['section']],
+                            'title': title,
+                            'librivox_book_name': bookTitle,
+                            'gutenberg_id': gutenbergId,
+                            'catalog_date': catalog_date,
+                            'gutenberg_start': '',
+                            'gutenberg_end': '',
+                            'text_replacement':{}
+                        }
+                    else:
+                        if not solo_reading:
+                            reader[chapter['reader']][title]['sections'].append(chapter['section'])
 
 
 
