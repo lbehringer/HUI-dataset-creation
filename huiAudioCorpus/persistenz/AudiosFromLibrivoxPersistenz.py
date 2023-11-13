@@ -23,12 +23,14 @@ class AudiosFromLibrivoxPersistenz:
         self.minimumUploadTimestamp = 1699225200 # 6 November 2023
 
     def save(self):
-        chapters, chapterDownloadLinks = self.getChapter(self.bookName, get_download_links=True)
+        chapters, chapterDownloadLinks = self.getChapters(self.bookName, get_download_links=True)
         Parallel(n_jobs=4)(delayed(self.pathUtil.copyFileFromUrl)(link ,self.savePath+ '/' + link.split('/')[-1]) for link in chapterDownloadLinks)
         chapters.to_csv(self.chapterPath)
         
 
-    def getChapter(self, bookName:str, get_download_links):
+    def getChapters(self, bookName:str, get_download_links):
+        """Get all chapters from a book.
+        Return a tuple of a DataFrame """
         searchUrl = self.getSearchUrl(bookName, self.url)
         response = self.loadSearchBook(searchUrl)
         chapterUrl = self.extractChapterUrl(response)
@@ -106,7 +108,7 @@ class AudiosFromLibrivoxPersistenz:
         else:
             limit = self.limitPerIteration
             minimum_upload_timestamp = self.minimumUploadTimestamp  # we only want to retrieve books released AFTER this date
-            for i in tqdm(range(self.numberOfIterations)):
+            for i in tqdm(range(self.numberOfIterations), desc=f"Performing retrieval in max. {self.numberOfIterations} iterations"):
                 requestUrl = f'https://librivox.org/api/feed/audiobooks/?limit={limit}&offset={i*limit}&since={minimum_upload_timestamp}&format=json'
                 page = requests.get(requestUrl)
                 page.encoding = "UTF-8"

@@ -40,7 +40,7 @@ class QA1_HifiBandwidth:
     def set_x_seconds_id(self, audio: Audio, book_name: str, chapter: int, seconds_to_analyze):
         """Assigns an ID to an Audio object, following the format `<book_name>_<chapter>_<seconds_to_analyze>sec`. 
         Returns the Audio with the attributes `id` and `name` (with identical values)."""
-        name = f"{book_name}_{chapter:02d}_f{seconds_to_analyze}sec"
+        name = f"{book_name}_{chapter:02d}_{seconds_to_analyze}sec"
         audio.id = name
         audio.name = name
         return audio
