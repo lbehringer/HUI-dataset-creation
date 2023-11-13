@@ -116,6 +116,8 @@ def runWorkflow(params: Dict, workflowConfig: Dict):
         config = {
             'audiosFromLibrivoxPersistenz': {
                 'bookName': params['librivox_book_name'],
+                'solo_reading': params['solo_reading'],
+                'sections': params['sections'],
                 'savePath': step1PathAudio + '/',
                 'chapterPath': step1PathChapter
             },

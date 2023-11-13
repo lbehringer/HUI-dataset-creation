@@ -6,13 +6,16 @@ import json
 from tqdm import tqdm
 from joblib import Parallel, delayed
 from urllib.parse import quote
+from typing import Union
 
 class AudiosFromLibrivoxPersistenz:
 
-    def __init__ (self, bookName: str, savePath: str, chapterPath: str, url:str = 'https://librivox.org/'):
+    def __init__ (self, bookName: str, savePath: str, solo_reading: bool, sections: Union[list, str], chapterPath: str, url:str = 'https://librivox.org/'):
         self.bookName = bookName
         self.url = url
         self.savePath = savePath
+        self.solo_reading = solo_reading
+        self.sections = sections
         self.chapterPath = chapterPath
         self.pathUtil = PathUtil()
         self.limitPerIteration = 1000
@@ -79,7 +82,12 @@ class AudiosFromLibrivoxPersistenz:
                 ''.join(td.stripped_strings)
                 for td in row.find_all('td')]
                 for row in parsed_table.find_all('tr')]
-        downloadLinks = [chapter[1] for chapter in data if len(chapter)>0]
+        if self.solo_reading:
+            downloadLinks = [chapter[1] for chapter in data if len(chapter)>0]
+        # if book is not solo_reading, download only chapters read by the specified reader
+        # index 0 contains empty chapter, so we skip it
+        else:
+            downloadLinks = [chapter[1] for idx, chapter in enumerate(data) if idx in set(self.sections) and len(chapter)>0]
         return downloadLinks
 
 
