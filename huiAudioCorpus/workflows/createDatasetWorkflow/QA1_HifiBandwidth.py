@@ -6,15 +6,16 @@ import librosa
 import numpy as np
 
 
+
 class QA1_HifiBandwidth:
     def __init__(
             self, 
             audio_persistenz: AudioPersistenz, 
-            audio_loudness_transformer: AudioLoudnessTransformer,
             save_path: str, 
             book_name: str,
             seconds_to_analyze: int,
             bandwidth_hz_threshold: int,
+            audio_loudness_transformer: AudioLoudnessTransformer = None,
             ):
         self.audio_persistenz = audio_persistenz
         self.save_path = save_path
@@ -29,7 +30,9 @@ class QA1_HifiBandwidth:
     def script(self):
         audios = self.audio_persistenz.loadAll(duration=self.seconds_to_analyze)
         for idx, audio in enumerate(audios):
-            audio = self.audio_loudness_transformer.transform(audio)
+            # only perform loudness normalization if specified in config
+            if self.audio_loudness_transformer:
+                audio = self.audio_loudness_transformer.transform(audio)
             audio.bandwidth = self.get_bandwidth(audio)
             # filter out audios which don't meet the minimum bandwidth threshold
             if audio.bandwidth >= self.bandwidth_hz_threshold:
@@ -55,14 +58,14 @@ class QA1_HifiBandwidth:
 
         mean_power = np.mean(power_spec)    
         power_spec_db = librosa.amplitude_to_db(power_spec, ref=np.max)
-        
-        # get highest frequency which is at least -50 dB relative to the peak value
+
+        # get highest frequency which is at least -50 dB (or higher) relative to the peak value (peak value should be <= 0)
         peak_value = np.max(power_spec_db)
         threshold = peak_value - 50  # -50 dB level relative to the peak value
-        frequencies_below_threshold = np.where(power_spec_db <= threshold)[0]
-        if len(frequencies_below_threshold) > 0:
-            bandwidth_start = frequencies_below_threshold[0]
-            bandwidth_end = frequencies_below_threshold[-1]
+        frequencies_above_threshold = np.where(power_spec_db >= threshold)[0]
+        if len(frequencies_above_threshold) > 0:
+            bandwidth_start = frequencies_above_threshold[0]
+            bandwidth_end = frequencies_above_threshold[-1]
             start_hz = librosa.fft_frequencies(sr=audio.samplingRate)[bandwidth_start]
             end_hz = librosa.fft_frequencies(sr=audio.samplingRate)[bandwidth_end]
             # TODO: test correct function of bandwidth estimation
