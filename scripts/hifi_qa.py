@@ -151,7 +151,7 @@ def runWorkflow(params: Dict, workflowConfig: Dict):
             "audio_persistenz": {
                 "loadPath": qa1_path_audio,
                 "savePath": qa2_path_audio,
-                "fileExtension": "mp3"
+                "fileExtension": "wav"
             },
             "audio_loudness_transformer": {
                 "loudness": -20
