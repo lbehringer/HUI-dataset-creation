@@ -8,6 +8,11 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 import torch
 from pprint import pprint
 from tqdm import tqdm
+import numpy as np
+import librosa
+from scipy.signal import butter, lfilter
+import matplotlib.pyplot as plt
+import soundfile as sf
 
 
 class QA2_HifiSNR:
@@ -46,6 +51,32 @@ class QA2_HifiSNR:
             audio = self.set_x_seconds_id(audio, self.book_name, idx+1, self.seconds_to_analyze)
             # TODO: compute SNR for specified frequency bands
             self.audio_persistenz.save(audio)
+                
+
+            # TODO: generate 4 timeSeries, one for each frequency band that we want to analyze
+            # TODO: Is it better to just compute the mel spectrogram, "cut off" all frequencies outside the passband, and then do an inverse mel transform and an inverse STFT?
+            print(audio.samplingRate)
+            # design band-pass Butterworth filter
+            lowcut = 300
+            highcut = 4000
+            nyquist = 0.5 * audio.samplingRate
+            low = lowcut / nyquist
+            high = highcut / nyquist
+            b, a = butter(N=4, Wn=[low, high], btype="bandpass")
+            # apply filter to signal
+            filtered_signal = lfilter(b, a, audio.timeSeries)
+            t = np.linspace(0, 1, len(audio.timeSeries), endpoint=False)  # Time vector
+
+            # Plot the original and filtered signals
+            plt.figure(figsize=(10, 6))
+            plt.plot(t, audio.timeSeries, label='Original Signal')
+            plt.plot(t, filtered_signal, label='Filtered Signal')
+            plt.xlabel('Time (s)')
+            plt.ylabel('Amplitude')
+            plt.legend()
+            plt.savefig("butterworth.png")
+            sf.write("original_audio.wav", audio.timeSeries, audio.samplingRate)
+            sf.write("filtered_audio.wav", filtered_signal, audio.samplingRate)
     
     def set_x_seconds_id(self, audio: Audio, book_name: str, chapter: int, seconds_to_analyze):
         """Assigns an ID to an Audio object, following the format `<book_name>_<chapter>_<seconds_to_analyze>sec`. 
@@ -126,3 +157,33 @@ class QA2_HifiSNR:
                 silence_timestamps.append({"start": start, "end": end})
                 start = speech_chunk["end"]
         return silence_timestamps
+
+    def get_snr(self, audio: Audio, speech_timestamps: list, silence_timestamps: list):
+        """Estimates the signal-plus-noise power in speech segments and the noise power in silence segments, then computes the SNR."""
+        # get speech-only audio and silence-only audio
+        speech_audio_segments = [audio.timeSeries[ts['start']:ts['end']] for ts in speech_timestamps]
+        silence_audio_segments =  [audio.timeSeries[ts['start']:ts['end']] for ts in silence_timestamps]
+        speech_audio = np.concatenate(speech_audio_segments)
+        silence_audio = np.concatenate(silence_audio_segments)
+
+        # get signal-plus-noise power in speech audio
+        speech_power = self.get_average_power(speech_audio)
+        # get noise power in silence audio
+        silence_power = self.get_average_power(silence_audio)
+        # compute SNR
+        return speech_power / silence_power
+
+    def get_average_power(self, y: np.ndarray):
+        """Calculates the average power of an audio signal.
+        Returns
+        -------
+        average_power (float)
+        """
+        stft_result = librosa.stft(y)
+        magnitude_spec = np.abs(stft_result)
+        power_spec = magnitude_spec**2
+        power_across_frequency_bins = np.sum(power_spec, axis=0)
+        total_power = np.sum(power_across_frequency_bins)
+        duration = len(y) / self.target_sr
+        average_power = total_power / duration
+        return average_power
