@@ -138,6 +138,6 @@ class GutenbergDownload:
     The id has to be searched manually with the link http://gutendex.com/books/?search=ThisIsTheSearchText
     """
     def downloadText(self, textId: int):
-        text = strip_headers(load_etext(textId, mirror='http://eremita.di.uminho.pt/gutenberg/')).strip()
+        text = strip_headers(load_etext(textId, mirror='http://www.mirrorservice.org/sites/ftp.ibiblio.org/pub/docs/books/gutenberg/')).strip()
         return text
 
