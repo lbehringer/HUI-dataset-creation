@@ -8,11 +8,12 @@ import os
 
 class Step0_Overview:
 
-    def __init__(self, audiosFromLibrivoxPersistenz: AudiosFromLibrivoxPersistenz, savePath: str, pathUtil: PathUtil, requestUrl: str = None):
+    def __init__(self, audiosFromLibrivoxPersistenz: AudiosFromLibrivoxPersistenz, savePath: str, pathUtil: PathUtil, requestUrl: str = None, language: str ="English"):
         self.savePath = savePath
         self.audiosFromLibrivoxPersistenz = audiosFromLibrivoxPersistenz
         self.pathUtil = pathUtil
         self.requestUrl = requestUrl
+        self.language = language
 
     def run(self):
         return DoneMarker(self.savePath).run(self.script, deleteFolder=False)
@@ -158,7 +159,7 @@ class Step0_Overview:
         Returns a boolean."""
         if book['totaltimesecs']<=0:
             return False
-        if book['language'] != "English":
+        if book['language'] != self.language:
             return False
         return True
     
