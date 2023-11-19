@@ -10,7 +10,7 @@ from typing import Union
 
 class AudiosFromLibrivoxPersistenz:
 
-    def __init__ (self, bookName: str, savePath: str, solo_reading: bool, sections: Union[list, str], chapterPath: str, url:str = 'https://librivox.org/'):
+    def __init__ (self, bookName: str, savePath: str, chapterPath: str, url: str = 'https://librivox.org/', solo_reading: bool = None, sections: Union[list, str] = None):
         self.bookName = bookName
         self.url = url
         self.savePath = savePath

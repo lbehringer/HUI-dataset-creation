@@ -35,6 +35,7 @@ from huiAudioCorpus.workflows.createDatasetWorkflow.Step1_DownloadAudio import S
 from huiAudioCorpus.converter.StringToSentencesConverter import StringToSentencesConverter
 from huiAudioCorpus.workflows.createDatasetWorkflow.QA1_HifiBandwidth import QA1_HifiBandwidth
 from huiAudioCorpus.workflows.createDatasetWorkflow.QA2_HifiSNR import QA2_HifiSNR
+from huiAudioCorpus.workflows.createDatasetWorkflow.Step4_1_NormalizeTranscript import Step4_1_NormalizeTranscript
 
 from frosch import hook
 hook(theme = 'paraiso_dark')
@@ -133,6 +134,7 @@ class DependencyInjection:
     step3_DowloadText: Step3_DownloadText
     step3_1_PrepareText: Step3_1_PrepareText
     step4_TranscriptAudio: Step4_TranscriptAudio
+    step4_1_NormalizeTranscript: Step4_1_NormalizeTranscript
     step5_AlignText: Step5_AlignText
     step6_FinalizeDataset: Step6_FinalizeDataset
     step7_AudioRawStatistic: Step7_AudioRawStatistic
