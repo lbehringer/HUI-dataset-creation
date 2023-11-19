@@ -4,8 +4,16 @@ from huiAudioCorpus.utils.ModelToStringConverter import ToString
 from typing import List
 
 class Sentence(ToString):
+    """
+    Represents a sentence and provides methods for processing and analyzing it
+    Params:
+        sentence (str): The input sentence
+        id (str): An optional identifier for the sentence
+    """
+
     def __init__(self, sentence: str, id: str = ''):
         sentence = self.cleanSpaces(sentence)
+        # clean spaces around punctuation in the sentence
         sentence = self.cleanSpacesPunctuation(sentence)
 
         self.sentence = sentence
@@ -26,13 +34,42 @@ class Sentence(ToString):
         self.rawChars = "".join(self.wordsWithoutPunct)
 
     def generateWords(self, textBlob:TextBlob):
+        """
+        Generate a list of words from a TextBlob object.
+
+        Params:
+            textBlob (TextBlob): TextBlob object representing the sentence
+
+        Returns:
+            List[str]: list of words
+        """        
+
         words = list(textBlob.tokenize())
         return words
     
     def __getitem__(self, k):
+        """
+        Get an item from `wordsMatchingWithChars` at index k.
+
+        Params:
+            k: the index of the item to retrieve
+
+        Returns:
+            Sentence: a new Sentence object
+        """
         return Sentence(" ".join(self.wordsMatchingWithChars[k]))
 
     def generateWordsMatchingWithChars(self, words:List[str], wordsWithoutPunct: List[str]):
+        """
+        Generate words matching with characters.
+
+        Params:
+            words (List[str]): list of words
+            wordsWithoutPunct (List[str]): list of words without punctuation
+
+        Returns:
+            wordMatching (List[str]): list of words matching with characters
+        """        
         wordMatching = []
         wordPointer = 0
         for word in words:
@@ -51,10 +88,20 @@ class Sentence(ToString):
 
 
     def cleanSpaces(self, text: str):
+        """Collapse multiple spaces to one space."""
         text =  text.replace('  ', ' ').replace('  ',' ').replace('  ',' ').replace('  ',' ')
         return text
 
     def cleanSpacesPunctuation(self, text: str):
+        """
+        Clean spaces around punctuation in the text.
+
+        Params:
+            text (str): input text
+
+        Returns:
+            text (str): text with cleaned spaces around punctuation
+        """        
         punctuations = '.,;?!:"'
         punctuations_with_preceding_space = '-()'
         # add trailing space
@@ -69,7 +116,6 @@ class Sentence(ToString):
         # add trailing space
         for char in punctuations_with_preceding_space:
             text = text.replace(char, char+' ')
-
 
         text = text.replace('  ', ' ').replace('  ', ' ')
         return text.strip()
