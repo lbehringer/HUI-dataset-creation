@@ -19,8 +19,11 @@ class Step5_AlignText:
         return result
 
     def script(self):
+        # load (normalized) ASR-generated transcripts (from step 4_1)
         transcripts = list(self.transcriptsPersistenz.loadAll())
         sentences = transcripts[0].sentences()
+
+        # load prepared source text (from step 3_1)
         with open(self.textToAlignPath, 'r', encoding='utf8') as f:
             inputText = f.read()
         inputSentence = Sentence(inputText)
@@ -40,12 +43,12 @@ class Step5_AlignText:
 
         print("notPerfektAlignments Percent",len(notPerfektAlignments)/len(alignments)*100)
 
-        results = [[align.sourceText.id, align.alignedText.sentence, align.distance] for align in alignments if align.isPerfect]
+        results = [[align.sourceText.id, align.alignedText.sentence, align.sourceText.sentence, align.distance] for align in alignments if align.isPerfect]
         csv =  DataFrame(results)
         transcripts = Transcripts(csv, 'transcripts', 'transcripts')
         self.transcriptsPersistenz.save(transcripts)
 
-        resultsNotPerfect = [[align.sourceText.id, align.alignedText.sentence, align.distance] for align in alignments if not align.isPerfect]
+        resultsNotPerfect = [[align.sourceText.id, align.alignedText.sentence, align.sourceText.sentence, align.distance] for align in alignments if not align.isPerfect]
         csv =  DataFrame(resultsNotPerfect)
         transcripts = Transcripts(csv, 'transcriptsNotPerfect', 'transcriptsNotPerfect')
         self.transcriptsPersistenz.save(transcripts)

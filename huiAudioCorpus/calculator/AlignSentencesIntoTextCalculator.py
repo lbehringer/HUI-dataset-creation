@@ -52,26 +52,26 @@ class AlignSentencesIntoTextCalculator:
             start = 0
             additionalRange = 0
             distance_threshold = 0.2
-            for sent in tqdm(sentences_to_align):
+            for asr_sent in tqdm(sentences_to_align):
 
                 range_start= max(0, start - WORDRANGE - additionalRange)
-                range_end = min(range_start + 2*(WORDRANGE + additionalRange) + sent.wordsCount, original_text.wordsCount + 1)
+                range_end = min(range_start + 2*(WORDRANGE + additionalRange) + asr_sent.wordsCount, original_text.wordsCount + 1)
 
                 # Find the best position for the current text within the given range
                 if range_end - range_start > 2000:
                     raise Exception('more than 2000 Words in search text')
 
-                (newStart, end), distance = self.bestPosition(parallel, original_text[range_start:range_end], sent, 0, range_end - range_start)
+                (newStart, end), distance = self.bestPosition(parallel, original_text[range_start:range_end], asr_sent, 0, range_end - range_start)
                 newStart += range_start
                 end += range_start
 
-                align = SentenceAlignment(sent, original_text[newStart: end],newStart, end, distance)
+                align = SentenceAlignment(asr_sent, original_text[newStart: end], newStart, end, distance)
 
                 if distance > distance_threshold:
                     print('*****************')
-                    print(f'skip because of too high distance (threshold {distance_threshold}): {sent.id} {distance:.3f}')
+                    print(f'Above distance threshold ({distance_threshold}): {asr_sent.id} {distance:.3f}')
                     print('*****************')
-                    print(f"Sentence to be aligned:\n{sent.sentence}")
+                    print(f"ASR transcript:\n{asr_sent.sentence}")
                     print('___________________')
                     print(f"Best alignment:\n{align.alignedText.sentence}")                    
                     print('___________________')
@@ -79,7 +79,7 @@ class AlignSentencesIntoTextCalculator:
                     print('########################')
 
                     align.isAboveThreshold = True
-                    additionalRange += 30 + sent.wordsCount
+                    additionalRange += 30 + asr_sent.wordsCount
                 else: 
                     start = end
                     additionalRange= 0
