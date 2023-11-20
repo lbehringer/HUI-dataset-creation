@@ -1,7 +1,7 @@
 from os import error
 from textblob import TextBlob
 from huiAudioCorpus.utils.ModelToStringConverter import ToString
-from typing import List
+from typing import List, Union
 
 class Sentence(ToString):
     """
@@ -15,6 +15,9 @@ class Sentence(ToString):
         sentence = self.cleanSpaces(sentence)
         # clean spaces around punctuation in the sentence
         sentence = self.cleanSpacesPunctuation(sentence)
+        if " ' " in sentence:
+            sentence = self.postprocess_split_contractions(sentence)
+
 
         self.sentence = sentence
         self.id = id
@@ -32,6 +35,25 @@ class Sentence(ToString):
         self.charCount = len(self.sentence)
         self.wordsMatchingWithChars = self.generateWordsMatchingWithChars(self.words, self.wordsWithoutPunct)
         self.rawChars = "".join(self.wordsWithoutPunct)
+
+
+    def postprocess_split_contractions(self, toks: Union[List, str]):
+        """Recombine contractions that were split by TextBlob (e.g. `don ' t` -> `don't`).
+        Returns the postprocessed string."""
+        if isinstance(toks, str):
+             toks = toks.split()
+        toks_out = []
+        while len(toks) > 2:
+                trigram = toks[:3]
+                if trigram[1] == "'" and (len(trigram[0]) == 1 or len(trigram[2]) == 1):
+                        toks_out.append("".join(trigram))
+                        toks = toks[3:]
+                else:
+                        toks_out.append(trigram[0])
+                        toks = toks[1:]
+        toks_out.extend(toks)
+        toks_out = " ".join(toks_out)
+        return toks_out
 
     def generateWords(self, textBlob:TextBlob):
         """
@@ -103,19 +125,19 @@ class Sentence(ToString):
             text (str): text with cleaned spaces around punctuation
         """        
         punctuations = '.,;?!:"'
-        punctuations_with_preceding_space = '-()'
+        # punctuations_with_preceding_space = '-()'
         # add trailing space
         for char in punctuations:
             text = text.replace(char, char+' ')
         # remove preceding space
         for char in punctuations:
             text = text.replace(' ' + char,char)
-        # add preceding space
-        for char in punctuations_with_preceding_space:
-            text = text.replace(char, ' '+char)
-        # add trailing space
-        for char in punctuations_with_preceding_space:
-            text = text.replace(char, char+' ')
+        # # add preceding space
+        # for char in punctuations_with_preceding_space:
+        #     text = text.replace(char, ' '+char)
+        # # add trailing space
+        # for char in punctuations_with_preceding_space:
+        #     text = text.replace(char, char+' ')
 
         text = text.replace('  ', ' ').replace('  ', ' ')
         return text.strip()

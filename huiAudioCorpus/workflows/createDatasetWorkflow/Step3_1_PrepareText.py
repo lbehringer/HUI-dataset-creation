@@ -114,10 +114,11 @@ class Step3_1_PrepareText:
             '...': '.',
             '«': ' ',
             '»': ' ',
-            "'": '',
+            '--': ' ',
+            #"'": '',
             '"': ' ',
             '_': ' ',
-            '-': ' ',
+            #'-': ' ',
             ':': ':',
             '’': ' ',
             '‘': ' ',
@@ -321,7 +322,7 @@ class Step3_1_PrepareText:
             # 'œ': 'oe',
             # 'Ç': 'C'
 
-        allowedChars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ äöüßÖÄÜ .,;?!: ;-() éêèàâáíîìóôòúûùœÇçÁÂÀÉÊÈÔëïæ" \n'
+        allowedChars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ äöüßÖÄÜ .,;?!: ;-() éêèàâáíîìóôòúûùœÇçÁÂÀÉÊÈÔëïæ" \n\''
         remaininNotAllowedChars = [char for char in text if char not in allowedChars]
         if len(remaininNotAllowedChars)>0:
             print('there are remaining unallowed chars inside the text')
