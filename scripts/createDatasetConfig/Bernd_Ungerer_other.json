@@ -1,7 +1,7 @@
 {
     "fruehen_kraenze": {
         "title": "fruehen_kraenze",
-        "LibrivoxBookName": "frühen Kränze",
+        "librivox_book_name": "frühen Kränze",
         "GutenbergId": "zweig/fruehkra/fruehkra.html",
         "GutenbergStart": "",
         "GutenbergEnd": "",
@@ -9,7 +9,7 @@
     },
     "totenhochzeit": {
         "title": "totenhochzeit",
-        "LibrivoxBookName": "Totenhochzeit",
+        "librivox_book_name": "Totenhochzeit",
         "GutenbergId": "hawthorn/totenhoc/totenhoc.html",
         "GutenbergStart": "",
         "GutenbergEnd": "",
@@ -25,7 +25,7 @@
     },
     "geheimnis_der_alten_mamsell": {
         "title": "geheimnis_der_alten_mamsell",
-        "LibrivoxBookName": "Geheimnis der alten Mamsell",
+        "librivox_book_name": "Geheimnis der alten Mamsell",
         "GutenbergId": "marlitt/mamsell/mamsell.html",
         "GutenbergStart": "",
         "GutenbergEnd": "",
@@ -47,7 +47,7 @@
     },
     "saemtliche_schriften3": {
         "title": "saemtliche_schriften3",
-        "LibrivoxBookName": "Sämtliche Schriften 1911-1921, Teil 3",
+        "librivox_book_name": "Sämtliche Schriften 1911-1921, Teil 3",
         "GutenbergId": "ossietzk/schrift1/chap101.html",
         "GutenbergStart": "",
         "GutenbergEnd": "niedergehenden Mode demütigst die Füße küssen.",
@@ -119,7 +119,7 @@
     },
     "saemtliche_schriften4": {
         "title": "saemtliche_schriften4",
-        "LibrivoxBookName": "Sämtliche Schriften 1911-1921, Teil 4",
+        "librivox_book_name": "Sämtliche Schriften 1911-1921, Teil 4",
         "GutenbergId": "ossietzk/schrift1/chap151.html",
         "GutenbergStart": "",
         "GutenbergEnd": "weit eher das rollende Auge und die geballte Faust liegt.",
@@ -175,7 +175,7 @@
     },
     "verteidiger_des_unsinns": {
         "title": "verteidiger_des_unsinns",
-        "LibrivoxBookName": "Verteidigung des Unsinns, der Demut, des Schundromans und anderer mißachteter Dinge",
+        "librivox_book_name": "Verteidigung des Unsinns, der Demut, des Schundromans und anderer mißachteter Dinge",
         "GutenbergId": "chestert/verteidi/verteidi.html",
         "GutenbergStart": "",
         "GutenbergEnd": "",
@@ -195,7 +195,7 @@
     },
     "knaben_und_moerder": {
         "title": "knaben_und_moerder",
-        "LibrivoxBookName": "Knaben und Mörder",
+        "librivox_book_name": "Knaben und Mörder",
         "GutenbergId": "ungar/knabenmr/knabenmr.html",
         "GutenbergStart": "",
         "GutenbergEnd": "",
@@ -205,7 +205,7 @@
     },
     "wunderwelten": {
         "title": "wunderwelten",
-        "LibrivoxBookName": "Wunderwelten",
+        "librivox_book_name": "Wunderwelten",
         "GutenbergId": 50770,
         "GutenbergStart": "Personenverzeichnis.",
         "GutenbergEnd": "schönsten und würdigsten Namen tragen, den Namen »_Heliastra_«.",

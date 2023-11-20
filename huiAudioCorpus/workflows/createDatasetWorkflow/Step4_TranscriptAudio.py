@@ -52,6 +52,7 @@ class Step4_TranscriptAudio:
         return sentences
 
     def loadIds(self, ids: List[str]):
+        """Based on given IDs, loads the corresponding audios and transcribes them via ASR, then returns the recognized sentences."""
         sentences = []
         for id in tqdm(ids):
             audio = self.audioPersistenz.load(id)

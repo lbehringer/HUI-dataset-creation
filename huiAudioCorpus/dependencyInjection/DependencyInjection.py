@@ -33,6 +33,10 @@ from huiAudioCorpus.workflows.createDatasetWorkflow.Step2_SplitAudio import Step
 from huiAudioCorpus.persistenz.AudiosFromLibrivoxPersistenz import AudiosFromLibrivoxPersistenz
 from huiAudioCorpus.workflows.createDatasetWorkflow.Step1_DownloadAudio import Step1_DownloadAudio
 from huiAudioCorpus.converter.StringToSentencesConverter import StringToSentencesConverter
+from huiAudioCorpus.workflows.createDatasetWorkflow.QA1_HifiBandwidth import QA1_HifiBandwidth
+from huiAudioCorpus.workflows.createDatasetWorkflow.QA2_HifiSNR import QA2_HifiSNR
+from huiAudioCorpus.workflows.createDatasetWorkflow.Step4_1_NormalizeTranscript import Step4_1_NormalizeTranscript
+
 from frosch import hook
 hook(theme = 'paraiso_dark')
 import logging
@@ -75,6 +79,7 @@ defaultConfig = {
 }
 
 class DependencyInjection:
+    # assign all the __annotations__ to DependencyInjection.__dict__
     #Calculators
     alignSentencesIntoTextCalculator: AlignSentencesIntoTextCalculator
     textNormalizer: TextNormalizer
@@ -99,18 +104,21 @@ class DependencyInjection:
     
     #Persistence
     audioPersistenz:AudioPersistenz
+    audio_persistenz: AudioPersistenz
     audioTranscriptPairPersistenz:AudioTranscriptPairPersistenz
     transcriptsPersistenz:TranscriptsPersistenz
     audiosFromLibrivoxPersistenz:AudiosFromLibrivoxPersistenz
     GutenbergBookPersistenz: GutenbergBookPersistenz
-    
+
     #Transformers
     audioAddSilenceTransformer:AudioAddSilenceTransformer
     audioSamplingRateTransformer:AudioSamplingRateTransformer
+    audio_sr_transformer: AudioSamplingRateTransformer
     transcriptsSelectionTransformer:TranscriptsSelectionTransformer
     audioSplitTransformer: AudioSplitTransformer
     sentenceDistanceTransformer: SentenceDistanceTransformer
     audioLoudnessTransformer: AudioLoudnessTransformer
+    audio_loudness_transformer: AudioLoudnessTransformer
     audioFadeTransformer: AudioFadeTransformer
 
 
@@ -126,11 +134,14 @@ class DependencyInjection:
     step3_DowloadText: Step3_DownloadText
     step3_1_PrepareText: Step3_1_PrepareText
     step4_TranscriptAudio: Step4_TranscriptAudio
+    step4_1_NormalizeTranscript: Step4_1_NormalizeTranscript
     step5_AlignText: Step5_AlignText
     step6_FinalizeDataset: Step6_FinalizeDataset
     step7_AudioRawStatistic: Step7_AudioRawStatistic
     step8_DatasetStatistic: Step8_DatasetStatistic
     step9_GenerateCleanDataset: Step9_GenerateCleanDataset
+    QA1_HifiBandwidth: QA1_HifiBandwidth
+    QA2_HifiSNR: QA2_HifiSNR
 
     #plot
     plot: Plot

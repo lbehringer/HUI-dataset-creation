@@ -1,7 +1,7 @@
 {
     "tausendUndEineNacht1": {
         "title": "tausend_und_eine_nacht_band_1",
-        "LibrivoxBookName": "Tausend und eine Nacht, Band 1",
+        "librivox_book_name": "Tausend und eine Nacht, Band 1",
         "GutenbergId": "weil/band1/inhalt.html",
         "GutenbergStart": "",
         "GutenbergEnd": "",
@@ -69,7 +69,7 @@
     },
     "tausendUndEineNacht2": {
         "title": "tausend_und_eine_nacht_band_2",
-        "LibrivoxBookName": "Tausend und eine Nacht, Band 2",
+        "librivox_book_name": "Tausend und eine Nacht, Band 2",
         "GutenbergId": "weil/band2/inhalt.html",
         "GutenbergStart": "",
         "GutenbergEnd": "",
@@ -93,7 +93,7 @@
     },
     "tausendUndEineNacht3": {
         "title": "tausend_und_eine_nacht_band_3",
-        "LibrivoxBookName": "Tausend und eine Nacht, Band 3",
+        "librivox_book_name": "Tausend und eine Nacht, Band 3",
         "GutenbergId": "weil/band3/inhalt.html",
         "GutenbergStart": "",
         "GutenbergEnd": "",
@@ -108,7 +108,7 @@
     },
     "tausendUndEineNacht4": {
         "title": "tausend_und_eine_nacht_band_4",
-        "LibrivoxBookName": "Tausend und eine Nacht, Band 4",
+        "librivox_book_name": "Tausend und eine Nacht, Band 4",
         "GutenbergId": "weil/band4/inhalt.html",
         "GutenbergStart": "",
         "GutenbergEnd": "",

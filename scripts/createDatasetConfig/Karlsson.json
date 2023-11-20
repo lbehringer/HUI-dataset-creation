@@ -1,7 +1,7 @@
 {
     "unterm_birnbaum": {
         "title": "unterm_birnbaum",
-        "LibrivoxBookName": "Unterm Birnbaum",
+        "librivox_book_name": "Unterm Birnbaum",
         "GutenbergId": 26686,
         "GutenbergStart": "Vor dem in dem großen und reichen Oderbruchdorfe Tschechin um",
         "GutenbergEnd": "gesponnen, ’s kommt doch alles an die Sonnen._‹«",
@@ -71,7 +71,7 @@
     },
     "schwle_tage": {
         "title": "schwle_tage",
-        "LibrivoxBookName": "Schwüle Tage",
+        "librivox_book_name": "Schwüle Tage",
         "GutenbergId": "keyserlg/schwuele/schwuele.html",
         "GutenbergStart": "",
         "GutenbergEnd": "",
@@ -83,7 +83,7 @@
     },
     "mdchen_vom_moorhof": {
         "title": "mdchen_vom_moorhof",
-        "LibrivoxBookName": "Mädchen vom Moorhof",
+        "librivox_book_name": "Mädchen vom Moorhof",
         "GutenbergId": 20211,
         "GutenbergStart": "Es ist in einem Thingsaal, weit draußen auf dem Lande. Am Richtertisch,",
         "GutenbergEnd": "um sie stand. Jetzt konnte sie ihm nicht mehr entfliehen.",
@@ -100,7 +100,7 @@
     },
     "sandmann": {
         "title": "sandmann",
-        "LibrivoxBookName": "Sandmann",
+        "librivox_book_name": "Sandmann",
         "GutenbergId": "etahoff/sandmann/sandmann.html",
         "GutenbergStart": "",
         "GutenbergEnd": "",
@@ -116,7 +116,7 @@
     },
     "spuk": {
         "title": "spuk",
-        "LibrivoxBookName": "Spuk",
+        "librivox_book_name": "Spuk",
         "GutenbergId": "klabund/spuk/spuk.html",
         "GutenbergStart": "",
         "GutenbergEnd": "",
@@ -166,7 +166,7 @@
     },
     "odysseus": {
         "title": "odysseus",
-        "LibrivoxBookName": "Odysseus",
+        "librivox_book_name": "Odysseus",
         "GutenbergId": "beckerkf/altewelt/altewelt.html",
         "GutenbergStart": "",
         "GutenbergEnd": "und den Gedanken an die Todesgöttinnen nicht scheut!",
@@ -177,7 +177,7 @@
     },
     "herr_und_knecht": {
         "title": "herr_und_knecht",
-        "LibrivoxBookName": "Herr und Knecht",
+        "librivox_book_name": "Herr und Knecht",
         "GutenbergId": 33266,
         "GutenbergStart": "Es war in den siebziger Jahren, ",
         "GutenbergEnd": "",
@@ -187,7 +187,7 @@
     },
     "smtliche_schriften_19111921_teil_1": {
         "title": "smtliche_schriften_19111921_teil_1",
-        "LibrivoxBookName": "Sämtliche Schriften 1911-1921, Teil 1",
+        "librivox_book_name": "Sämtliche Schriften 1911-1921, Teil 1",
         "GutenbergId": "ossietzk/schrift1/schrift1.html",
         "GutenbergStart": "",
         "GutenbergEnd": "Mitteilungen der Deutschen Friedensgesellschaft. Januar 1920",
@@ -298,7 +298,7 @@
     },
     "smtliche_schriften_19111921_teil_2": {
         "title": "smtliche_schriften_19111921_teil_2",
-        "LibrivoxBookName": "Sämtliche Schriften 1911-1921, Teil 2",
+        "librivox_book_name": "Sämtliche Schriften 1911-1921, Teil 2",
         "GutenbergId": "ossietzk/schrift1/chap051.html",
         "GutenbergStart": "",
         "GutenbergEnd": "Auf Wiedersehen beim nächsten Putsch ...!",

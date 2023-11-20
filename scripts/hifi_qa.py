@@ -36,6 +36,7 @@ friedrich = pathUtil.loadJson(basePath + '/Friedrich.json')
 eva = pathUtil.loadJson(basePath + '/Eva.json')
 karlsson = pathUtil.loadJson(basePath + '/Karlsson.json')
 sonja = pathUtil.loadJson(basePath + '/Sonja.json')
+christian_culp_latest = pathUtil.loadJson(basePath + '/Christian_Culp_latest.json')
 
 allLibriboxIds = [author[key]['librivox_book_name'] for author in [
     bernd, hokuspokus, friedrich, eva, karlsson, redaer] for key in author]
@@ -50,21 +51,23 @@ if len(duplicatIds) > 0:
 allConfigs = sonja
 # allConfigs = friedrich
 #allConfigs = redaer
+allConfigs = christian_culp_latest
 
 # this is needed for the statistic and split into others
 specialSpeakers = ['Bernd_Ungerer', 'Eva_K', 'Friedrich', 'Hokuspokus', 'Karlsson']
 
 workflowConfig = {
     'continueOnError': False,
-    'prepareAudio': True,
-    'prepareText': True,
-    'transcriptText': True,
-    'alignText': True,
-    'finalize': True,
-    'audioRawStatistic': True,
-    'cleanStatistic': True,
-    'fullStatistic': True,
-    'generateClean': True
+    "hifi_qa": True,
+    'prepareAudio': False,
+    'prepareText': False,
+    'transcriptText': False,
+    'alignText': False,
+    'finalize': False,
+    'audioRawStatistic': False,
+    'cleanStatistic': False,
+    'fullStatistic': False,
+    'generateClean': False
 }
 
 
@@ -102,13 +105,82 @@ def runWorkflow(params: Dict, workflowConfig: Dict):
     step5Path = bookBasePath + params['title'] + '/Step5_AlignText'
     step6Path = bookBasePath + params['title'] + '/Step6_FinalizeDataset'
 
+    qa1_path = bookBasePath + params["title"] + "/QA1_HifiBandwidth"
+    qa1_path_audio = os.path.join(qa1_path, "audio")
+
+    qa2_path = bookBasePath + params["title"] + "/QA2_HifiSNR"
+    qa2_path_audio = os.path.join(qa2_path, "audio")
+
+    if workflowConfig["hifi_qa"]:
+        logStep('Step1_DownloadAudio')
+        config = {
+            'audiosFromLibrivoxPersistenz': {
+                'bookName': params['librivox_book_name'],
+                'solo_reading': params['solo_reading'],
+                'sections': params['sections'],
+                'savePath': step1PathAudio + '/',
+                'chapterPath': step1PathChapter
+            },
+            'step1_DownloadAudio': {
+                'savePath': step1Path
+            }
+        }
+        DependencyInjection(config).step1_DownloadAudio.run()
+
+        logStep("QA1_HifiBandwidth")
+        config = {
+            "audio_persistenz": {
+                "loadPath": step1PathAudio,
+                "savePath": qa1_path_audio,
+                "fileExtension": "mp3"
+            },
+            "audio_loudness_transformer": {
+                "loudness": -20
+            },
+            "QA1_HifiBandwidth": {
+                "save_path": qa1_path_audio,
+                "book_name": params["title"],
+                "seconds_to_analyze": 30,
+                "bandwidth_hz_threshold": 13000
+            },
+        }
+        DependencyInjection(config).QA1_HifiBandwidth.run()
+
+        logStep("QA2_HifiSNR")
+        config = {
+            "audio_persistenz": {
+                "loadPath": qa1_path_audio,
+                "savePath": qa2_path_audio,
+                "fileExtension": "wav"
+            },
+            "audio_loudness_transformer": {
+                "loudness": -20
+            },
+            "audio_sr_transformer": {
+                "targetSamplingRate": 16000
+            },            
+            "QA2_HifiSNR": {
+                "save_path": qa2_path_audio,
+                'book_name': params['title'],
+                "seconds_to_analyze": 30,
+            },
+        }
+        DependencyInjection(config).QA2_HifiSNR.run()
+
+
+
+
+
+
+
+############################################################################################
+############################################################################################
+
     if workflowConfig['prepareAudio']:
         logStep('Step1_DowloadAudio')
         config = {
             'audiosFromLibrivoxPersistenz': {
                 'bookName': params['librivox_book_name'],
-                'solo_reading': params['solo_reading'],
-                'sections': params['sections'],                
                 'savePath': step1PathAudio + '/',
                 'chapterPath': step1PathChapter
             },

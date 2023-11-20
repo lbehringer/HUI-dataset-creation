@@ -6,20 +6,23 @@ from huiAudioCorpus.calculator.TextNormalizer import TextNormalizer
 
 import re
 import json
+from nemo_text_processing.text_normalization import Normalizer
 
 class Step3_1_PrepareText:
 
-    def __init__(self, savePath: str, loadFile: str, saveFile: str, startSentence: str, endSentence: str, textReplacement: Dict[str,str],  textNormalizer: TextNormalizer, moves: List[Dict[str, str]], remove: List[Dict[str, str] ]):
+    def __init__(self, savePath: str, loadFile: str, saveFile: str, startSentence: str, endSentence: str, textReplacement: Dict[str,str],  textNormalizer: TextNormalizer, moves: List[Dict[str, str]], remove: List[Dict[str, str]], language: str = "en"):
         self.savePath = savePath
         self.textNormalizer = textNormalizer
         self.loadFile = loadFile
         self.saveFile = saveFile
-        self.textReplacement = textReplacement
+        # order replacements in reverse length order to match longest replacement strings first (e.g. "xii" before "xi")
+        self.textReplacement = {k: textReplacement[k] for k in sorted(textReplacement, key=len, reverse=True)}
         self.pathUtil = PathUtil()
         self.startSentence = startSentence
         self.endSentence = endSentence
         self.moves = moves
         self.removes = remove
+        self.language = language
 
     def run(self):
         return DoneMarker(self.savePath).run(self.script)
@@ -28,6 +31,15 @@ class Step3_1_PrepareText:
         inputText = self.pathUtil.loadFile(self.loadFile)
         cuttedText = self.cutText(inputText, self.startSentence , self.endSentence)
         removedText = self.remove(cuttedText, self.removes)
+        # TODO: Figure out why Nemo Normalizer doesn't work in French
+        # lines = removedText.split("\n")
+        # nemo_norm = Normalizer(
+        #     input_case="cased", 
+        #     lang=self.language,
+        #     )
+        # normalized = nemo_norm.normalize_list(lines)
+        # normalized = "\n".join(normalized)
+        # movedText = self.move(normalized, self.moves)
         replacedText = self.replace(removedText, self.textReplacement)
         movedText = self.move(replacedText, self.moves)
         self.pathUtil.writeFile(movedText, self.saveFile)
@@ -45,32 +57,53 @@ class Step3_1_PrepareText:
         return text
 
     def remove(self, text: str, removes: List[Dict[str, str]]):
+        # Iterate through the list of dictionaries containing removal information
         for remove in removes:
             textToRemove = ""
             textToRemove_old = None
             start = remove['start']
             end = remove['end']
+            
+            # Continue the loop until the removed text stops changing
             while textToRemove != textToRemove_old:
-                textToRemvoe = start + text.partition(start)[-1].partition(end)[0] + end     
-                text = text.replace(textToRemvoe, "")
+                # Construct the text to be removed by extracting content between 'start' and 'end'
+                textToRemove = start + text.partition(start)[-1].partition(end)[0] + end
+                
+                # Remove the constructed text from the original text
+                text = text.replace(textToRemove, "")
+                
+                # Update the old value for comparison in the next iteration
                 textToRemove_old = textToRemove
-                print(textToRemvoe)
+                
+                # Print the removed text for debugging purposes (you may remove this line in production)
+                print(textToRemove)
+        
+        # Return the modified text after all removals
         return text
 
 
     def cutText(self, text: str, startSentence: str, endSentence: str):
-        if startSentence =="":
+        # Check if startSentence is empty
+        if startSentence == "":
             withoutFirst = text
         else:
+            # If startSentence is not empty, extract text after the startSentence
             withoutFirst = startSentence + text.split(startSentence, 1)[1]
-        
-        if endSentence=="":
+
+        # Check if endSentence is empty
+        if endSentence == "":
             withoutEnd = withoutFirst
         else:
-            withoutEnd = withoutFirst.split(endSentence,1)[0] + endSentence
-        
+            # If endSentence is not empty, extract text before the endSentence
+            withoutEnd = withoutFirst.split(endSentence, 1)[0] + endSentence
+
+        # Remove leading and trailing whitespaces
         stripped = withoutEnd.strip()
+
+        # Replace carriage return ('\r') characters with an empty string
         prepared = stripped.replace('\r', '')
+
+        # Return the prepared text
         return prepared
 
     def replace(self, text: str, textReplacement: Dict[str,str]):
@@ -81,10 +114,11 @@ class Step3_1_PrepareText:
             '...': '.',
             '«': ' ',
             '»': ' ',
-            "'": '',
+            '--': ' ',
+            #"'": '',
             '"': ' ',
             '_': ' ',
-            '-': ' ',
+            #'-': ' ',
             ':': ':',
             '’': ' ',
             '‘': ' ',
@@ -94,6 +128,7 @@ class Step3_1_PrepareText:
             '‹': ' ',
             '^': ' ',
             '|': ' ',
+            '+': 'plus',
             # replace em-dash by dash
             '–': '-',
 
@@ -241,7 +276,10 @@ class Step3_1_PrepareText:
 
         self.pathUtil.writeFile(text, self.saveFile)
 
+        ############################################################################
         ###  Check for remaining numbers, abbreviations, and unwanted characters ###
+        ############################################################################
+
         remainingNumbers = [s for s in text.split() if bool(re.search(r'\d', s))]
         if len(remainingNumbers)>0:
             print('there are remaining number inside the text')
@@ -265,7 +303,9 @@ class Step3_1_PrepareText:
 
         aToZ = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
         possibleAbbreviations = [' '+char+'.' for char in 'abcdefghijklmnopqrstuvwxyz' if ' '+char+'.' in text] + [' '+char+char2+'.' for char in aToZ for char2 in aToZ if ' '+char+char2+'.' in text]
-        shortWords = [' Co.', ' go.', ' Da.',' na.',' ab.', ' an.', ' da.', ' du.', ' er.', ' es.', ' ja.', ' so.', ' um.', ' zu.', ' Ja.', ' Ad.', ' je.', ' Es.', ' ob.', ' is.', ' tu.', ' Hm.', ' So.', ' wo.', ' ha.', ' he.', ' Du.', ' du.', ' Nu.', ' in.']
+        # shortWords = [' Co.', ' go.', ' Da.',' na.',' ab.', ' an.', ' da.', ' du.', ' er.', ' es.', ' ja.', ' so.', ' um.', ' zu.', ' Ja.', ' Ad.', ' je.', ' Es.', ' ob.', ' is.', ' tu.', ' Hm.', ' So.', ' wo.', ' ha.', ' he.', ' Du.', ' du.', ' Nu.', ' in.']
+        # add French short words
+        shortWords = [' y.', ' ci.', ' en.', ' et.', ' il.', ' la.', ' nu.', ' on.', ' pu.', ' un.', ' va.', ' vu.', ' Co.', ' go.', ' Da.',' na.',' ab.', ' an.', ' da.', ' du.', ' er.', ' es.', ' ja.', ' so.', ' um.', ' zu.', ' Ja.', ' Ad.', ' je.', ' Es.', ' ob.', ' is.', ' tu.', ' Hm.', ' So.', ' wo.', ' ha.', ' he.', ' Du.', ' du.', ' Nu.', ' in.']
         possibleAbbreviations = [ab for ab in possibleAbbreviations if ab not in shortWords]
         if len(possibleAbbreviations)>0:
             print('there are remaining possible abberviations inside the text')
@@ -282,7 +322,7 @@ class Step3_1_PrepareText:
             # 'œ': 'oe',
             # 'Ç': 'C'
 
-        allowedChars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ äöüßÖÄÜ .,;?!: ;-() éèàáœÇç" \n'
+        allowedChars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ äöüßÖÄÜ .,;?!: ;-() éêèàâáíîìóôòúûùœÇçÁÂÀÉÊÈÔëïæ" \n\''
         remaininNotAllowedChars = [char for char in text if char not in allowedChars]
         if len(remaininNotAllowedChars)>0:
             print('there are remaining unallowed chars inside the text')

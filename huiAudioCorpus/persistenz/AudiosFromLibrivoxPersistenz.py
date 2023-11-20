@@ -6,28 +6,34 @@ import json
 from tqdm import tqdm
 from joblib import Parallel, delayed
 from urllib.parse import quote
+from typing import Union
 
 class AudiosFromLibrivoxPersistenz:
 
-    def __init__ (self, bookName: str, savePath: str, chapterPath: str, url:str = 'https://librivox.org/'):
+    def __init__ (self, bookName: str, savePath: str, chapterPath: str, url: str = 'https://librivox.org/', solo_reading: bool = None, sections: Union[list, str] = None):
         self.bookName = bookName
         self.url = url
         self.savePath = savePath
+        self.solo_reading = solo_reading
+        self.sections = sections
         self.chapterPath = chapterPath
         self.pathUtil = PathUtil()
         self.limitPerIteration = 1000
         self.numberOfIterations = 20
         # self.minimumUploadTimestamp = 1625672626 # 7 July 2021 (which is the date of the last change in the HUI repo)
         # self.minimumUploadTimestamp = 1672527600 # 1 January 2023
-        self.minimumUploadTimestamp = 1698184800 # 25 October 2023
+        # self.minimumUploadTimestamp = 1698184800 # 25 October 2023
+        self.minimumUploadTimestamp = 1699225200 # 6 November 2023
 
     def save(self):
-        chapters, chapterDownloadLinks = self.getChapter(self.bookName, get_download_links=True)
+        chapters, chapterDownloadLinks = self.getChapters(self.bookName, get_download_links=True)
         Parallel(n_jobs=4)(delayed(self.pathUtil.copyFileFromUrl)(link ,self.savePath+ '/' + link.split('/')[-1]) for link in chapterDownloadLinks)
         chapters.to_csv(self.chapterPath)
         
 
-    def getChapter(self, bookName:str, get_download_links):
+    def getChapters(self, bookName:str, get_download_links):
+        """Get all chapters from a book.
+        Return a tuple of a DataFrame """
         searchUrl = self.getSearchUrl(bookName, self.url)
         response = self.loadSearchBook(searchUrl)
         chapterUrl = self.extractChapterUrl(response)
@@ -76,7 +82,12 @@ class AudiosFromLibrivoxPersistenz:
                 ''.join(td.stripped_strings)
                 for td in row.find_all('td')]
                 for row in parsed_table.find_all('tr')]
-        downloadLinks = [chapter[1] for chapter in data if len(chapter)>0]
+        if self.solo_reading:
+            downloadLinks = [chapter[1] for chapter in data if len(chapter)>0]
+        # if book is not solo_reading, download only chapters read by the specified reader
+        # index 0 contains empty chapter, so we skip it
+        else:
+            downloadLinks = [chapter[1] for idx, chapter in enumerate(data) if idx in set(self.sections) and len(chapter)>0]
         return downloadLinks
 
 
@@ -92,7 +103,9 @@ class AudiosFromLibrivoxPersistenz:
                 result = json.loads(page.text)
                 if 'books' in result:
                     # add catalog date
-                    result['books'][0]['catalog_date'] = self.get_catalog_date(result['books'][0]['url_librivox'])
+                    for idx, book in enumerate(result['books']):
+                        result['books'][idx]['catalog_date'] = self.get_catalog_date(book['url_librivox'])
+                    # result['books'][0]['catalog_date'] = self.get_catalog_date(result['books'][0]['url_librivox'])
                     books.extend(result['books'])
                 else:
                     print(result)
@@ -103,7 +116,7 @@ class AudiosFromLibrivoxPersistenz:
         else:
             limit = self.limitPerIteration
             minimum_upload_timestamp = self.minimumUploadTimestamp  # we only want to retrieve books released AFTER this date
-            for i in tqdm(range(self.numberOfIterations)):
+            for i in tqdm(range(self.numberOfIterations), desc=f"Performing retrieval in max. {self.numberOfIterations} iterations"):
                 requestUrl = f'https://librivox.org/api/feed/audiobooks/?limit={limit}&offset={i*limit}&since={minimum_upload_timestamp}&format=json'
                 page = requests.get(requestUrl)
                 page.encoding = "UTF-8"
@@ -111,8 +124,13 @@ class AudiosFromLibrivoxPersistenz:
                     result = json.loads(page.text)
                     if 'books' in result:
                         # add catalog date
-                        result['books'][0]['catalog_date'] = self.get_catalog_date(result['books'][0]['url_librivox'])                        
+                        for idx, book in enumerate(result['books']):
+                            result['books'][idx]['catalog_date'] = self.get_catalog_date(book['url_librivox'])
+                        # result['books'][0]['catalog_date'] = self.get_catalog_date(result['books'][0]['url_librivox'])
+                        # if "catalog_date" not in result["books"][0]:
+                        #     raise KeyError
                         books.extend(result['books'])
+                
                     else:
                         print(result)
                         print("Stopping download of overview metadata.")

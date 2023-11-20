@@ -1,7 +1,7 @@
 {
     "vierzehnte_dezember": {
         "title": "vierzehnte_dezember",
-        "LibrivoxBookName": "vierzehnte Dezember",
+        "librivox_book_name": "vierzehnte Dezember",
         "GutenbergId": "mereschk/14dezemb/14dezemb.html",
         "GutenbergStart": "",
         "GutenbergEnd": "",
@@ -52,7 +52,7 @@
     },
     "lustige_geschichten": {
         "title": "lustige_geschichten",
-        "LibrivoxBookName": "Lustige Geschichten",
+        "librivox_book_name": "Lustige Geschichten",
         "GutenbergId": "cechov/novel5/novel5.html",
         "GutenbergStart": "",
         "GutenbergEnd": "",
@@ -82,7 +82,7 @@
     },
     "saemtliche_schriften6": {
         "title": "saemtliche_schriften6",
-        "LibrivoxBookName": "Sämtliche Schriften 1911-1921, Teil 6",
+        "librivox_book_name": "Sämtliche Schriften 1911-1921, Teil 6",
         "GutenbergId": "ossietzk/schrift1/chap251.html",
         "GutenbergStart": "",
         "GutenbergEnd": "",
@@ -145,7 +145,7 @@
     },
     "saemtliche_schriften5": {
         "title": "saemtliche_schriften5",
-        "LibrivoxBookName": "Sämtliche Schriften 1911-1921, Teil 5",
+        "librivox_book_name": "Sämtliche Schriften 1911-1921, Teil 5",
         "GutenbergId": "ossietzk/schrift1/chap201.html",
         "GutenbergStart": "",
         "GutenbergEnd": "dieses Abends gelernt haben. Es wird noch einiges über diesen Trauerfall zu sagen sein.",
@@ -200,7 +200,7 @@
     },
     "homo_sapiens": {
         "title": "homo_sapiens",
-        "LibrivoxBookName": "Homo sapiens - Romantrilogie",
+        "librivox_book_name": "Homo sapiens - Romantrilogie",
         "GutenbergId": "przybysz/homosapi/homosapi.html",
         "GutenbergStart": "",
         "GutenbergEnd": "",
@@ -229,7 +229,7 @@
     },
     "aus_allen_winkeln": {
         "title": "aus_allen_winkeln",
-        "LibrivoxBookName": "Aus allen Winkeln - Erzählungen",
+        "librivox_book_name": "Aus allen Winkeln - Erzählungen",
         "GutenbergId": "heiberg/erzaehlg/erzaehlg.html",
         "GutenbergStart": "In einer der besten Gegenden der Stadt",
         "GutenbergEnd": "",
@@ -282,7 +282,7 @@
     },
     "falsches_geld": {
         "title": "falsches_geld",
-        "LibrivoxBookName": "Falsches Geld",
+        "librivox_book_name": "Falsches Geld",
         "GutenbergId": "zapp/falsgeld/falsgeld.html",
         "GutenbergStart": "",
         "GutenbergEnd": "",
@@ -341,7 +341,7 @@
     },
     "judith_trachtenberg": {
         "title": "judith_trachtenberg",
-        "LibrivoxBookName": "Judith Trachtenberg",
+        "librivox_book_name": "Judith Trachtenberg",
         "GutenbergId": "franzos/trachten/trachten.html",
         "GutenbergStart": "",
         "GutenbergEnd": "",
@@ -351,7 +351,7 @@
     },
     "verbrechen": {
         "title": "verbrechen",
-        "LibrivoxBookName": "Verbrechen",
+        "librivox_book_name": "Verbrechen",
         "GutenbergId": "gorki/verbrec1/verbrec1.html",
         "GutenbergStart": "",
         "GutenbergEnd": "",
@@ -359,7 +359,7 @@
     },
     "furchtbare_rache": {
         "title": "furchtbare_rache",
-        "LibrivoxBookName": "Furchtbare Rache",
+        "librivox_book_name": "Furchtbare Rache",
         "GutenbergId": "gogol/rache/rache.html",
         "GutenbergStart": "",
         "GutenbergEnd": "",
@@ -367,7 +367,7 @@
     },
     "gruene_nachtigall": {
         "title": "gruene_nachtigall",
-        "LibrivoxBookName": "grüne Nachtigall und andere Novellen",
+        "librivox_book_name": "grüne Nachtigall und andere Novellen",
         "GutenbergId": "kusmin/grnachti/grnachti.html",
         "GutenbergStart": "Das grüne Haus glich so sehr",
         "GutenbergEnd": "",

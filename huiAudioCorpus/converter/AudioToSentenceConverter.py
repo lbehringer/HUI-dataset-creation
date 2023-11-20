@@ -6,6 +6,8 @@ from huiAudioCorpus.model.Sentence import Sentence
 import numpy as np
 from tqdm import tqdm
 import whisper
+# from whisper.tokenizer import get_tokenizer
+# from huiAudioCorpus.utils.whisper_utils import get_language_code
 
 try:
     from deepspeech import Model
@@ -15,13 +17,21 @@ except:
 from huiAudioCorpus.sttInference import deepspeechModel
 
 class AudioToSentenceConverter:
-    def __init__(self, use_whisper=True, whisper_decode_lang="de"):
+    def __init__(self, use_whisper=True, whisper_decode_lang="fr"):
         self.model = None
         self.use_whisper = use_whisper
         if self.use_whisper:
             self.whisper_sr = 16000
             self.whisper_sr_transformer = AudioSamplingRateTransformer(targetSamplingRate=self.whisper_sr)
             self.decode_lang = whisper_decode_lang
+            # self.tokenizer = get_tokenizer(multilingual=True, language=whisper_decode_lang)
+            # get number tokens so we can suppress them to enforce literal transcription (cf. https://github.com/openai/whisper/discussions/1041)
+            # this helps with getting correct transcriptions for languages in which numbers can be pronounced in various ways
+            # e.g. French 1848: `dix-huit cent quarante-huit` or `mille huit cent quarante-huit`
+            # TODO: Currently not working, numeric is omitted entirely instead!
+            # self.number_tokens = [
+            #     i for i in range(self.tokenizer.eot) if all(c in "0123456789" for c in self.tokenizer.decode([i]).strip())
+            # ]            
         else:
             self.modelPath = deepspeechModel.__path__[0]
         
@@ -30,10 +40,11 @@ class AudioToSentenceConverter:
         if self.use_whisper:
             if self.model is None:
                 print("Loading Whisper model")
-                self.model = whisper.load_model("small")
+                self.model = whisper.load_model("small") # choices: tiny (~1GB VRAM), base (~1GB), small (~2GB), medium (~5GB), large (~10GB)
             audioSamplingRateTransformer = self.whisper_sr_transformer
             audioSampled = audioSamplingRateTransformer.transform(audio)
-            decode_options = {"language": self.decode_lang} # set the language which Whisper should use for ASR
+            # decode_options = {"language": self.decode_lang, "suppress_tokens": [-1] + self.number_tokens}
+            decode_options = {"language": self.decode_lang}
             transcript = self.model.transcribe(audioSampled.timeSeries, **decode_options)["text"]
         else:
             if self.model is None:
@@ -41,7 +52,7 @@ class AudioToSentenceConverter:
             audioSamplingRateTransformer = AudioSamplingRateTransformer(self.samplingRate)
             audioSampled = audioSamplingRateTransformer.transform(audio)
             timeSeries =  audioSampled.timeSeries
-            timeSeries /=1.414
+            timeSeries /= 1.414
             timeSeries *= 32767
             audioNumpy = timeSeries.astype(np.int16)
 

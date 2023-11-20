@@ -7,6 +7,7 @@ import argparse
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-d", "--database_path", type=str, default=None, help="Set directory where overview file should be created.")
+    parser.add_argument("-l", "--language", type=str, default="English", help="Set the language of the books that should be retrieved.")
     parser.add_argument ("--request_url", type=str, default=None, help="Set custom request URL for metadata retrieval.")
     args = parser.parse_args()
 
@@ -30,7 +31,8 @@ if __name__ == "__main__":
         },
         'step0_Overview': {
             'savePath': step0Path,
-            "requestUrl": request_url
+            "requestUrl": request_url,
+            "language": args.language.capitalize()
         }
     }
     DependencyInjection(config).step0_Overview.run()

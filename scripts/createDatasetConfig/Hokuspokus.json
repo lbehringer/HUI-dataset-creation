@@ -1,7 +1,7 @@
 {
     "effi_briest": {
         "title": "effi_briest",
-        "LibrivoxBookName": "Effi Briest",
+        "librivox_book_name": "Effi Briest",
         "GutenbergId": 5323,
         "GutenbergStart": "In Front des schon seit Kurfürst Georg Wilhelm von der Familie",
         "GutenbergEnd": "",
@@ -41,7 +41,7 @@
     },
     "dschinnistan": {
         "title": "dschinnistan",
-        "LibrivoxBookName": "Dschinnistan oder Auserlesene Feen- und Geistermärchen",
+        "librivox_book_name": "Dschinnistan oder Auserlesene Feen- und Geistermärchen",
         "GutenbergId": "wieland/dschinn/dschinn.html",
         "GutenbergStart": "",
         "GutenbergEnd": "",
@@ -49,7 +49,7 @@
     },
     "teufel_geister_daemonen": {
         "title": "teufel_geister_daemonen",
-        "LibrivoxBookName": "Von Teufeln, Geistern und Dämonen (Auswahl)",
+        "librivox_book_name": "Von Teufeln, Geistern und Dämonen (Auswahl)",
         "GutenbergId": "becquer/vonteufe/vonteufe.html",
         "GutenbergStart": "In den dunklen Winkeln meines Hirns schlummern, nackt und eng beieinander,",
         "GutenbergEnd": "der unbewegliche Ritter den Arm hob und ihn mit einem furchtbaren Schlag seiner steinernen Hand zu Boden streckte.",
@@ -124,7 +124,7 @@
     },
     "verkaufte_grossmutter": {
         "title": "verkaufte_grossmutter",
-        "LibrivoxBookName": "verkaufte Großmutter",
+        "librivox_book_name": "verkaufte Großmutter",
         "GutenbergId": "ewers/grossmut/grossmut.html",
         "GutenbergStart": "",
         "GutenbergEnd": "",
@@ -184,7 +184,7 @@
     },
     "schwarze_see": {
         "title": "schwarze_see",
-        "LibrivoxBookName": "schwarze See",
+        "librivox_book_name": "schwarze See",
         "GutenbergId": "contessa/erzaehlg/chap005.html",
         "GutenbergStart": "",
         "GutenbergEnd": "Erscheinung war in der ganzen Gegend unter dem Namen, »der fremde Jäger« wohlbekannt.",
@@ -192,7 +192,7 @@
     },
     "weissagung": {
         "title": "weissagung",
-        "LibrivoxBookName": "Weissagung",
+        "librivox_book_name": "Weissagung",
         "GutenbergId": "schnitzl/weissagu/weissagu.html",
         "GutenbergStart": "",
         "GutenbergEnd": "",
@@ -207,7 +207,7 @@
     },
     "die_acht_gesichter_am_biwasee": {
         "title": "die_acht_gesichter_am_biwasee",
-        "LibrivoxBookName": "acht Gesichter am Biwasee",
+        "librivox_book_name": "acht Gesichter am Biwasee",
         "GutenbergId": "dauthend/biwasee/biwasee.html",
         "GutenbergStart": "Hanake hatte allen Körperschmuck, den ein japanisches Mädchen sitzend,",
         "GutenbergEnd": "gedenken, den das Unglück weiß wie Schnee machte.",
@@ -215,7 +215,7 @@
     },
     "deutsche_literaturgeschichte": {
         "title": "deutsche_literaturgeschichte",
-        "LibrivoxBookName": "Deutsche Literaturgeschichte in einer Stunde",
+        "librivox_book_name": "Deutsche Literaturgeschichte in einer Stunde",
         "GutenbergId": "klabund/literatu/literatu.html",
         "GutenbergStart": "",
         "GutenbergEnd": "",
@@ -453,7 +453,7 @@
     },
     "maerchen": {
         "title": "maerchen",
-        "LibrivoxBookName": "Märchen",
+        "librivox_book_name": "Märchen",
         "GutenbergId": "fischerc/maehrch/chap001.html",
         "GutenbergStart": "",
         "GutenbergEnd": "über die Aufnahme des Prinzen, noch über die Genesung der Prinzessin.",
@@ -466,7 +466,7 @@
     },
     "jane_eyre_die_waise_von_lowood": {
         "title": "jane_eyre_die_waise_von_lowood",
-        "LibrivoxBookName": "Jane Eyre, die Waise von Lowood",
+        "librivox_book_name": "Jane Eyre, die Waise von Lowood",
         "GutenbergId": "brontec/janeeyre/janeeyre.html",
         "GutenbergStart": "",
         "GutenbergEnd": "",
@@ -498,7 +498,7 @@
     },
     "schatzgraeber": {
         "title": "schatzgraeber",
-        "LibrivoxBookName": "Schatzgräber",
+        "librivox_book_name": "Schatzgräber",
         "GutenbergId": "contessa/schatz/schatz.html",
         "GutenbergStart": "",
         "GutenbergEnd": "",
@@ -534,7 +534,7 @@
     },
     "tote_gast": {
         "title": "tote_gast",
-        "LibrivoxBookName": "tote Gast",
+        "librivox_book_name": "tote Gast",
         "GutenbergId": "zschokke/totegast/totegast.html",
         "GutenbergStart": "",
         "GutenbergEnd": "",
@@ -545,7 +545,7 @@
     },
     "walpurgisnacht": {
         "title": "walpurgisnacht",
-        "LibrivoxBookName": "Walpurgisnacht",
+        "librivox_book_name": "Walpurgisnacht",
         "GutenbergId": "meyrink/walpurgi/walpurgi.html",
         "GutenbergStart": "",
         "GutenbergEnd": "",
@@ -582,7 +582,7 @@
     },
     "mann_im_mond_oder_der_zug": {
         "title": "mann_im_mond_oder_der_zug",
-        "LibrivoxBookName": "Mann im Mond oder Der Zug des Herzens ist des Schicksals Stimme",
+        "librivox_book_name": "Mann im Mond oder Der Zug des Herzens ist des Schicksals Stimme",
         "GutenbergId": 13451,
         "GutenbergStart": "Über Freilingen lag eine kalte, stürmische Novembernacht; der Wind",
         "GutenbergEnd": "",
@@ -642,7 +642,7 @@
     },
     "briefe_aus_dem_gefaengnis": {
         "title": "briefe_aus_dem_gefaengnis",
-        "LibrivoxBookName": "Briefe aus dem Gefängnis",
+        "librivox_book_name": "Briefe aus dem Gefängnis",
         "GutenbergId": 26964,
         "GutenbergStart": "Drei Jahre und vier Monate hat Rosa Luxemburg während des Krieges im",
         "GutenbergEnd": "",
@@ -722,7 +722,7 @@
     },
     "bulemanns_haus": {
         "title": "bulemanns_haus",
-        "LibrivoxBookName": "Bulemanns Haus",
+        "librivox_book_name": "Bulemanns Haus",
         "GutenbergId": "storm/bule/bule.html",
         "GutenbergStart": "In einer norddeutschen Seestadt, in der sogenannten Düsternstraße, steht",
         "GutenbergEnd": "",
@@ -732,7 +732,7 @@
     },
     "reise_durch_england_und_schottland": {
         "title": "reise_durch_england_und_schottland",
-        "LibrivoxBookName": "Reise durch England und Schottland",
+        "librivox_book_name": "Reise durch England und Schottland",
         "GutenbergId": 10823,
         "GutenbergStart": "",
         "GutenbergEnd": "",
@@ -914,7 +914,7 @@
     },
     "ber_psychoanalyse": {
         "title": "ber_psychoanalyse",
-        "LibrivoxBookName": "Über Psychoanalyse",
+        "librivox_book_name": "Über Psychoanalyse",
         "GutenbergId": 20613,
         "GutenbergStart": "                                  ÜBER",
         "GutenbergEnd": "",

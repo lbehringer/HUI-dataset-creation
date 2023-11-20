@@ -14,16 +14,18 @@ class AudioPersistenz:
         self.fileListUtil = FileListUtil()
         self.pathUtil = PathUtil()
 
-    def load(self, id: str):
+    def load(self, id: str, duration=None):
+        """Load an audio file and return it as an Audio object"""
         audioTimeSeries: NDArray
         samplingRate: int
         targetPath = self.loadPath +'/' +  id + '.' + self.fileExtension
         name = self.pathUtil.filenameWithoutExtension(targetPath)
-        audioTimeSeries, samplingRate = librosa.core.load(targetPath, sr=None) # type: ignore
+        audioTimeSeries, samplingRate = librosa.core.load(targetPath, sr=None, duration=duration) # type: ignore
         audio = Audio(audioTimeSeries, samplingRate, id, name)
         return audio
 
     def save(self, audio: Audio):
+        """Save an Audio object to file"""
         targetPath = self.savePath + '/' + audio.id + '.wav'
         self.pathUtil.createFolderForFile(targetPath)
         audioTimeSeries = audio.timeSeries
@@ -31,7 +33,7 @@ class AudioPersistenz:
         soundfile.write(targetPath, audioTimeSeries, samplingRate)
 
     def getNames(self):
-        names = [self.transformIdToName(id) for id in self.getIds()]
+        names = [self.pathUtil.filenameWithoutExtension(id) for id in self.getIds()]
         return names
 
     def getIds(self):
@@ -41,10 +43,7 @@ class AudioPersistenz:
 
         return audioFiles
 
-    def loadAll(self):
+    def loadAll(self, duration=None):
         ids = self.getIds()
         for id in ids:
-            yield self.load(id)
-
-    def transformIdToName(self, id: str):
-        return self.pathUtil.filenameWithoutExtension(id)
+            yield self.load(id, duration=duration)
