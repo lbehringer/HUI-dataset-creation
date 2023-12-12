@@ -111,6 +111,9 @@ def runWorkflow(params: Dict, workflowConfig: Dict):
     qa2_path = bookBasePath + params["title"] + "/QA2_HifiSNR"
     qa2_path_audio = os.path.join(qa2_path, "audio")
 
+    qa3_path = bookBasePath + params["title"] + "/QA3_WVMOS"
+    qa3_path_audio = os.path.join(qa3_path, "audio")
+
     if workflowConfig["hifi_qa"]:
         logStep('Step1_DownloadAudio')
         config = {
@@ -166,6 +169,19 @@ def runWorkflow(params: Dict, workflowConfig: Dict):
             },
         }
         DependencyInjection(config).QA2_HifiSNR.run()
+
+        logStep("QA3_WVMOS")
+        config = {
+            "audio_persistenz": {
+                "loadPath": qa2_path_audio,
+                "savePath": qa3_path_audio,
+                "fileExtension": "wav"
+            },
+            "QA3_WVMOS": {
+                "save_path": qa3_path_audio
+            }
+        }
+        DependencyInjection(config).QA3_WVMOS.run()
 
 
 

@@ -35,6 +35,7 @@ from huiAudioCorpus.workflows.createDatasetWorkflow.Step1_DownloadAudio import S
 from huiAudioCorpus.converter.StringToSentencesConverter import StringToSentencesConverter
 from huiAudioCorpus.workflows.createDatasetWorkflow.QA1_HifiBandwidth import QA1_HifiBandwidth
 from huiAudioCorpus.workflows.createDatasetWorkflow.QA2_HifiSNR import QA2_HifiSNR
+from huiAudioCorpus.workflows.createDatasetWorkflow.QA3_WVMOS import QA3_WVMOS
 from huiAudioCorpus.workflows.createDatasetWorkflow.Step4_1_NormalizeTranscript import Step4_1_NormalizeTranscript
 
 from frosch import hook
@@ -142,6 +143,7 @@ class DependencyInjection:
     step9_GenerateCleanDataset: Step9_GenerateCleanDataset
     QA1_HifiBandwidth: QA1_HifiBandwidth
     QA2_HifiSNR: QA2_HifiSNR
+    QA3_WVMOS: QA3_WVMOS
 
     #plot
     plot: Plot
