@@ -69,8 +69,7 @@ class QA1_HifiBandwidth:
             start_hz = librosa.fft_frequencies(sr=audio.samplingRate)[bandwidth_start]
             end_hz = librosa.fft_frequencies(sr=audio.samplingRate)[bandwidth_end]
             # TODO: test correct function of bandwidth estimation
-            print(f"Estimated speech signal's bandwidth: {start_hz:.2f} Hz to {end_hz:.2f} Hz")
-            print(f"Mean of power spectrogram: {mean_power:.2f}")
+            print(f"{audio.id} | Estimated bandwidth: {start_hz:.2f} Hz to {end_hz:.2f} Hz | Mean of power spectrogram: {mean_power:.2f}")
             return end_hz - start_hz
         else:
             print("No continuous frequency range falls below the specified threshold.")
