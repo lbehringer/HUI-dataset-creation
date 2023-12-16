@@ -39,7 +39,7 @@ sonja = pathUtil.loadJson(basePath + '/Sonja.json')
 christian_culp_latest = pathUtil.loadJson(basePath + '/Christian_Culp_latest.json')
 twospeakers = pathUtil.loadJson(basePath + "/twospeakers.json")
 two_readers_latest = pathUtil.loadJson(os.path.join(basePath, "two_readers_latest.json"))
-overview_20231215_212809 = pathUtil.loadJson("/mnt/c/Users/lyone/Documents/_ComputationalLinguistics/HUI_accent/HUI-Audio-Corpus-German/database/overview_20231215_212809/readerLatestBook.json")
+overview_20231215_212809 = pathUtil.loadJson(os.path.join(externalPaths[0], "overview_20231215_212809", "readerLatestBook.json"))
 
 allLibriboxIds = [author[key]['librivox_book_name'] for author in [
     bernd, hokuspokus, friedrich, eva, karlsson, redaer] for key in author]
@@ -92,30 +92,30 @@ def cleanFilter(input):
 
 def runWorkflow(params: Dict, workflowConfig: Dict):
     print(params)
-    author_base_path = os.path.join(dataBasePath, "authors")
-    step1Path = os.path.join(author_base_path, params["reader"], "Step1_DownloadAudio")
+    readers_base_path = os.path.join(dataBasePath, "readers")
+    step1Path = os.path.join(readers_base_path, params["reader"], "Step1_DownloadAudio")
     step1PathAudio = step1Path + '/audio'
     step1PathChapter = step1Path + '/chapter.csv'
-    step2Path = os.path.join(author_base_path, params["reader"], "Step2_SplitAudio")
-    step2_1_Path = os.path.join(author_base_path, params["reader"], "Step2_1_AudioStatistic")
+    step2Path = os.path.join(readers_base_path, params["reader"], "Step2_SplitAudio")
+    step2_1_Path = os.path.join(readers_base_path, params["reader"], "Step2_1_AudioStatistic")
 
     step2PathAudio = step2Path + '/audio'
-    step3Path = os.path.join(author_base_path, params["reader"], "Step3_DownloadText")
+    step3Path = os.path.join(readers_base_path, params["reader"], "Step3_DownloadText")
     step3PathText = step3Path + '/text.txt'
-    step3_1_Path = os.path.join(author_base_path, params["reader"], "Step3_1_PrepareText")
+    step3_1_Path = os.path.join(readers_base_path, params["reader"], "Step3_1_PrepareText")
     step3_1_PathText = step3_1_Path + '/text.txt'
 
-    step4Path = os.path.join(author_base_path, params["reader"], "Step4_TranscriptAudio")
-    step5Path = os.path.join(author_base_path, params["reader"], "Step5_AlignText")
-    step6Path = os.path.join(author_base_path, params["reader"], "Step6_FinalizeDataset")
+    step4Path = os.path.join(readers_base_path, params["reader"], "Step4_TranscriptAudio")
+    step5Path = os.path.join(readers_base_path, params["reader"], "Step5_AlignText")
+    step6Path = os.path.join(readers_base_path, params["reader"], "Step6_FinalizeDataset")
 
-    qa1_path = os.path.join(author_base_path, params["reader"], "QA1_HifiBandwidth")
+    qa1_path = os.path.join(readers_base_path, params["reader"], "QA1_HifiBandwidth")
     qa1_path_audio = os.path.join(qa1_path, "audio")
 
-    qa2_path = os.path.join(author_base_path, params["reader"], "QA2_HifiSNR")
+    qa2_path = os.path.join(readers_base_path, params["reader"], "QA2_HifiSNR")
     qa2_path_audio = os.path.join(qa2_path, "audio")
 
-    qa3_path = os.path.join(author_base_path, params["reader"], "QA3_WVMOS")
+    qa3_path = os.path.join(readers_base_path, params["reader"], "QA3_WVMOS")
     qa3_path_audio = os.path.join(qa3_path, "audio")
 
     if workflowConfig["hifi_qa"]:
@@ -126,7 +126,8 @@ def runWorkflow(params: Dict, workflowConfig: Dict):
                 'solo_reading': params['solo_reading'],
                 'sections': params['sections'],
                 'savePath': step1PathAudio + '/',
-                'chapterPath': step1PathChapter
+                'chapterPath': step1PathChapter,
+                'max_chapters_per_reader': 2
             },
             'step1_DownloadAudio': {
                 'savePath': step1Path

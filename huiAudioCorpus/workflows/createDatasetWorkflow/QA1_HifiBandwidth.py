@@ -61,7 +61,7 @@ class QA1_HifiBandwidth:
 
         # get highest frequency which is at least -50 dB (or higher) relative to the peak value (peak value should be <= 0)
         peak_value = np.max(power_spec_db)
-        threshold = peak_value - 50  # -50 dB level relative to the peak value
+        threshold = peak_value - 60  # -50 dB level relative to the peak value
         frequencies_above_threshold = np.where(power_spec_db >= threshold)[0]
         if len(frequencies_above_threshold) > 0:
             bandwidth_start = frequencies_above_threshold[0]

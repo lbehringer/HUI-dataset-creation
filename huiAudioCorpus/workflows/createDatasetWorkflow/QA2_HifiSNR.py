@@ -32,12 +32,6 @@ class QA2_HifiSNR:
         self.audio_sr_transformer = audio_sr_transformer
         self.audio_loudness_transformer = audio_loudness_transformer
         self.target_sr = target_sr
-        self.vad_model, utils = torch.hub.load(repo_or_dir='snakers4/silero-vad',
-                                model='silero_vad',
-                                force_reload=False,
-                                onnx=False)
-        (self.get_speech_timestamps, _, self.read_audio, _, _) = utils
-        self.vad_models = dict()
 
     def run(self):
         return DoneMarker(self.save_path).run(self.script)
@@ -45,6 +39,14 @@ class QA2_HifiSNR:
     def script(self):
         audios = self.audio_persistenz.loadAll(duration=self.seconds_to_analyze)
         for idx, audio in enumerate(audios):
+            # only load VAD model if there are any audios to be analyzed
+            if idx == 0:
+                self.vad_model, utils = torch.hub.load(repo_or_dir='snakers4/silero-vad',
+                                    model='silero_vad',
+                                    force_reload=False,
+                                    onnx=False)
+                (self.get_speech_timestamps, _, self.read_audio, _, _) = utils
+                self.vad_models = dict()
             audio = self.audio_loudness_transformer.transform(audio)
             speech_timestamps, silence_timestamps = self.apply_vad(audio)
             audio = self.set_x_seconds_id(audio, self.book_name, idx+1, self.seconds_to_analyze)
