@@ -149,6 +149,7 @@ def runWorkflow(params: Dict, workflowConfig: Dict):
                 "save_path": qa1_path_audio,
                 "book_name": params["title"],
                 "seconds_to_analyze": 30,
+                "analysis_offset": 30,
                 "bandwidth_hz_threshold": 13000
             },
         }
@@ -184,7 +185,10 @@ def runWorkflow(params: Dict, workflowConfig: Dict):
             },
             "QA3_WVMOS": {
                 "save_path": qa3_path_audio
-            }
+            },
+            "audio_sr_transformer": {
+                "targetSamplingRate": 16000
+            },    
         }
         DependencyInjection(config).QA3_WVMOS.run()
 

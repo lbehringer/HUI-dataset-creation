@@ -41,12 +41,7 @@ class QA2_HifiSNR:
         for idx, audio in enumerate(audios):
             # only load VAD model if there are any audios to be analyzed
             if idx == 0:
-                self.vad_model, utils = torch.hub.load(repo_or_dir='snakers4/silero-vad',
-                                    model='silero_vad',
-                                    force_reload=False,
-                                    onnx=False)
-                (self.get_speech_timestamps, _, self.read_audio, _, _) = utils
-                self.vad_models = dict()
+                self.load_vad_model()
             audio = self.audio_loudness_transformer.transform(audio)
             speech_timestamps, silence_timestamps = self.apply_vad(audio)
             audio = self.set_x_seconds_id(audio, self.book_name, idx+1, self.seconds_to_analyze)
@@ -124,6 +119,15 @@ class QA2_HifiSNR:
             sf.write("filtered_audio.wav", filtered_signal, audio.samplingRate)
             """
     
+    def load_vad_model(self):
+        """Load Silero VAD model and corresponding functions"""
+        self.vad_model, utils = torch.hub.load(repo_or_dir='snakers4/silero-vad',
+                            model='silero_vad',
+                            force_reload=False,
+                            onnx=False)
+        (self.get_speech_timestamps, _, self.read_audio, _, _) = utils
+        self.vad_models = dict()
+
     def set_x_seconds_id(self, audio: Audio, book_name: str, chapter: int, seconds_to_analyze):
         """Assigns an ID to an Audio object, following the format `<book_name>_<chapter>_<seconds_to_analyze>sec`. 
         Returns the Audio with the attributes `id` and `name` (with identical values)."""

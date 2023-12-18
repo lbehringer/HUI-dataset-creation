@@ -14,13 +14,19 @@ class AudioPersistenz:
         self.fileListUtil = FileListUtil()
         self.pathUtil = PathUtil()
 
-    def load(self, id: str, duration=None):
+    def load(self, id: str, duration=None, offset=0.0):
         """Load an audio file and return it as an Audio object"""
         audioTimeSeries: NDArray
         samplingRate: int
         targetPath = self.loadPath +'/' +  id + '.' + self.fileExtension
         name = self.pathUtil.filenameWithoutExtension(targetPath)
-        audioTimeSeries, samplingRate = librosa.core.load(targetPath, sr=None, duration=duration) # type: ignore
+        # give duration higher priority than offset: 
+        # if file is not long enough to allow the specified duration with the specified offset, reduce offset
+        if offset > 0.0:
+            file_duration = librosa.get_duration(path=targetPath)
+            if file_duration - offset < duration:
+                offset = max(0, file_duration - duration)
+        audioTimeSeries, samplingRate = librosa.core.load(targetPath, sr=None, duration=duration, offset=offset) # type: ignore
         audio = Audio(audioTimeSeries, samplingRate, id, name)
         return audio
 
@@ -43,7 +49,7 @@ class AudioPersistenz:
 
         return audioFiles
 
-    def loadAll(self, duration=None):
+    def loadAll(self, duration=None, offset=0.0):
         ids = self.getIds()
         for id in ids:
-            yield self.load(id, duration=duration)
+            yield self.load(id, duration=duration, offset=offset)

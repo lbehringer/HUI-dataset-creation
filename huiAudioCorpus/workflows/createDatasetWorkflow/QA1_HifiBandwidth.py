@@ -14,6 +14,7 @@ class QA1_HifiBandwidth:
             save_path: str, 
             book_name: str,
             seconds_to_analyze: int,
+            analysis_offset: float,
             bandwidth_hz_threshold: int,
             audio_loudness_transformer: AudioLoudnessTransformer = None,
             ):
@@ -21,6 +22,7 @@ class QA1_HifiBandwidth:
         self.save_path = save_path
         self.book_name = book_name
         self.seconds_to_analyze = seconds_to_analyze
+        self.analysis_offset = analysis_offset
         self.audio_loudness_transformer = audio_loudness_transformer
         self.bandwidth_hz_threshold = bandwidth_hz_threshold
 
@@ -28,7 +30,7 @@ class QA1_HifiBandwidth:
         return DoneMarker(self.save_path).run(self.script)
     
     def script(self):
-        audios = self.audio_persistenz.loadAll(duration=self.seconds_to_analyze)
+        audios = self.audio_persistenz.loadAll(duration=self.seconds_to_analyze, offset=self.analysis_offset)
         for idx, audio in enumerate(audios):
             # only perform loudness normalization if specified in config
             if self.audio_loudness_transformer:
