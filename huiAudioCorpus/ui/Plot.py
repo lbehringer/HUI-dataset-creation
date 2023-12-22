@@ -6,32 +6,30 @@ logging.getLogger('matplotlib.font_manager').disabled = True
 logging.getLogger('matplotlib.colorbar').disabled = True
 
 class Plot:
-    def __init__(self, showDuration: int, savePath: str = ''):
-        self.showDuration = showDuration
-        self.savePath = savePath
-        self.pathUtil = PathUtil()
+    def __init__(self, show_duration: int, save_path: str = ''):
+        self.show_duration = show_duration
+        self.save_path = save_path
+        self.path_util = PathUtil()
 
-
-    def histogram(self, histogram:Histogram, name:str, logScaleY = False, logScaleX = False):
+    def histogram(self, histogram: Histogram, name: str, log_scale_y=False, log_scale_x=False):
         plt.clf()
         _, ax = plt.subplots()
 
-
-        ax.bar(histogram.bins,histogram.values, width=1) # type: ignore
-        ax.set_ylabel('count') # type: ignore
-        ax.set_xlabel('bins') # type: ignore
-        ax.set_title(name) # type: ignore
-        if logScaleY:
+        ax.bar(histogram.bins, histogram.values, width=1)  # type: ignore
+        ax.set_ylabel('count')  # type: ignore
+        ax.set_xlabel('bins')  # type: ignore
+        ax.set_title(name)  # type: ignore
+        if log_scale_y:
             ax.set_yscale('log')
-        if logScaleX:
+        if log_scale_x:
             ax.set_xscale('log')
 
     def show(self):
         plt.show(block=False)
-        plt.pause(self.showDuration)
+        plt.pause(self.show_duration)
         plt.close()
-    
+
     def save(self, filename: str):
-        filename = self.savePath + '/' + filename
-        self.pathUtil.createFolderForFile(filename)
+        filename = self.save_path + '/' + filename
+        self.path_util.create_folder_for_file(filename)
         plt.savefig(filename, dpi=200)

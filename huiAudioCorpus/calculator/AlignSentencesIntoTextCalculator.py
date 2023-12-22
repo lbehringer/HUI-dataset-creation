@@ -8,15 +8,15 @@ from huiAudioCorpus.transformer.SentenceDistanceTransformer import SentenceDista
 from joblib import Parallel, delayed
 
 # range of words to consider when aligning sentences
-WORDRANGE = 40
+word_range = 40
 
 class AlignSentencesIntoTextCalculator:
     """
     A class for aligning sentences to text based on distance metrics.
     """
 
-    def __init__(self, sentenceDistanceTransformer: SentenceDistanceTransformer):
-        self.sentenceDistanceTransformer = sentenceDistanceTransformer
+    def __init__(self, sentence_distance_transformer: SentenceDistanceTransformer):
+        self.sentence_distance_transformer = sentence_distance_transformer
 
     def calculate(self, original_text: Sentence, sentences_to_align: List[Sentence]):
         """
@@ -30,13 +30,13 @@ class AlignSentencesIntoTextCalculator:
             alignments (List[SentenceAlignment]): list of SentenceAlignment objects representing the alignments
         """
 
-        alignments = self.calculateAlignments(original_text, sentences_to_align)
-        alignments = self.evaluateIfPerfektStartAndEnd(alignments, original_text.wordsCount)
-        alignments = self.getMissingWordsBetweenAlignments(alignments, original_text)
+        alignments = self.calculate_alignments(original_text, sentences_to_align)
+        alignments = self.evaluate_if_perfect_start_and_end(alignments, original_text.words_count)
+        alignments = self.get_missing_words_between_alignments(alignments, original_text)
         return alignments
 
 
-    def calculateAlignments(self, original_text: Sentence, sentences_to_align: List[Sentence]):
+    def calculate_alignments(self, original_text: Sentence, sentences_to_align: List[Sentence]):
         """
         Calculate sentence alignments based on distance metrics.
 
@@ -50,22 +50,22 @@ class AlignSentencesIntoTextCalculator:
         with Parallel(n_jobs=4, batch_size="auto") as parallel:
             alignments:List[SentenceAlignment] = []
             start = 0
-            additionalRange = 0
+            additional_range = 0
             distance_threshold = 0.2
             for asr_sent in tqdm(sentences_to_align):
 
-                range_start= max(0, start - WORDRANGE - additionalRange)
-                range_end = min(range_start + 2*(WORDRANGE + additionalRange) + asr_sent.wordsCount, original_text.wordsCount + 1)
+                range_start = max(0, start - word_range - additional_range)
+                range_end = min(range_start + 2 * (word_range + additional_range) + asr_sent.words_count, original_text.words_count + 1)
 
                 # Find the best position for the current text within the given range
                 if range_end - range_start > 2000:
                     raise Exception('more than 2000 Words in search text')
 
-                (newStart, end), distance = self.bestPosition(parallel, original_text[range_start:range_end], asr_sent, 0, range_end - range_start)
-                newStart += range_start
+                (new_start, end), distance = self.best_position(parallel, original_text[range_start:range_end], asr_sent, 0, range_end - range_start)
+                new_start += range_start
                 end += range_start
 
-                align = SentenceAlignment(asr_sent, original_text[newStart: end], newStart, end, distance)
+                align = SentenceAlignment(asr_sent, original_text[new_start: end], new_start, end, distance)
 
                 if distance > distance_threshold:
                     print('*****************')
@@ -73,22 +73,22 @@ class AlignSentencesIntoTextCalculator:
                     print('*****************')
                     print(f"ASR transcript:\n{asr_sent.sentence}")
                     print('___________________')
-                    print(f"Best alignment:\n{align.alignedText.sentence}")                    
+                    print(f"Best alignment:\n{align.aligned_text.sentence}")                    
                     print('___________________')
                     print(f"Original text search range:\n{original_text[range_start:range_end].sentence}")
                     print('########################')
 
-                    align.isAboveThreshold = True
-                    additionalRange += 30 + asr_sent.wordsCount
+                    align.is_above_threshold = True
+                    additional_range += 30 + asr_sent.words_count
                 else: 
                     start = end
-                    additionalRange= 0
+                    additional_range = 0
 
                 alignments.append(align)
             return alignments
 
 
-    def bestPosition(self, parallel: Parallel, original_text: Sentence, sentence_to_align: Sentence, range_start: int, range_end: int):
+    def best_position(self, parallel: Parallel, original_text: Sentence, sentence_to_align: Sentence, range_start: int, range_end: int):
         """
         Find the best position for aligning a sentence within a given range.
 
@@ -100,24 +100,24 @@ class AlignSentencesIntoTextCalculator:
             range_end (int): end index of the range
 
         Returns:
-            bestPosition (Tuple[Tuple[int, int], float]): tuple containing the best start and end positions and the distance
+            best_position (Tuple[Tuple[int, int], float]): tuple containing the best start and end positions and the distance
         """        
-        startEnds = []
+        start_ends = []
         # Generate possible start and end positions within the given range
         for end in range(range_start, range_end):
-            for start in range(max(range_start,end-sentence_to_align.wordsCount-10), end):
-                startEnds.append((start, end))
+            for start in range(max(range_start, end - sentence_to_align.words_count - 10), end):
+                start_ends.append((start, end))
 
         # Use parallel processing to find positions and distances
-        positions = parallel(delayed(self.positionOneSentence)(original_text, sentence_to_align, start, end) for start, end in startEnds)
-        #positions = [self.positionOneSentence(original_text, sentence_to_align, start, end) for start, end in startEnds]
+        positions = parallel(delayed(self.position_one_sentence)(original_text, sentence_to_align, start, end) for start, end in start_ends)
+        # positions = [self.position_one_sentence(original_text, sentence_to_align, start, end) for start, end in start_ends]
         
         # Find the best position based on the minimum distance
-        bestPosition = min(positions, key=operator.itemgetter(1)) # type: ignore
-        return bestPosition
+        best_position = min(positions, key=operator.itemgetter(1)) # type: ignore
+        return best_position
 
 
-    def positionOneSentence(self, original_text: Sentence , sentence_to_align: Sentence, start: int, end: int):
+    def position_one_sentence(self, original_text: Sentence , sentence_to_align: Sentence, start: int, end: int):
         """
         Calculate the distance between a part of the original sentence and the sentence to align.
 
@@ -130,11 +130,11 @@ class AlignSentencesIntoTextCalculator:
         Returns:
             Tuple[Tuple[int, int], float]: tuple containing the start and end positions and the distance
         """        
-        distance = self.sentenceDistanceTransformer.transform(original_text[start:end], sentence_to_align)
+        distance = self.sentence_distance_transformer.transform(original_text[start:end], sentence_to_align)
         return [(start, end), distance]
 
 
-    def evaluateIfPerfektStartAndEnd(self, alignments: List[SentenceAlignment], original_text_length: int):
+    def evaluate_if_perfect_start_and_end(self, alignments: List[SentenceAlignment], original_text_length: int):
         """
         Evaluate if the start and end positions of alignments are perfect.
 
@@ -146,34 +146,34 @@ class AlignSentencesIntoTextCalculator:
             alignments (List[SentenceAlignment]): The list of SentenceAlignment objects with evaluated perfection.
         """        
         for index, align in enumerate(alignments):
-            align.leftIsPerfekt = False
-            align.rightIsPerfekt = False
-            align.isFirst = index ==0
-            align.isLast = index == len(alignments)-1
+            align.left_is_perfect = False
+            align.right_is_perfect = False
+            align.is_first = index == 0
+            align.is_last = index == len(alignments) - 1
 
             # Check if the alignment starts or ends perfectly
-            if align.start==0:
-                align.leftIsPerfekt=True
+            if align.start == 0:
+                align.left_is_perfect = True
             if align.end == original_text_length:
-                align.rightIsPerfekt= True
+                align.right_is_perfect = True
 
             try:
-                if align.start == alignments[index-1].end:
-                    align.leftIsPerfekt=True
+                if align.start == alignments[index - 1].end:
+                    align.left_is_perfect = True
             except:
                 pass
             try:
-                if align.end == alignments[index+1].start:
-                    align.rightIsPerfekt=True
+                if align.end == alignments[index + 1].start:
+                    align.right_is_perfect = True
             except:
                 pass
             
             # Determine if the alignment is perfect
-            align.isPerfect = (align.leftIsPerfekt or align.isFirst) and (align.rightIsPerfekt or align.isLast) and not align.isAboveThreshold
+            align.is_perfect = (align.left_is_perfect or align.is_first) and (align.right_is_perfect or align.is_last) and not align.is_above_threshold
         return alignments
 
 
-    def getMissingWordsBetweenAlignments(self, alignments: List[SentenceAlignment], original_text: Sentence):
+    def get_missing_words_between_alignments(self, alignments: List[SentenceAlignment], original_text: Sentence):
         """
         Print missing words between non-perfect alignments.
 
@@ -186,7 +186,7 @@ class AlignSentencesIntoTextCalculator:
         for index, align in enumerate(alignments[:-1]):
             
             # Print missing words between non-perfect alignments
-            if not align.rightIsPerfekt:
-                print(original_text[align.end:alignments[index+1].start])
+            if not align.right_is_perfect:
+                print(original_text[align.end:alignments[index + 1].start])
 
         return alignments

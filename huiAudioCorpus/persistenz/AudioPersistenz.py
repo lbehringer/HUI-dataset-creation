@@ -7,49 +7,49 @@ from huiAudioCorpus.utils.PathUtil import PathUtil
 from natsort import natsorted
 
 class AudioPersistenz:
-    def __init__(self, loadPath:str, savePath: str = None , fileExtension:str = 'wav'):
-        self.savePath = loadPath if savePath is None else savePath
-        self.loadPath = loadPath
-        self.fileExtension = fileExtension
-        self.fileListUtil = FileListUtil()
-        self.pathUtil = PathUtil()
+    def __init__(self, load_path: str, save_path: str = None, file_extension: str = 'wav'):
+        self.save_path = load_path if save_path is None else save_path
+        self.load_path = load_path
+        self.file_extension = file_extension
+        self.file_list_util = FileListUtil()
+        self.path_util = PathUtil()
 
-    def load(self, id: str, duration=None, offset=0.0):
+    def load(self, audio_id: str, duration=None, offset=0.0):
         """Load an audio file and return it as an Audio object"""
-        audioTimeSeries: NDArray
-        samplingRate: int
-        targetPath = self.loadPath +'/' +  id + '.' + self.fileExtension
-        name = self.pathUtil.filenameWithoutExtension(targetPath)
-        # give duration higher priority than offset: 
-        # if file is not long enough to allow the specified duration with the specified offset, reduce offset
+        audio_time_series: NDArray
+        sampling_rate: int
+        target_path = self.load_path + '/' + audio_id + '.' + self.file_extension
+        name = self.path_util.filename_without_extension(target_path)
+        # give duration higher priority than offset:
+        # if the file is not long enough to allow the specified duration with the specified offset, reduce offset
         if offset > 0.0:
-            file_duration = librosa.get_duration(path=targetPath)
+            file_duration = librosa.get_duration(path=target_path)
             if file_duration - offset < duration:
                 offset = max(0, file_duration - duration)
-        audioTimeSeries, samplingRate = librosa.core.load(targetPath, sr=None, duration=duration, offset=offset) # type: ignore
-        audio = Audio(audioTimeSeries, samplingRate, id, name)
+        audio_time_series, sampling_rate = librosa.core.load(target_path, sr=None, duration=duration, offset=offset)  # type: ignore
+        audio = Audio(audio_time_series, sampling_rate, audio_id, name)
         return audio
 
     def save(self, audio: Audio):
-        """Save an Audio object to file"""
-        targetPath = self.savePath + '/' + audio.id + '.wav'
-        self.pathUtil.createFolderForFile(targetPath)
-        audioTimeSeries = audio.timeSeries
-        samplingRate = audio.samplingRate
-        soundfile.write(targetPath, audioTimeSeries, samplingRate)
+        """Save an Audio object to a file"""
+        target_path = self.save_path + '/' + audio.id + '.wav'
+        self.path_util.create_folder_for_file(target_path)
+        audio_time_series = audio.time_series
+        sampling_rate = audio.sampling_rate
+        soundfile.write(target_path, audio_time_series, sampling_rate)
 
-    def getNames(self):
-        names = [self.pathUtil.filenameWithoutExtension(id) for id in self.getIds()]
+    def get_names(self):
+        names = [self.path_util.filename_without_extension(audio_id) for audio_id in self.get_ids()]
         return names
 
-    def getIds(self):
-        audioFiles = self.fileListUtil.getFiles(self.loadPath, self.fileExtension)
-        audioFiles = [file.replace(self.loadPath,'')[1:-len(self.fileExtension)-1] for file in audioFiles]
-        audioFiles = natsorted(audioFiles)
+    def get_ids(self):
+        audio_files = self.file_list_util.get_files(self.load_path, self.file_extension)
+        audio_files = [file.replace(self.load_path, '')[1:-len(self.file_extension)-1] for file in audio_files]
+        audio_files = natsorted(audio_files)
 
-        return audioFiles
+        return audio_files
 
-    def loadAll(self, duration=None, offset=0.0):
-        ids = self.getIds()
-        for id in ids:
-            yield self.load(id, duration=duration, offset=offset)
+    def load_all(self, duration=None, offset=0.0):
+        ids = self.get_ids()
+        for audio_id in ids:
+            yield self.load(audio_id, duration=duration, offset=offset)

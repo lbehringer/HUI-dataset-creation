@@ -12,9 +12,9 @@ class Sentence(ToString):
     """
 
     def __init__(self, sentence: str, id: str = ''):
-        sentence = self.cleanSpaces(sentence)
+        sentence = self.clean_spaces(sentence)
         # clean spaces around punctuation in the sentence
-        sentence = self.cleanSpacesPunctuation(sentence)
+        sentence = self.clean_spaces_punctuation(sentence)
         if " ' " in sentence:
             sentence = self.postprocess_split_contractions(sentence)
 
@@ -22,19 +22,19 @@ class Sentence(ToString):
         self.sentence = sentence
         self.id = id
 
-        textBlob = TextBlob(self.sentence.replace('.',' . ') )
-        self.words = self.generateWords(textBlob)
+        text_blob = TextBlob(self.sentence.replace('.', ' . '))
+        self.words = self.generate_words(text_blob)
 
         # remove punctuation from `words` and lower-case all elements
-        self.wordsWithoutPunct: List[str] = [word.lower() for word in textBlob.words] # type: ignore
+        self.words_without_punct: List[str] = [word.lower() for word in text_blob.words] # type: ignore
 
         # get words and keep lower/upper case
-        self.wordsWithoutPunctAndCased: List[str] = [word for word in textBlob.words] # type: ignore
+        self.words_without_punct_and_cased: List[str] = [word for word in text_blob.words] # type: ignore
 
-        self.wordsCount = len(self.wordsWithoutPunct)
-        self.charCount = len(self.sentence)
-        self.wordsMatchingWithChars = self.generateWordsMatchingWithChars(self.words, self.wordsWithoutPunct)
-        self.rawChars = "".join(self.wordsWithoutPunct)
+        self.words_count = len(self.words_without_punct)
+        self.char_count = len(self.sentence)
+        self.words_matching_with_chars = self.generate_words_matching_with_chars(self.words, self.words_without_punct)
+        self.raw_chars = "".join(self.words_without_punct)
 
 
     def postprocess_split_contractions(self, toks: Union[List, str]):
@@ -55,23 +55,23 @@ class Sentence(ToString):
         toks_out = " ".join(toks_out)
         return toks_out
 
-    def generateWords(self, textBlob:TextBlob):
+    def generate_words(self, text_blob:TextBlob):
         """
         Generate a list of words from a TextBlob object.
 
         Params:
-            textBlob (TextBlob): TextBlob object representing the sentence
+            text_blob (TextBlob): TextBlob object representing the sentence
 
         Returns:
             List[str]: list of words
         """        
 
-        words = list(textBlob.tokenize())
+        words = list(text_blob.tokenize())
         return words
     
     def __getitem__(self, k):
         """
-        Get an item from `wordsMatchingWithChars` at index k.
+        Get an item from `words_matching_with_chars` at index k.
 
         Params:
             k: the index of the item to retrieve
@@ -79,42 +79,42 @@ class Sentence(ToString):
         Returns:
             Sentence: a new Sentence object
         """
-        return Sentence(" ".join(self.wordsMatchingWithChars[k]))
+        return Sentence(" ".join(self.words_matching_with_chars[k]))
 
-    def generateWordsMatchingWithChars(self, words:List[str], wordsWithoutPunct: List[str]):
+    def generate_words_matching_with_chars(self, words:List[str], words_without_punct: List[str]):
         """
         Generate words matching with characters.
 
         Params:
             words (List[str]): list of words
-            wordsWithoutPunct (List[str]): list of words without punctuation
+            words_without_punct (List[str]): list of words without punctuation
 
         Returns:
-            wordMatching (List[str]): list of words matching with characters
+            word_matching (List[str]): list of words matching with characters
         """        
-        wordMatching = []
-        wordPointer = 0
+        word_matching = []
+        word_pointer = 0
         for word in words:
-            if wordPointer<len(wordsWithoutPunct) and wordsWithoutPunct[wordPointer] == word.lower():
-                wordPointer+=1
-                wordMatching.append(word)
+            if word_pointer<len(words_without_punct) and words_without_punct[word_pointer] == word.lower():
+                word_pointer+=1
+                word_matching.append(word)
             else:
-                if len(wordMatching) == 0:
+                if len(word_matching) == 0:
                     continue
-                # if the last element of wordMatching is longer than 1000, there is something wrong
-                if len(wordMatching[-1]) > 1000:
-                    print(wordMatching[-1])
+                # if the last element of word_matching is longer than 1000, there is something wrong
+                if len(word_matching[-1]) > 1000:
+                    print(word_matching[-1])
                     raise Exception("Problems during creation of word matchings.")
-                wordMatching[-1]+=' ' + word
-        return wordMatching
+                word_matching[-1]+=' ' + word
+        return word_matching
 
 
-    def cleanSpaces(self, text: str):
+    def clean_spaces(self, text: str):
         """Collapse multiple spaces to one space."""
         text =  text.replace('  ', ' ').replace('  ',' ').replace('  ',' ').replace('  ',' ')
         return text
 
-    def cleanSpacesPunctuation(self, text: str):
+    def clean_spaces_punctuation(self, text: str):
         """
         Clean spaces around punctuation in the text.
 

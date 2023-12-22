@@ -1,19 +1,18 @@
 import librosa
 from huiAudioCorpus.model.Audio import Audio
 
-
 class AudioSamplingRateTransformer():
 
-    def __init__(self, targetSamplingRate: int = None):
-        self.targetSamplingRate = targetSamplingRate
+    def __init__(self, target_sampling_rate: int = None):
+        self.target_sampling_rate = target_sampling_rate
 
-    def transform(self, audio: Audio ):
-        if self.targetSamplingRate is None:
+    def transform(self, audio: Audio):
+        if self.target_sampling_rate is None:
             return audio
-        if audio.samplingRate == self.targetSamplingRate:
+        if audio.sampling_rate == self.target_sampling_rate:
             return audio
-        audioTimeSeries = audio.timeSeries
-        samplingRate = audio.samplingRate
-        resampledTimeSeries = librosa.core.resample(y=audioTimeSeries, orig_sr=samplingRate, target_sr=self.targetSamplingRate)
-        resampledAudio = Audio(resampledTimeSeries, self.targetSamplingRate, audio.id, audio.name) # type:ignore
-        return resampledAudio
+        audio_time_series = audio.time_series
+        sampling_rate = audio.sampling_rate
+        resampled_time_series = librosa.core.resample(y=audio_time_series, orig_sr=sampling_rate, target_sr=self.target_sampling_rate)
+        resampled_audio = Audio(resampled_time_series, self.target_sampling_rate, audio.id, audio.name)
+        return resampled_audio

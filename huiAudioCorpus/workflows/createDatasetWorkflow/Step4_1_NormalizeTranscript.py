@@ -11,32 +11,32 @@ import numpy as np
 import pandas as pd
 from joblib import Parallel, delayed
 
-class Step4_1_NormalizeTranscript:
+class Step4_1NormalizeTranscript:
 
-    def __init__(self, savePath: str, textReplacement: Dict[str,str], transcriptsPersistenz: TranscriptsPersistenz):
-        self.savePath = savePath
-        self.textReplacement = textReplacement
-        self.transcriptsPersistenz = transcriptsPersistenz
+    def __init__(self, save_path: str, text_replacement: Dict[str, str], transcripts_persistenz: TranscriptsPersistenz):
+        self.save_path = save_path
+        self.text_replacement = text_replacement
+        self.transcripts_persistenz = transcripts_persistenz
 
     def run(self):
-        return DoneMarker(self.savePath).run(self.script)
+        return DoneMarker(self.save_path).run(self.script)
     
     def script(self):
         # load transcripts objects (as of now, this Generator should always yield a single Transcripts object)
-        transcripts = self.transcriptsPersistenz.loadAll()
+        transcripts = self.transcripts_persistenz.load_all()
         for t in transcripts:
-        # normalize transcripts with replacements specified in config
+            # normalize transcripts with replacements specified in config
             df = t.transcripts
             df.reset_index(drop=True, inplace=True)
-            normalized_trancripts = []
+            normalized_transcripts = []
             for _, row in tqdm(df.iterrows(), total=df.shape[0], desc="Normalizing transcript"):
-                normalized_trancripts.append(self.replace(row[1], self.textReplacement))
-            df[1] = normalized_trancripts
+                normalized_transcripts.append(self.replace(row[1], self.text_replacement))
+            df[1] = normalized_transcripts
             t.transcripts = df
 
-            self.transcriptsPersistenz.save(t)
+            self.transcripts_persistenz.save(t)
     
-    def replace(self, text: str, textReplacement: Dict[str, str]):
-        for input, target in textReplacement.items():
-            text = text.replace(input,target)
+    def replace(self, text: str, text_replacement: Dict[str, str]):
+        for input, target in text_replacement.items():
+            text = text.replace(input, target)
         return text

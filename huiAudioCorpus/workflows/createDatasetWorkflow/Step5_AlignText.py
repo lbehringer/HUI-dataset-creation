@@ -5,50 +5,50 @@ from huiAudioCorpus.calculator.AlignSentencesIntoTextCalculator import AlignSent
 from huiAudioCorpus.persistenz.TranscriptsPersistenz import TranscriptsPersistenz
 from huiAudioCorpus.utils.DoneMarker import DoneMarker
 
-class Step5_AlignText:
+class Step5AlignText:
 
-    def __init__(self, savePath: str, alignSentencesIntoTextCalculator: AlignSentencesIntoTextCalculator, transcriptsPersistenz: TranscriptsPersistenz, textToAlignPath: str):
-        self.savePath = savePath
-        self.alignSentencesIntoTextCalculator = alignSentencesIntoTextCalculator
-        self.transcriptsPersistenz = transcriptsPersistenz
-        self.textToAlignPath = textToAlignPath
+    def __init__(self, save_path: str, align_sentences_into_text_calculator: AlignSentencesIntoTextCalculator, transcripts_persistenz: TranscriptsPersistenz, text_to_align_path: str):
+        self.save_path = save_path
+        self.align_sentences_into_text_calculator = align_sentences_into_text_calculator
+        self.transcripts_persistenz = transcripts_persistenz
+        self.text_to_align_path = text_to_align_path
 
     def run(self):
-        doneMarker = DoneMarker(self.savePath)
-        result = doneMarker.run(self.script, deleteFolder=False)
+        done_marker = DoneMarker(self.save_path)
+        result = done_marker.run(self.script, delete_folder=False)
         return result
 
     def script(self):
         # load (normalized) ASR-generated transcripts (from step 4_1)
-        transcripts = list(self.transcriptsPersistenz.loadAll())
+        transcripts = list(self.transcripts_persistenz.load_all())
         sentences = transcripts[0].sentences()
 
         # load prepared source text (from step 3_1)
-        with open(self.textToAlignPath, 'r', encoding='utf8') as f:
-            inputText = f.read()
-        inputSentence = Sentence(inputText)
-        
-        alignments = self.alignSentencesIntoTextCalculator.calculate(inputSentence, sentences)
+        with open(self.text_to_align_path, 'r', encoding='utf8') as f:
+            input_text = f.read()
+        input_sentence = Sentence(input_text)
+
+        alignments = self.align_sentences_into_text_calculator.calculate(input_sentence, sentences)
 
         # print alignments that are kept despite not being perfect
-        notPerfektAlignments = [align for align in alignments if not align.isPerfect and not align.isAboveThreshold]
-        for align in notPerfektAlignments:
+        not_perfect_alignments = [align for align in alignments if not align.is_perfect and not align.is_above_threshold]
+        for align in not_perfect_alignments:
             print('------------------')
-            print(align.sourceText.id)
-            print(f"Transcribed text which was aligned:\n{align.alignedText.sentence}")
-            print(f"Source text: {align.sourceText.sentence}")
-            print(f"Left alignment perfect: {align.leftIsPerfekt}")
-            print(f"Right alignment perfect: {align.rightIsPerfekt}")
+            print(align.source_text.id)
+            print(f"Transcribed text which was aligned:\n{align.aligned_text.sentence}")
+            print(f"Source text: {align.source_text.sentence}")
+            print(f"Left alignment perfect: {align.left_is_perfect}")
+            print(f"Right alignment perfect: {align.right_is_perfect}")
             print(f"Distance: {align.distance}")
 
-        print("notPerfektAlignments Percent",len(notPerfektAlignments)/len(alignments)*100)
+        print("not_perfect_alignments Percent", len(not_perfect_alignments) / len(alignments) * 100)
 
-        results = [[align.sourceText.id, align.alignedText.sentence, align.sourceText.sentence, align.distance] for align in alignments if align.isPerfect]
-        csv =  DataFrame(results)
+        results = [[align.source_text.id, align.aligned_text.sentence, align.source_text.sentence, align.distance] for align in alignments if align.is_perfect]
+        csv = DataFrame(results)
         transcripts = Transcripts(csv, 'transcripts', 'transcripts')
-        self.transcriptsPersistenz.save(transcripts)
+        self.transcripts_persistenz.save(transcripts)
 
-        resultsNotPerfect = [[align.sourceText.id, align.alignedText.sentence, align.sourceText.sentence, align.distance] for align in alignments if not align.isPerfect]
-        csv =  DataFrame(resultsNotPerfect)
-        transcripts = Transcripts(csv, 'transcriptsNotPerfect', 'transcriptsNotPerfect')
-        self.transcriptsPersistenz.save(transcripts)
+        results_not_perfect = [[align.source_text.id, align.aligned_text.sentence, align.source_text.sentence, align.distance] for align in alignments if not align.is_perfect]
+        csv = DataFrame(results_not_perfect)
+        transcripts = Transcripts(csv, 'transcripts_not_perfect', 'transcripts_not_perfect')
+        self.transcripts_persistenz.save(transcripts)

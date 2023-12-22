@@ -7,10 +7,10 @@ class PhoneticSentenceToSymbolSentenceConverter:
         self.symbols = PhoneticChars().chars
         self.symbol_to_id = {s: i for i, s in enumerate(self.symbols)}
 
-    def convert(self, phoneticSentence:PhoneticSentence):
-        sentence = phoneticSentence.sentence
-        symbols = [self.getId(char) for char in sentence]
+    def convert(self, phonetic_sentence: PhoneticSentence):
+        sentence = phonetic_sentence.sentence
+        symbols = [self.get_id(char) for char in sentence]
         return SymbolSentence(symbols)
 
-    def getId(self, char):
-            return self.symbol_to_id[char] +1
+    def get_id(self, char):
+        return self.symbol_to_id[char] + 1

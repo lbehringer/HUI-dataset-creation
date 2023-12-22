@@ -6,45 +6,43 @@ from huiAudioCorpus.persistenz.AudioPersistenz import AudioPersistenz
 from huiAudioCorpus.persistenz.TranscriptsPersistenz import TranscriptsPersistenz
 from tqdm import tqdm
 
-class Step6_FinalizeDataset:
+class Step6FinalizeDataset:
 
-    def __init__(self, savePath: str,chapterPath: str, audioPersistenz: AudioPersistenz, transcriptsPersistenz: TranscriptsPersistenz, transcriptsSelectionTransformer: TranscriptsSelectionTransformer):
-        self.savePath = savePath
-        self.audioPersistenz = audioPersistenz
-        self.transcriptsPersistenz = transcriptsPersistenz
-        self.chapterPath = chapterPath
-        self.transcriptsSelectionTransformer = transcriptsSelectionTransformer
-    
+    def __init__(self, save_path: str, chapter_path: str, audio_persistenz: AudioPersistenz, transcripts_persistenz: TranscriptsPersistenz, transcripts_selection_transformer: TranscriptsSelectionTransformer):
+        self.save_path = save_path
+        self.audio_persistenz = audio_persistenz
+        self.transcripts_persistenz = transcripts_persistenz
+        self.chapter_path = chapter_path
+        self.transcripts_selection_transformer = transcripts_selection_transformer
     
     def run(self):
-        doneMarker = DoneMarker(self.savePath)
-        result = doneMarker.run(self.script, deleteFolder=False)
+        done_marker = DoneMarker(self.save_path)
+        result = done_marker.run(self.script, delete_folder=False)
         return result
 
     def script(self):
-        transcriptsIterator = list(self.transcriptsPersistenz.loadAll())
-        transcripts = transcriptsIterator[0]
-        transcriptsIds = [sentence.id for sentence in transcripts.sentences()]
-        chapters = pd.read_csv(self.chapterPath)
+        transcripts_iterator = list(self.transcripts_persistenz.load_all())
+        transcripts = transcripts_iterator[0]
+        transcripts_ids = [sentence.id for sentence in transcripts.sentences()]
+        chapters = pd.read_csv(self.chapter_path)
 
-        transcriptsSelectedIds = {}
+        transcripts_selected_ids = {}
 
-        ids = self.audioPersistenz.getIds()
-        audios = self.audioPersistenz.loadAll()
-        audio: Audio
+        ids = self.audio_persistenz.get_ids()
+        audios = self.audio_persistenz.load_all()
         for audio in tqdm(audios, total=len(ids)):
-            book, chapter, index  = audio.id.rsplit('_',2)
-            reader:str = chapters.loc[int(chapter)-1]['Reader'] # type:ignore
-            reader = reader.replace(' ', '_')
-            if audio.id in transcriptsIds:
+            book, chapter, index = audio.id.rsplit('_', 2)
+            reader = str(chapters.loc[int(chapter) - 1]['Reader']).replace(' ', '_')  # type:ignore
+            if audio.id in transcripts_ids:
                 path = reader + '/' + book
-                if path in transcriptsSelectedIds:
-                    transcriptsSelectedIds[path].append(audio.id)
+                if path in transcripts_selected_ids:
+                    transcripts_selected_ids[path].append(audio.id)
                 else:
-                    transcriptsSelectedIds[path] = [audio.id]
+                    transcripts_selected_ids[path] = [audio.id]
                 audio.id = path + '/wavs/' + audio.id
-                self.audioPersistenz.save(audio)
-        for path, ids in transcriptsSelectedIds.items():
-            localTranscripts = self.transcriptsSelectionTransformer.transform(transcripts, ids)
-            localTranscripts.id = path + '/metadata'
-            self.transcriptsPersistenz.save(localTranscripts)
+                self.audio_persistenz.save(audio)
+
+        for path, ids in transcripts_selected_ids.items():
+            local_transcripts = self.transcripts_selection_transformer.transform(transcripts, ids)
+            local_transcripts.id = path + '/metadata'
+            self.transcripts_persistenz.save(local_transcripts)

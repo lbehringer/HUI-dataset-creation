@@ -2,100 +2,101 @@ from io import BufferedReader
 import json
 from pathlib import Path
 import os
-import huiAudioCorpus.testOutput as testOutput
-from tqdm import tqdm 
+import huiAudioCorpus.testOutput as test_output
+from tqdm import tqdm
 import requests
 from zipfile import ZipFile
 
+
 class PathUtil:
-    def filenameWithoutExtension(self, path:str):
-        filename = self.filenameWithExtension(path)
-        filenameWithoutExtension =os.path.splitext(filename)[0]
-        return filenameWithoutExtension
+    def filename_without_extension(self, path: str):
+        filename = self.filename_with_extension(path)
+        filename_without_extension = os.path.splitext(filename)[0]
+        return filename_without_extension
 
-    def filenameWithExtension(self, path: str):
+    def filename_with_extension(self, path: str):
         filename = Path(path).name
-        return filename 
+        return filename
 
-    def createFolderForFile(self,file):
+    def create_folder_for_file(self, file):
         Path(file).parent.mkdir(parents=True, exist_ok=True)
 
-    def deleteFolder(self, folder):
+    def delete_folder(self, folder):
         if os.path.isdir(folder):
             for filename in os.listdir(folder):
                 file_path = os.path.join(folder, filename)
                 if os.path.isfile(file_path) or os.path.islink(file_path):
                     os.unlink(file_path)
                 else:
-                    self.deleteFolder(file_path)
+                    self.delete_folder(file_path)
             os.rmdir(folder)
 
-    def getTestDataFolder(self, testFile: str):
-        testFolder = testOutput.__path__[0] +'/' +  self.filenameWithoutExtension(testFile)
-        return testFolder
+    def get_test_data_folder(self, test_file: str):
+        test_folder = test_output.__path__[0] + '/' + self.filename_without_extension(test_file)
+        return test_folder
 
-    def copyFileWithStream(self, inputStream: BufferedReader, inputSize: int, outputFile):
-        self.createFolderForFile(outputFile)
-        bufferSize = 1024*1024*2
+    def copy_file_with_stream(self, input_stream: BufferedReader, input_size: int, output_file):
+        self.create_folder_for_file(output_file)
+        buffer_size = 1024 * 1024 * 2
 
-        with tqdm(total=inputSize, unit='iB', unit_scale=True, unit_divisor=1024) as pbar:
-            with open(outputFile, 'wb') as dest:
+        with tqdm(total=input_size, unit='iB', unit_scale=True, unit_divisor=1024) as pbar:
+            with open(output_file, 'wb') as dest:
                 while True:
-                    copy_buffer = inputStream.read(bufferSize)
+                    copy_buffer = input_stream.read(buffer_size)
                     if not copy_buffer:
                         break
                     size = dest.write(copy_buffer)
                     pbar.update(size)
 
-    def copyFileFromUrl(self, url: str, outputFile):
-        self.createFolderForFile(outputFile)
-        bufferSize = 1024*10
+    def copy_file_from_url(self, url: str, output_file):
+        self.create_folder_for_file(output_file)
+        buffer_size = 1024 * 10
 
         resp = requests.get(url, stream=True)
-        inputSize = resp.headers.get('content-length')
-        if inputSize is not None:
-            inputSize = int(inputSize)
+        input_size = resp.headers.get('content-length')
+        if input_size is not None:
+            input_size = int(input_size)
         else:
-            inputSize = None
+            input_size = None
 
-        inputSize = int()# type:ignore
-        with tqdm(total=inputSize, unit='iB', unit_scale=True, unit_divisor=1024, desc=url) as pbar:
-            with open(outputFile, 'wb') as dest:
-                for data in resp.iter_content(chunk_size=bufferSize):
+        input_size = int()  # type: ignore
+        with tqdm(total=input_size, unit='iB', unit_scale=True, unit_divisor=1024, desc=url) as pbar:
+            with open(output_file, 'wb') as dest:
+                for data in resp.iter_content(chunk_size=buffer_size):
                     size = dest.write(data)
                     pbar.update(size)
 
-    def copyFile(self, inputFile: str, outputFile: str):
-        size = os.path.getsize(inputFile)
-        with open(inputFile, 'rb',) as source:
-            self.copyFileWithStream(source, size, outputFile)
+    def copy_file(self, input_file: str, output_file: str):
+        size = os.path.getsize(input_file)
+        with open(input_file, 'rb', ) as source:
+            self.copy_file_with_stream(source, size, output_file)
 
-    def unzip(self, inputZip:str, outputFolder:str):
-        with ZipFile(inputZip, 'r') as zipReference:
-            for file in zipReference.namelist():
-                if not os.path.isfile(os.path.join(outputFolder, file)):
+    def unzip(self, input_zip: str, output_folder: str):
+        with ZipFile(input_zip, 'r') as zip_reference:
+            for file in zip_reference.namelist():
+                if not os.path.isfile(os.path.join(output_folder, file)):
                     print('start unzipping because file ', file, 'does not exist.')
-                    self.deleteFolder(outputFolder)
-                    zipReference.extractall(outputFolder)
+                    self.delete_folder(output_folder)
+                    zip_reference.extractall(output_folder)
                     break
 
-    def saveJson(self, filename:str, jsonContent):
-        string = json.dumps(jsonContent, indent=4, ensure_ascii=False)
-        self.createFolderForFile(filename)
+    def save_json(self, filename: str, json_content):
+        string = json.dumps(json_content, indent=4, ensure_ascii=False)
+        self.create_folder_for_file(filename)
         with open(filename, 'w', encoding='utf8') as file:
             file.write(string)
 
-    def loadJson(self, filename: str):
-        with open(filename, encoding='utf8') as jsonFile:
-            data = json.load(jsonFile)
+    def load_json(self, filename: str):
+        with open(filename, encoding='utf8') as json_file:
+            data = json.load(json_file)
         return data
 
-    def writeFile(self, text: str, filename: str):
-        self.createFolderForFile(filename)
+    def write_file(self, text: str, filename: str):
+        self.create_folder_for_file(filename)
         with open(filename, 'w', encoding='utf8') as f:
             f.write(text)
 
-    def loadFile(self, filename: str):
+    def load_file(self, filename: str):
         with open(filename, 'r', encoding='utf8') as f:
-            inputText = f.read()
-        return inputText
+            input_text = f.read()
+        return input_text

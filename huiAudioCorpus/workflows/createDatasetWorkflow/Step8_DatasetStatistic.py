@@ -7,83 +7,82 @@ from typing import List
 from huiAudioCorpus.ui.Plot import Plot
 from pandas_profiling import ProfileReport
 
-class Step8_DatasetStatistic:
-    def __init__(self, savePath: str, loadPath: str, specialSpeakers: List[str], filter,  pathUtil: PathUtil, audioStatisticComponent:AudioStatisticComponent, textStatisticComponent:TextStatisticComponent, plot: Plot):
-        self.savePath = savePath
-        self.pathUtil = pathUtil
-        self.loadPath = loadPath
-        self.specialSpeakers = specialSpeakers
-        self.filter = filter
-        self.audioStatisticComponent =audioStatisticComponent
-        self.textStatisticComponent = textStatisticComponent
+class Step8DatasetStatistic:
+    def __init__(self, save_path: str, load_path: str, special_speakers: List[str], data_filter, path_util: PathUtil,
+                 audio_statistic_component: AudioStatisticComponent, text_statistic_component: TextStatisticComponent, plot: Plot):
+        self.save_path = save_path
+        self.path_util = path_util
+        self.load_path = load_path
+        self.special_speakers = special_speakers
+        self.data_filter = data_filter
+        self.audio_statistic_component = audio_statistic_component
+        self.text_statistic_component = text_statistic_component
         self.plot = plot
 
     def run(self):
-        doneMarker = DoneMarker(self.savePath)
-        result = doneMarker.run(self.script, deleteFolder=False)
+        done_marker = DoneMarker(self.save_path)
+        result = done_marker.run(self.script, delete_folder=False)
         return result
 
     def script(self):
-        rawData = pd.read_csv(self.loadPath, sep='|', index_col='id')
+        raw_data = pd.read_csv(self.load_path, sep='|', index_col='id')
 
-        print('Audios before: ', rawData.shape[0])
-        infoText = " - full"
-        if self.filter is not None:
-            infoText = " - clean"
-            rawData = self.filter(rawData)
-        print('Audios after: ', rawData.shape[0])
+        print('Audios before: ', raw_data.shape[0])
+        info_text = " - full"
+        if self.data_filter is not None:
+            info_text = " - clean"
+            raw_data = self.data_filter(raw_data)
+        print('Audios after: ', raw_data.shape[0])
 
+        print(raw_data)
 
-        print(rawData)
         # all Speakers
-        self.saveSummary(rawData, self.savePath  + '/complete', "All speakers" + infoText)
+        self.save_summary(raw_data, self.save_path + '/complete', "All speakers" + info_text)
 
         # every Speaker
-        for speakerId, data in rawData.groupby('speaker'):
-            self.saveSummary(data, self.savePath + '/speaker/' + speakerId, "Speaker: " + speakerId + infoText)
+        for speaker_id, data in raw_data.groupby('speaker'):
+            self.save_summary(data, self.save_path + '/speaker/' + speaker_id, "Speaker: " + speaker_id + info_text)
 
         # others
-        others = rawData[~rawData['speaker'].isin(self.specialSpeakers)]
+        others = raw_data[~raw_data['speaker'].isin(self.special_speakers)]
         if not others.empty:
-            self.saveSummary(others, self.savePath + '/others', "Other speakers" + infoText)
+            self.save_summary(others, self.save_path + '/others', "Other speakers" + info_text)
 
-
-    def saveSummary(self, rawData, savePath: str, title: str):
+    def save_summary(self, raw_data, save_path: str, title: str):
         print(title)
-        statisticsText, _, counter, uniqeWordsWithMinimum = self.textStatisticComponent.getStatistic(rawData)
-        statisticsAudio, _ = self.audioStatisticComponent.getStatistic(rawData)
+        statistics_text, _, counter, unique_words_with_minimum = self.text_statistic_component.get_statistic(raw_data)
+        statistics_audio, _ = self.audio_statistic_component.get_statistic(raw_data)
 
-        statistics = {**statisticsAudio, **statisticsText}
-        filePath = savePath + '/statistic.txt'
-        self.pathUtil.createFolderForFile(filePath)
+        statistics = {**statistics_audio, **statistics_text}
+        file_path = save_path + '/statistic.txt'
+        self.path_util.create_folder_for_file(file_path)
 
-        rawData.to_csv(savePath + '/overview.csv' , sep='|')
+        raw_data.to_csv(save_path + '/overview.csv', sep='|')
 
-        profile = rawData.profile_report(title = title)
-        profile.to_file(savePath + "/profilingReport.html")
+        profile = raw_data.profile_report(title=title)
+        profile.to_file(save_path + "/profilingReport.html")
 
+        self.path_util.save_json(save_path + '/wordCounts.json', counter)
+        self.path_util.save_json(save_path + '/uniqueWordsWithMinimalNumberOfOccurrences.json', unique_words_with_minimum)
 
-        self.pathUtil.saveJson(savePath + '/wordCounts.json',counter )
-        self.pathUtil.saveJson(savePath + '/uniqueWordsWithMinimalNumberOfOccurrences.json',uniqeWordsWithMinimum )
-
-        with open(filePath, 'w') as textFile:
+        with open(file_path, 'w') as text_file:
             for statistic in statistics.values():
-                textFile.write(statistic['description'])
-                textFile.write('\n')
-                textFile.write(statistic['statistic'].__str__())
-                textFile.write('\n')
-                textFile.write('\n')
-                textFile.write('\n')
+                text_file.write(statistic['description'])
+                text_file.write('\n')
+                text_file.write(statistic['statistic'].__str__())
+                text_file.write('\n')
+                text_file.write('\n')
+                text_file.write('\n')
 
-        histogrammData = {}
-        extractHistogram = lambda hist : {'bins': hist.bins, 'values': hist.values}
+        histogram_data = {}
+        extract_histogram = lambda hist: {'bins': hist.bins, 'values': hist.values}
 
         for statistic in statistics.values():
-            if statistic['name'] =='samplingrate':
+            if statistic['name'] == 'samplingrate':
                 continue
-            self.plot.histogram(statistic['histogram'],  statistic['description'])
-            self.plot.savePath = savePath
+            self.plot.histogram(statistic['histogram'], statistic['description'])
+            self.plot.save_path = save_path
             self.plot.save(statistic['name'])
-            histogrammData[statistic['name']] = extractHistogram(statistic['histogram'])
+            histogram_data[statistic['name']] = extract_histogram(statistic['histogram'])
 
-        self.pathUtil.saveJson(savePath + '/histogrammData.json',histogrammData )
+        self.path_util.save_json(save_path + '/histogrammData.json', histogram_data)

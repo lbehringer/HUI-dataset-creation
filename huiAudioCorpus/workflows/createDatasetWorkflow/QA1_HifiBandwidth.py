@@ -5,13 +5,11 @@ from huiAudioCorpus.transformer.AudioLoudnessTransformer import AudioLoudnessTra
 import librosa
 import numpy as np
 
-
-
 class QA1_HifiBandwidth:
     def __init__(
-            self, 
-            audio_persistenz: AudioPersistenz, 
-            save_path: str, 
+            self,
+            audio_persistenz: AudioPersistenz,
+            save_path: str,
             book_name: str,
             seconds_to_analyze: int,
             analysis_offset: float,
@@ -30,7 +28,7 @@ class QA1_HifiBandwidth:
         return DoneMarker(self.save_path).run(self.script)
     
     def script(self):
-        audios = self.audio_persistenz.loadAll(duration=self.seconds_to_analyze, offset=self.analysis_offset)
+        audios = self.audio_persistenz.load_all(duration=self.seconds_to_analyze, offset=self.analysis_offset)
         for idx, audio in enumerate(audios):
             # only perform loudness normalization if specified in config
             if self.audio_loudness_transformer:
@@ -39,7 +37,6 @@ class QA1_HifiBandwidth:
             # filter out audios which don't meet the minimum bandwidth threshold
             if audio.bandwidth >= self.bandwidth_hz_threshold:
                 self.audio_persistenz.save(audio)
-
 
     def set_x_seconds_id(self, audio: Audio, book_name: str, chapter: int, seconds_to_analyze):
         """Assigns an ID to an Audio object, following the format `<book_name>_<chapter>_<seconds_to_analyze>sec`. 
@@ -52,7 +49,7 @@ class QA1_HifiBandwidth:
     def get_bandwidth(self, audio: Audio):
         """Computes the bandwidth of a signal by finding the lowest and highest frequencies which are at least -50 dB relative to the peak value of the power spectrogram.
         Returns the bandwidth as a float."""
-        stft_result = librosa.stft(audio.timeSeries)
+        stft_result = librosa.stft(audio.time_series)
 
         # compute power spectrogram from magnitude of the STFT result
         power_spec = np.abs(stft_result)**2
@@ -67,8 +64,8 @@ class QA1_HifiBandwidth:
         if len(frequencies_above_threshold) > 0:
             bandwidth_start = frequencies_above_threshold[0]
             bandwidth_end = frequencies_above_threshold[-1]
-            start_hz = librosa.fft_frequencies(sr=audio.samplingRate)[bandwidth_start]
-            end_hz = librosa.fft_frequencies(sr=audio.samplingRate)[bandwidth_end]
+            start_hz = librosa.fft_frequencies(sr=audio.sampling_rate)[bandwidth_start]
+            end_hz = librosa.fft_frequencies(sr=audio.sampling_rate)[bandwidth_end]
             # TODO: test correct function of bandwidth estimation
             print(f"{audio.id} | Estimated bandwidth: {start_hz:.2f} Hz to {end_hz:.2f} Hz | Mean of power spectrogram: {mean_power:.2f}")
             return end_hz - start_hz

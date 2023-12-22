@@ -1,23 +1,23 @@
 from typing import Dict
 from huiAudioCorpus.dependencyInjection.DependencyInjection import DependencyInjection
-# import datasetWorkflow
+# import dataset_workflow
 import scripts.createDatasetConfig as createDatasetConfig
 from huiAudioCorpus.utils.PathUtil import PathUtil
 import os
 
-pathUtil = PathUtil()
-basePath = createDatasetConfig.__path__[0]  # type: ignore
+path_util = PathUtil()
+base_path = createDatasetConfig.__path__[0]  # type: ignore
 
 # set external path where database should be created
-externalPaths = ["/mnt/c/Users/lyone/Documents/_ComputationalLinguistics/HUI_accent/HUI-Audio-Corpus-German/database"
+external_paths = ["/mnt/c/Users/lyone/Documents/_ComputationalLinguistics/HUI_accent/HUI-Audio-Corpus-German/database"
 ]
 
-# dataBasePath = datasetWorkflow.__path__[0]  # type: ignore
-for path in externalPaths:
+# database_path = dataset_workflow.__path__[0]  # type: ignore
+for path in external_paths:
     if os.path.exists(path):
-        dataBasePath = path
+        database_path = path
 
-def logStep(name):
+def log_step(name):
     print('')
     print('')
     print('#######################################################')
@@ -26,88 +26,86 @@ def logStep(name):
     print('')
 
 ### load all configurations
-bernd_1 = pathUtil.loadJson(
-    basePath + '/Bernd_Ungerer_tausendUndEineNacht.json')
-bernd_2 = pathUtil.loadJson(basePath + '/Bernd_Ungerer_other.json')
+bernd_1 = path_util.load_json(
+    base_path + '/Bernd_Ungerer_tausendUndEineNacht.json')
+bernd_2 = path_util.load_json(base_path + '/Bernd_Ungerer_other.json')
 bernd = {**bernd_1, **bernd_2}
-hokuspokus = pathUtil.loadJson(basePath + '/Hokuspokus.json')
-redaer = pathUtil.loadJson(basePath + '/redaer.json')
-friedrich = pathUtil.loadJson(basePath + '/Friedrich.json')
-eva = pathUtil.loadJson(basePath + '/Eva.json')
-karlsson = pathUtil.loadJson(basePath + '/Karlsson.json')
-sonja = pathUtil.loadJson(basePath + '/Sonja.json')
-christian_culp_latest = pathUtil.loadJson(basePath + '/Christian_Culp_latest.json')
-twospeakers = pathUtil.loadJson(basePath + "/twospeakers.json")
-two_readers_latest = pathUtil.loadJson(os.path.join(basePath, "two_readers_latest.json"))
-overview_20231215_212809 = pathUtil.loadJson(os.path.join(externalPaths[0], "overview_20231215_212809", "readerLatestBook.json"))
+hokuspokus = path_util.load_json(base_path + '/Hokuspokus.json')
+redaer = path_util.load_json(base_path + '/redaer.json')
+friedrich = path_util.load_json(base_path + '/Friedrich.json')
+eva = path_util.load_json(base_path + '/Eva.json')
+karlsson = path_util.load_json(base_path + '/Karlsson.json')
+sonja = path_util.load_json(base_path + '/Sonja.json')
+christian_culp_latest = path_util.load_json(base_path + '/Christian_Culp_latest.json')
+twospeakers = path_util.load_json(base_path + "/twospeakers.json")
+two_readers_latest = path_util.load_json(os.path.join(base_path, "two_readers_latest.json"))
+overview_20231215_212809 = path_util.load_json(os.path.join(external_paths[0], "overview_20231215_212809", "readerLatestBook.json"))
 
-allLibriboxIds = [author[key]['librivox_book_name'] for author in [
+all_librivox_ids = [author[key]['librivox_book_name'] for author in [
     bernd, hokuspokus, friedrich, eva, karlsson, redaer] for key in author]
-duplicatIds = set([x for x in allLibriboxIds if allLibriboxIds.count(x) > 1])
+duplicate_ids = set([x for x in all_librivox_ids if all_librivox_ids.count(x) > 1])
 
-if len(duplicatIds) > 0:
-    raise Exception("Duplicate Librivox ids: " + str(duplicatIds))
-
+if len(duplicate_ids) > 0:
+    raise Exception("Duplicate Librivox ids: " + str(duplicate_ids))
 
 # configure this object to only create a single speaker
-# allConfigs = {**bernd, **hokuspokus, **friedrich, **eva, **karlsson, **sonja}
-allConfigs = sonja
-# allConfigs = friedrich
-#allConfigs = redaer
-allConfigs = christian_culp_latest
-allConfigs = two_readers_latest
-allConfigs = overview_20231215_212809
+# all_configs = {**bernd, **hokuspokus, **friedrich, **eva, **karlsson, **sonja}
+all_configs = sonja
+# all_configs = friedrich
+# all_configs = redaer
+all_configs = christian_culp_latest
+all_configs = two_readers_latest
+all_configs = overview_20231215_212809
 
 # this is needed for the statistic and split into others
-specialSpeakers = ['Bernd_Ungerer', 'Eva_K', 'Friedrich', 'Hokuspokus', 'Karlsson']
+special_speakers = ['Bernd_Ungerer', 'Eva_K', 'Friedrich', 'Hokuspokus', 'Karlsson']
 
-workflowConfig = {
-    'continueOnError': False,
+workflow_config = {
+    'continue_on_error': False,
     "hifi_qa": True,
-    'prepareAudio': False,
-    'prepareText': False,
-    'transcriptText': False,
-    'alignText': False,
+    'prepare_audio': False,
+    'prepare_text': False,
+    'transcript_text': False,
+    'align_text': False,
     'finalize': False,
-    'audioRawStatistic': False,
-    'cleanStatistic': False,
-    'fullStatistic': False,
-    'generateClean': False
+    'audio_raw_statistic': False,
+    'clean_statistic': False,
+    'full_statistic': False,
+    'generate_clean': False
 }
 
+final_dataset_path = database_path + '/finalDataset'
+final_dataset_path_clean = database_path + '/finalDatasetClean'
+step7_path = database_path + '/rawStatistic'
+step8_path = database_path + '/datasetStatistic'
+step8_path_clean = database_path + '/datasetStatisticClean'
 
-finalDatasetPath = dataBasePath + '/finalDataset'
-finalDatasetPathClean = dataBasePath + '/finalDatasetClean'
-step7Path = dataBasePath + '/rawStatistic'
-setp8Path = dataBasePath + '/datasetStatistic'
-setp8Path_clean = dataBasePath + '/datasetStatisticClean'
 
-
-def cleanFilter(input):
+def clean_filter(input_data):
     """Described in the HUI paper in section 4.2"""
-    input = input[input['minSilenceDB'] < -50]
-    input = input[input['silencePercent'] < 45]
-    input = input[input['silencePercent'] > 10]
-    return input
+    input_data = input_data[input_data['min_silence_db'] < -50]
+    input_data = input_data[input_data['silence_percent'] < 45]
+    input_data = input_data[input_data['silence_percent'] > 10]
+    return input_data
 
-def runWorkflow(params: Dict, workflowConfig: Dict):
+def run_workflow(params: Dict, workflow_config: Dict):
     print(params)
-    readers_base_path = os.path.join(dataBasePath, "readers")
-    step1Path = os.path.join(readers_base_path, params["reader"], "Step1_DownloadAudio")
-    step1PathAudio = step1Path + '/audio'
-    step1PathChapter = step1Path + '/chapter.csv'
-    step2Path = os.path.join(readers_base_path, params["reader"], "Step2_SplitAudio")
-    step2_1_Path = os.path.join(readers_base_path, params["reader"], "Step2_1_AudioStatistic")
+    readers_base_path = os.path.join(database_path, "readers")
+    step1_path = os.path.join(readers_base_path, params["reader"], "Step1_DownloadAudio")
+    step1_path_audio = step1_path + '/audio'
+    step1_path_chapter = step1_path + '/chapter.csv'
+    step2_path = os.path.join(readers_base_path, params["reader"], "Step2_SplitAudio")
+    step2_1_path = os.path.join(readers_base_path, params["reader"], "Step2_1_AudioStatistic")
 
-    step2PathAudio = step2Path + '/audio'
-    step3Path = os.path.join(readers_base_path, params["reader"], "Step3_DownloadText")
-    step3PathText = step3Path + '/text.txt'
-    step3_1_Path = os.path.join(readers_base_path, params["reader"], "Step3_1_PrepareText")
-    step3_1_PathText = step3_1_Path + '/text.txt'
+    step2_path_audio = step2_path + '/audio'
+    step3_path = os.path.join(readers_base_path, params["reader"], "Step3_DownloadText")
+    step3_path_text = step3_path + '/text.txt'
+    step3_1_path = os.path.join(readers_base_path, params["reader"], "Step3_1_PrepareText")
+    step3_1_path_text = step3_1_path + '/text.txt'
 
-    step4Path = os.path.join(readers_base_path, params["reader"], "Step4_TranscriptAudio")
-    step5Path = os.path.join(readers_base_path, params["reader"], "Step5_AlignText")
-    step6Path = os.path.join(readers_base_path, params["reader"], "Step6_FinalizeDataset")
+    step4_path = os.path.join(readers_base_path, params["reader"], "Step4_TranscriptAudio")
+    step5_path = os.path.join(readers_base_path, params["reader"], "Step5_AlignText")
+    step6_path = os.path.join(readers_base_path, params["reader"], "Step6_FinalizeDataset")
 
     qa1_path = os.path.join(readers_base_path, params["reader"], "QA1_HifiBandwidth")
     qa1_path_audio = os.path.join(qa1_path, "audio")
@@ -118,34 +116,34 @@ def runWorkflow(params: Dict, workflowConfig: Dict):
     qa3_path = os.path.join(readers_base_path, params["reader"], "QA3_WVMOS")
     qa3_path_audio = os.path.join(qa3_path, "audio")
 
-    if workflowConfig["hifi_qa"]:
-        logStep('Step1_DownloadAudio')
-        config = {
-            'audiosFromLibrivoxPersistenz': {
-                'bookName': params['librivox_book_name'],
+    if workflow_config["hifi_qa"]:
+        log_step('Step1_DownloadAudio')
+        config_step1 = {
+            'audios_from_librivox_persistenz': {
+                'book_name': params['librivox_book_name'],
                 'solo_reading': params['solo_reading'],
                 'sections': params['sections'],
-                'savePath': step1PathAudio + '/',
-                'chapterPath': step1PathChapter,
+                'save_path': step1_path_audio + '/',
+                'chapter_path': step1_path_chapter,
                 'max_chapters_per_reader': 2
             },
-            'step1_DownloadAudio': {
-                'savePath': step1Path
+            'step1_download_audio': {
+                'save_path': step1_path
             }
         }
-        DependencyInjection(config).step1_DownloadAudio.run()
+        DependencyInjection(config_step1).step1_download_audio.run()
 
-        logStep("QA1_HifiBandwidth")
-        config = {
+        log_step("QA1_HifiBandwidth")
+        config_qa1 = {
             "audio_persistenz": {
-                "loadPath": step1PathAudio,
-                "savePath": qa1_path_audio,
-                "fileExtension": "mp3"
+                "load_path": step1_path_audio,
+                "save_path": qa1_path_audio,
+                "file_extension": "mp3"
             },
             "audio_loudness_transformer": {
                 "loudness": -20
             },
-            "QA1_HifiBandwidth": {
+            "qa1_hifi_bandwidth": {
                 "save_path": qa1_path_audio,
                 "book_name": params["title"],
                 "seconds_to_analyze": 30,
@@ -153,270 +151,267 @@ def runWorkflow(params: Dict, workflowConfig: Dict):
                 "bandwidth_hz_threshold": 13000
             },
         }
-        DependencyInjection(config).QA1_HifiBandwidth.run()
+        DependencyInjection(config_qa1).qa1_hifi_bandwidth.run()
 
-        logStep("QA2_HifiSNR")
-        config = {
+        log_step("QA2_HifiSNR")
+        config_qa2 = {
             "audio_persistenz": {
-                "loadPath": qa1_path_audio,
-                "savePath": qa2_path_audio,
-                "fileExtension": "wav"
+                "load_path": qa1_path_audio,
+                "save_path": qa2_path_audio,
+                "file_extension": "wav"
             },
             "audio_loudness_transformer": {
                 "loudness": -20
             },
             "audio_sr_transformer": {
-                "targetSamplingRate": 16000
-            },            
-            "QA2_HifiSNR": {
+                "target_sampling_rate": 16000
+            },
+            "qa2_hifi_snr": {
                 "save_path": qa2_path_audio,
                 'book_name': params['title'],
                 "seconds_to_analyze": 30,
             },
         }
-        DependencyInjection(config).QA2_HifiSNR.run()
+        DependencyInjection(config_qa2).qa2_hifi_snr.run()
 
-        logStep("QA3_WVMOS")
-        config = {
+        log_step("QA3_WVMOS")
+        config_qa3 = {
             "audio_persistenz": {
-                "loadPath": qa2_path_audio,
-                "savePath": qa3_path_audio,
-                "fileExtension": "wav"
+                "load_path": qa2_path_audio,
+                "save_path": qa3_path_audio,
+                "file_extension": "wav"
             },
-            "QA3_WVMOS": {
+            "qa3_wvmos": {
                 "save_path": qa3_path_audio
             },
             "audio_sr_transformer": {
-                "targetSamplingRate": 16000
-            },    
-        }
-        DependencyInjection(config).QA3_WVMOS.run()
-
-
-
-
-
-
-
-############################################################################################
-############################################################################################
-
-    if workflowConfig['prepareAudio']:
-        logStep('Step1_DowloadAudio')
-        config = {
-            'audiosFromLibrivoxPersistenz': {
-                'bookName': params['librivox_book_name'],
-                'savePath': step1PathAudio + '/',
-                'chapterPath': step1PathChapter
+                "target_sampling_rate": 16000
             },
-            'step1_DownloadAudio': {
-                'savePath': step1Path
+        }
+        DependencyInjection(config_qa3).qa3_wvmos.run()
+
+
+
+
+############################################################################################
+############################################################################################
+        
+
+    if workflow_config['prepare_audio']:
+        log_step('Step1_DownloadAudio')
+        config_step1 = {
+            'audios_from_librivox_persistenz': {
+                'book_name': params['librivox_book_name'],
+                'save_path': step1_path_audio + '/',
+                'chapter_path': step1_path_chapter
+            },
+            'step1_download_audio': {
+                'save_path': step1_path
             }
         }
-        DependencyInjection(config).step1_DownloadAudio.run()
+        DependencyInjection(config_step1).step1_download_audio.run()
 
-        logStep('Step2_SplitAudio')
-        config = {
-            'audioSplitTransformer': {
-                'minAudioDuration': 5,
-                'maxAudioDuration': 40
+        log_step('Step2_SplitAudio')
+        config_step2 = {
+            'audio_split_transformer': {
+                'min_audio_duration': 5,
+                'max_audio_duration': 40
             },
-            'audioPersistenz': {
-                'loadPath': step1PathAudio,
-                'savePath': step2PathAudio,
-                'fileExtension': 'mp3'
+            'audio_persistenz': {
+                'load_path': step1_path_audio,
+                'save_path': step2_path_audio,
+                'file_extension': 'mp3'
             },
-            'audioLoudnessTransformer': {
+            'audio_loudness_transformer': {
                 'loudness': -20
             },
-            'step2_SplitAudio': {
-                'bookName': params['title'],
-                'savePath': step2Path,
-                'remapSort': params['remapSort'] if 'remapSort' in params else None
+            'step2_split_audio': {
+                'book_name': params['title'],
+                'save_path': step2_path,
+                'remap_sort': params['remap_sort'] if 'remap_sort' in params else None
             }
         }
-        DependencyInjection(config).step2_SplitAudio.run()
+        DependencyInjection(config_step2).step2_split_audio.run()
 
-        logStep('Step2_1_AudioStatistic')
-        config = {
-            'step2_1_AudioStatistic': {
-                'savePath': step2_1_Path,
+        log_step('Step2_1_AudioStatistic')
+        config_step2_1 = {
+            'step2_1_audio_statistic': {
+                'save_path': step2_1_path,
             },
-            'audioPersistenz': {
-                'loadPath': step2PathAudio
+            'audio_persistenz': {
+                'load_path': step2_path_audio
             },
             'plot': {
-                'showDuration': 1,
-                'savePath': step2_1_Path
+                'show_duration': 1,
+                'save_path': step2_1_path
             }
         }
-        DependencyInjection(config).step2_1_AudioStatistic.run()
+        DependencyInjection(config_step2_1).step2_1_audio_statistic.run()
 
-    if workflowConfig['prepareText']:
-        logStep('Step3_DowloadText')
-        config = {
-            'GutenbergBookPersistenz': {
-                'textId': params['gutenberg_id'],
-                'savePath': step3PathText
+    if workflow_config['prepare_text']:
+        log_step('Step3_DownloadText')
+        config_step3 = {
+            'gutenberg_book_persistenz': {
+                'text_id': params['gutenberg_id'],
+                'save_path': step3_path_text
             },
-            'step3_DowloadText': {
-                'savePath': step3Path
+            'step3_download_text': {
+                'save_path': step3_path
             }
         }
-        DependencyInjection(config).step3_DowloadText.run()
+        DependencyInjection(config_step3).step3_download_text.run()
 
-        logStep('Step3_1_PrepareText')
-        config = {
-            'step3_1_PrepareText': {
-                'savePath': step3_1_Path,
-                'loadFile': step3PathText,
-                'saveFile': step3_1_PathText,
-                'textReplacement': params['text_replacement'],
-                'startSentence': params['gutenberg_start'],
-                'endSentence': params['gutenberg_end'],
+        log_step('Step3_1_PrepareText')
+        config_step3_1 = {
+            'step3_1_prepare_text': {
+                'save_path': step3_1_path,
+                'load_file': step3_path_text,
+                'save_file': step3_1_path_text,
+                'text_replacement': params['text_replacement'],
+                'start_sentence': params['gutenberg_start'],
+                'end_sentence': params['gutenberg_end'],
                 'moves': params['moves'] if 'moves' in params else [],
                 'remove': params['remove'] if 'remove' in params else []
             }
         }
-        DependencyInjection(config).step3_1_PrepareText.run()
+        DependencyInjection(config_step3_1).step3_1_prepare_text.run()
 
-    if workflowConfig['transcriptText']:
-        logStep('Step4_TranscriptAudio')
-        config = {
-            'step4_TranscriptAudio': {
-                'savePath': step4Path,
+    if workflow_config['transcript_text']:
+        log_step('Step4_TranscriptAudio')
+        config_step4 = {
+            'step4_transcript_audio': {
+                'save_path': step4_path,
             },
-            'audioPersistenz': {
-                'loadPath': step2PathAudio
+            'audio_persistenz': {
+                'load_path': step2_path_audio
             },
-            'transcriptsPersistenz': {
-                'loadPath': step4Path,
+            'transcripts_persistenz': {
+                'load_path': step4_path,
             }
         }
-        DependencyInjection(config).step4_TranscriptAudio.run()
+        DependencyInjection(config_step4).step4_transcript_audio.run()
 
-    if workflowConfig['alignText']:
-        logStep('Step5_AlignText')
-        config = {
-            'step5_AlignText': {
-                'savePath': step5Path,
-                'textToAlignPath': step3_1_PathText
+    if workflow_config['align_text']:
+        log_step('Step5_AlignText')
+        config_step5 = {
+            'step5_align_text': {
+                'save_path': step5_path,
+                'text_to_align_path': step3_1_path_text
             },
-            'transcriptsPersistenz': {
-                'loadPath': step4Path,
-                'savePath': step5Path
+            'transcripts_persistenz': {
+                'load_path': step4_path,
+                'save_path': step5_path
             }
         }
-        DependencyInjection(config).step5_AlignText.run()
+        DependencyInjection(config_step5).step5_align_text.run()
 
-    if workflowConfig['finalize']:
-        logStep('Step6_FinalizeDataset')
-        config = {
-            'step6_FinalizeDataset': {
-                'savePath': step6Path,
-                'chapterPath': step1PathChapter
+    if workflow_config['finalize']:
+        log_step('Step6_FinalizeDataset')
+        config_step6 = {
+            'step6_finalize_dataset': {
+                'save_path': step6_path,
+                'chapter_path': step1_path_chapter
             },
-            'audioPersistenz': {
-                'loadPath': step2PathAudio,
-                'savePath': finalDatasetPath
+            'audio_persistenz': {
+                'load_path': step2_path_audio,
+                'save_path': final_dataset_path
             },
-            'transcriptsPersistenz': {
-                'loadPath': step5Path,
-                'savePath': finalDatasetPath
+            'transcripts_persistenz': {
+                'load_path': step5_path,
+                'save_path': final_dataset_path
             }
         }
-        DependencyInjection(config).step6_FinalizeDataset.run()
-
+        DependencyInjection(config_step6).step6_finalize_dataset.run()
 
 if __name__ == "__main__":
     summary = {}
-    for configName in allConfigs:
+    for config_name in all_configs:
         print('+++++++++++++++++++++++++++++++++++++++++')
         print('+++++++++++++++++++++++++++++++++++++++++')
         print('+++++++++++++++++++++++++++++++++++++++++')
-        logStep(configName)
+        log_step(config_name)
         print('+++++++++++++++++++++++++++++++++++++++++')
         print('+++++++++++++++++++++++++++++++++++++++++')
         print('+++++++++++++++++++++++++++++++++++++++++')
 
-        config = allConfigs[configName]
-        if workflowConfig['continueOnError']:
+        config = all_configs[config_name]
+        if workflow_config['continue_on_error']:
             try:
-                runWorkflow(config, workflowConfig)
+                run_workflow(config, workflow_config)
                 summary[config['title']] = 'finished'
             except:
                 summary[config['title']] = 'error'
         else:
-            runWorkflow(config, workflowConfig)
+            run_workflow(config, workflow_config)
     print(summary)
 
-    if workflowConfig['audioRawStatistic']:
-        logStep('audioRawStatistic')
-        diConfig = {
-            'step7_AudioRawStatistic': {
-                'savePath': step7Path,
-                'loadPath': finalDatasetPath
+    if workflow_config['audio_raw_statistic']:
+        log_step('audio_raw_statistic')
+        di_config_step7 = {
+            'step7_audio_raw_statistic': {
+                'save_path': step7_path,
+                'load_path': final_dataset_path
             }
         }
-        DependencyInjection(diConfig).step7_AudioRawStatistic.run()
+        DependencyInjection(di_config_step7).step7_audio_raw_statistic.run()
 
-    if workflowConfig['fullStatistic']:
-        logStep('fullStatistic')
-        diConfig = {
-            'step8_DatasetStatistic': {
-                'savePath': setp8Path,
-                'loadPath': step7Path + '/overview.csv',
-                'specialSpeakers': specialSpeakers,
+    if workflow_config['full_statistic']:
+        log_step('full_statistic')
+        di_config_step8 = {
+            'step8_dataset_statistic': {
+                'save_path': step8_path,
+                'load_path': step7_path + '/overview.csv',
+                'special_speakers': special_speakers,
                 'filter': None
             },
-            'audioPersistenz': {
-                'loadPath':''
+            'audio_persistenz': {
+                'load_path': ''
             },
-            'transcriptsPersistenz': {
-                'loadPath':''
-            },
-            'plot': {
-                'showDuration': 0
-            }
-        }
-        DependencyInjection(diConfig).step8_DatasetStatistic.run()
-
-    if workflowConfig['cleanStatistic']:
-        logStep('cleanStatistic')
-        diConfig = {
-            'step8_DatasetStatistic': {
-                'savePath': setp8Path_clean,
-                'loadPath': step7Path + '/overview.csv',
-                'specialSpeakers': specialSpeakers,
-                'filter': cleanFilter
-            },
-            'audioPersistenz': {
-                'loadPath':''
-            },
-            'transcriptsPersistenz': {
-                'loadPath':''
+            'transcripts_persistenz': {
+                'load_path': ''
             },
             'plot': {
-                'showDuration': 0
+                'show_duration': 0
             }
         }
-        DependencyInjection(diConfig).step8_DatasetStatistic.run()
+        DependencyInjection(di_config_step8).step8_dataset_statistic.run()
 
-    if workflowConfig['generateClean']:
-        logStep('generateClean')
-        diConfig = {
-            'step9_GenerateCleanDataset': {
-                'savePath': finalDatasetPath,
-                'infoFile': step7Path +'/overview.csv',
-                'filter': cleanFilter
+    if workflow_config['clean_statistic']:
+        log_step('clean_statistic')
+        di_config_clean_statistic = {
+            'step8_dataset_statistic': {
+                'save_path': step8_path_clean,
+                'load_path': step7_path + '/overview.csv',
+                'special_speakers': special_speakers,
+                'filter': clean_filter
             },
-            'transcriptsPersistenz': {
-                'loadPath': finalDatasetPath,
-                'savePath': finalDatasetPathClean
+            'audio_persistenz': {
+                'load_path': ''
             },
-            'audioPersistenz': {
-                'loadPath': finalDatasetPath,
-                'savePath': finalDatasetPathClean
+            'transcripts_persistenz': {
+                'load_path': ''
+            },
+            'plot': {
+                'show_duration': 0
+            }
+        }
+        DependencyInjection(di_config_clean_statistic).step8_dataset_statistic.run()
+
+    if workflow_config['generate_clean']:
+        log_step('generate_clean')
+        di_config_step9 = {
+            'step9_generate_clean_dataset': {
+                'save_path': final_dataset_path,
+                'info_file': step7_path + '/overview.csv',
+                'filter': clean_filter
+            },
+            'transcripts_persistenz': {
+                'load_path': final_dataset_path,
+                'save_path': final_dataset_path_clean
+            },
+            'audio_persistenz': {
+                'load_path': final_dataset_path,
+                'save_path': final_dataset_path_clean
             },
         }
-        DependencyInjection(diConfig).step9_GenerateCleanDataset.run()
+        DependencyInjection(di_config_step9).step9_generate_clean_dataset.run()

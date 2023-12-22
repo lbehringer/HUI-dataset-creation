@@ -1,143 +1,111 @@
 from typing import List, Union
-from huiAudioCorpus.utils.PathUtil import PathUtil
 import re
 from bs4 import BeautifulSoup
 import requests
 from gutenberg.acquire import load_etext
 from gutenberg.cleanup import strip_headers
+from huiAudioCorpus.utils.PathUtil import PathUtil
 
-class GutenbergBookPersistenz:
+class GutenbergBookPersistence:
 
-    def __init__(self, textId: Union[str,int], savePath: str):
-        self.textId = textId
-        self.savePath = savePath
-        self.pathUtil = PathUtil()
-        self.gutenbergProjektDownload = GutenbergProjektDownload()
-        self.gutenbergDownload = GutenbergDownload()
+    def __init__(self, text_id: Union[str, int], save_path: str):
+        self.text_id = text_id
+        self.save_path = save_path
+        self.path_util = PathUtil()
+        self.gutenberg_projekt_download = GutenbergProjektDownload()
+        self.gutenberg_download = GutenbergDownload()
 
     def save(self):
-        if isinstance(self.textId, str) :
-            text = self.gutenbergProjektDownload.downloadText(self.textId)
+        if isinstance(self.text_id, str):
+            text = self.gutenberg_projekt_download.download_text(self.text_id)
         else:
-            text = self.gutenbergDownload.downloadText(self.textId)
-        self.pathUtil.writeFile(text, self.savePath)
+            text = self.gutenberg_download.download_text(self.text_id)
+        self.path_util.write_file(text, self.save_path)
 
 
-class GutenbergProjektDownload():
-    """
-    This class downloads a book from www.projekt-gutenberg.org
-    The id has to be searched manually with the link https://www.projekt-gutenberg.org/info/texte/allworka.html
-    You have to use the last part of the links for example dauthend/biwasee/biwasee.html
-    """
+class GutenbergProjektDownload:
 
     def __init__(self):
-        self.baseLink = 'https://www.projekt-gutenberg.org/'
+        self.base_link = 'https://www.projekt-gutenberg.org/'
 
-    def getIds(self):
-        works_link = self.baseLink + "info/texte/allworka.html"
-
+    def get_ids(self):
+        works_link = self.base_link + "info/texte/allworka.html"
         works = requests.get(works_link)
         works.encoding = "UTF-8"
-
-        works_soup = BeautifulSoup(works.text,"html.parser")
+        works_soup = BeautifulSoup(works.text, "html.parser")
 
         books = []
-        lastName=''
-        firstName=''
+        last_name = ''
+        first_name = ''
         elements = works_soup.find("dl")
         for element in elements:
             if element.name == 'dt':
-                currentAuthor = element.text
-                if ', ' in currentAuthor:
-                        names = currentAuthor.split(', ')
-                        firstName = names[-1]
-                        lastName = names[0]
-
-                else: 
-                    lastName = currentAuthor,
-                    firstName = ''
+                current_author = element.text
+                if ', ' in current_author:
+                    names = current_author.split(', ')
+                    first_name = names[-1]
+                    last_name = names[0]
+                else:
+                    last_name = current_author
+                    first_name = ''
 
             if element.name == 'dd':
                 link = element.find("a")
                 if link is not None:
-                    id = link["href"][5:]
-                    bookname = link.text
+                    book_id = link["href"][5:]
+                    book_name = link.text
                     books.append({
-                        'name': bookname,
-                        'fistName': firstName,
-                        'lastName': lastName,
-                        'id': id
+                        'name': book_name,
+                        'first_name': first_name,
+                        'last_name': last_name,
+                        'id': book_id
                     })
         return books
 
-    def downloadText(self, textId: str):
-        link = self.baseLink + textId
-        fullText = ''
+    def download_text(self, text_id: str):
+        link = self.base_link + text_id
+        full_text = ''
         while link is not None:
-            paragraph, link = self.downloadPage(link)
-            preparedParagraph = self.prepareParagraph(paragraph)
-            fullText+=preparedParagraph
-        return fullText
+            paragraphs, link = self.download_page(link)
+            prepared_paragraph = self.prepare_paragraph(paragraphs)
+            full_text += prepared_paragraph
+        return full_text
 
-    def downloadPage(self, link: str):
+    def download_page(self, link: str):
         page = requests.get(link)
         page.encoding = "UTF-8"
-
-        # Create a BeautifulSoup object 'pageSoup' to parse the HTML content of the 'page'
-        pageSoup = BeautifulSoup(page.text,"html.parser")
-
-        # Find the first 'p' (paragraph) element in the HTML content using BeautifulSoup, 
-        # and then find all 'p' elements within it, storing them in the 'paragraphs' variable.
-        paragraphs = pageSoup.find('p').find_all("p")
+        page_soup = BeautifulSoup(page.text, "html.parser")
+        paragraphs = page_soup.find('p').find_all("p")
         if len(paragraphs) == 0:
-            # Find all 'p' (paragraph) elements in the HTML content
-            paragraphs = pageSoup.find_all("p", class_ = None)
-        
+            paragraphs = page_soup.find_all("p", class_=None)
 
-        nextLink = None
-        # Check if there are any 'a' elements with text matching "weiter >>"
-        if len(pageSoup.find_all("a",text=re.compile("weiter\s*>>")))>0:
-            # Find the first 'a' element with text matching "weiter >>" and get its "href" attribute
-            directLink = pageSoup.find("a",text=re.compile("weiter\s*>>"))["href"]
+        next_link = None
+        if len(page_soup.find_all("a", text=re.compile("weiter\s*>>"))) > 0:
+            direct_link = page_soup.find("a", text=re.compile("weiter\s*>>"))["href"]
+            next_link = page.url.split("/")
+            next_link.pop()
+            next_link.append(direct_link)
+            next_link = "/".join(next_link)
+        return paragraphs, next_link
 
-            # Split the URL of the current page into parts using "/"
-            nextLink = page.url.split("/")
-
-            # Remove the current filepath (i.e. chapter), e.g., `schrei01.html`, from the URL parts
-            nextLink.pop() 
-
-            # Add the new filepath, e.g., `schrei02.html`, to the URL parts
-            nextLink.append(directLink) 
-
-            # Join the modified URL parts back together to form the 'nextLink'
-            nextLink = "/".join(nextLink)
-        
-        return paragraphs, nextLink
-
-
-    def prepareParagraph(self, paragraphs:List):
-        extractedParagraphs = ''
+    def prepare_paragraph(self, paragraphs: List):
+        extracted_paragraphs = ''
         for paragraph in paragraphs:
             if paragraph.text:
-                # Remove any 'span' elements within the current 'paragraph'
                 for footnote in paragraph.select('span'):
                     footnote.extract()
 
                 if len(paragraph.text) > 0 and len(paragraph.contents) == 1:
-                    # Remove extra spaces, tabs, and newlines, and replace them with a single space
-                    extractedParagraph = re.sub(r" +",r" ",paragraph.text.replace("\t"," ").replace("\n", " "))
-
-                    # Remove leading and trailing spaces and add the cleaned 'paragraph' text to 'extractedParagraphs'
-                    extractedParagraphs += extractedParagraph.strip()+"\n"
-        return extractedParagraphs
+                    extracted_paragraph = re.sub(r" +", r" ",
+                                                 paragraph.text.replace("\t", " ").replace("\n", " "))
+                    extracted_paragraphs += extracted_paragraph.strip() + "\n"
+        return extracted_paragraphs
 
 
 class GutenbergDownload:
-    """
-    This class downloads a book from www.gutenberg.org
-    The id has to be searched manually with the link http://gutendex.com/books/?search=ThisIsTheSearchText
-    """
-    def downloadText(self, textId: int):
-        text = strip_headers(load_etext(textId, mirror='http://www.mirrorservice.org/sites/ftp.ibiblio.org/pub/docs/books/gutenberg/')).strip()
-        return text
 
+    def download_text(self, text_id: int):
+        text = strip_headers(
+            load_etext(text_id, mirror='http://www.mirrorservice.org/sites/ftp.ibiblio.org/pub/docs/books/gutenberg/')
+        ).strip()
+        return text

@@ -7,47 +7,45 @@ from huiAudioCorpus.transformer.AudioSamplingRateTransformer import AudioSamplin
 from tqdm.std import tqdm
 import pandas as pd
 
-class Step9_GenerateCleanDataset:
+class Step9GenerateCleanDataset:
 
-    def __init__(self, savePath: str, infoFile:str, audioPersistenz: AudioPersistenz, transcriptsPersistenz: TranscriptsPersistenz, audioSamplingRateTransformer: AudioSamplingRateTransformer, transcriptsSelectionTransformer: TranscriptsSelectionTransformer, filter):
-        self.audioSamplingRateTransformer = audioSamplingRateTransformer
-        self.audioPersistenz = audioPersistenz
-        self.transcriptsPersistenz = transcriptsPersistenz
-        self.transcriptsSelectionTransformer = transcriptsSelectionTransformer
-        self.savePath = savePath
-        self.infoFile = infoFile
-        self.filter = filter
+    def __init__(self, save_path: str, info_file: str, audio_persistenz: AudioPersistenz, transcripts_persistenz: TranscriptsPersistenz,
+                 audio_sampling_rate_transformer: AudioSamplingRateTransformer, transcripts_selection_transformer: TranscriptsSelectionTransformer, data_filter):
+        self.audio_sampling_rate_transformer = audio_sampling_rate_transformer
+        self.audio_persistenz = audio_persistenz
+        self.transcripts_persistenz = transcripts_persistenz
+        self.transcripts_selection_transformer = transcripts_selection_transformer
+        self.save_path = save_path
+        self.info_file = info_file
+        self.data_filter = data_filter
 
     def run(self):
-        doneMarker = DoneMarker(self.savePath)
-        result = doneMarker.run(self.script, deleteFolder=False)
+        done_marker = DoneMarker(self.save_path)
+        result = done_marker.run(self.script, delete_folder=False)
         return result
 
     def script(self):
-        df = pd.read_csv(self.infoFile, sep='|' , index_col=0)
+        df = pd.read_csv(self.info_file, sep='|', index_col=0)
         try:
             df = df.set_index('id')
         except:
             pass
 
         print('Audios before: ', df.shape[0])
-        filteredAudios = self.filter(df)
-        print('Audios after: ', filteredAudios.shape[0])
-        audiosAllowed = filteredAudios.index.tolist()
+        filtered_audios = self.data_filter(df)
+        print('Audios after: ', filtered_audios.shape[0])
+        audios_allowed = filtered_audios.index.tolist()
 
-        self.copyAudioFiles(audiosAllowed)
-        self.copyAndFilterTranscripts(audiosAllowed)
+        self.copy_audio_files(audios_allowed)
+        self.copy_and_filter_transcripts(audios_allowed)
 
+    def copy_audio_files(self, audios_allowed):
+        count_files = len(self.audio_persistenz.get_ids())
+        for audio in tqdm(self.audio_persistenz.load_all(), total=count_files):
+            if audio.name in audios_allowed:
+                self.audio_persistenz.save(audio)
 
-
-
-    def copyAudioFiles(self, audiosAllowed):
-        countFiles = len(self.audioPersistenz.getIds())
-        for audio in tqdm(self.audioPersistenz.loadAll(), total= countFiles):
-            if audio.name in audiosAllowed:
-                self.audioPersistenz.save(audio)
-
-    def copyAndFilterTranscripts(self, usedAudioFileNames):
-        for transcripts in tqdm(self.transcriptsPersistenz.loadAll()):
-            filteredTranscript = self.transcriptsSelectionTransformer.transform(transcripts, usedAudioFileNames)
-            self.transcriptsPersistenz.save(filteredTranscript)
+    def copy_and_filter_transcripts(self, used_audio_file_names):
+        for transcripts in tqdm(self.transcripts_persistenz.load_all()):
+            filtered_transcript = self.transcripts_selection_transformer.transform(transcripts, used_audio_file_names)
+            self.transcripts_persistenz.save(filtered_transcript)

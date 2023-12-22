@@ -1,7 +1,7 @@
 import glob
 
 class FileListUtil:
-    def getFiles(self, path: str, extension: str):
-        searchPath = path +  '/**/*.' + extension
-        files = glob.glob(searchPath, recursive=True)
+    def get_files(self, path: str, extension: str):
+        search_path = path + '/**/*.' + extension
+        files = glob.glob(search_path, recursive=True)
         return files

@@ -10,7 +10,7 @@ class Transcripts(ToString):
     
 
     @property
-    def transcriptsCount(self):
+    def transcripts_count(self):
         return self.transcripts.shape[0]
 
     @property

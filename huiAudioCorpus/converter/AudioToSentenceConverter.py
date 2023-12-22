@@ -33,57 +33,57 @@ class AudioToSentenceConverter:
             #     i for i in range(self.tokenizer.eot) if all(c in "0123456789" for c in self.tokenizer.decode([i]).strip())
             # ]            
         else:
-            self.modelPath = deepspeechModel.__path__[0]
+            self.model_path = deepspeechModel.__path__[0]
         
 
-    def convert(self, audio: Audio, samplingRate:int = 15000):
+    def convert(self, audio: Audio, sampling_rate:int = 15000):
         if self.use_whisper:
             if self.model is None:
                 print("Loading Whisper model")
                 self.model = whisper.load_model("small") # choices: tiny (~1GB VRAM), base (~1GB), small (~2GB), medium (~5GB), large (~10GB)
-            audioSamplingRateTransformer = self.whisper_sr_transformer
-            audioSampled = audioSamplingRateTransformer.transform(audio)
+            audio_sampling_rate_transformer = self.whisper_sr_transformer
+            audio_sampled = audio_sampling_rate_transformer.transform(audio)
             # decode_options = {"language": self.decode_lang, "suppress_tokens": [-1] + self.number_tokens}
             decode_options = {"language": self.decode_lang}
-            transcript = self.model.transcribe(audioSampled.timeSeries, **decode_options)["text"]
+            transcript = self.model.transcribe(audio_sampled.time_series, **decode_options)["text"]
         else:
             if self.model is None:
-                self.model, self.samplingRate = self.loadDeepspeech(self.modelPath)
-            audioSamplingRateTransformer = AudioSamplingRateTransformer(self.samplingRate)
-            audioSampled = audioSamplingRateTransformer.transform(audio)
-            timeSeries =  audioSampled.timeSeries
-            timeSeries /= 1.414
-            timeSeries *= 32767
-            audioNumpy = timeSeries.astype(np.int16)
+                self.model, self.sampling_rate = self.load_deepspeech(self.model_path)
+            audio_sampling_rate_transformer = AudioSamplingRateTransformer(self.sampling_rate)
+            audio_sampled = audio_sampling_rate_transformer.transform(audio)
+            time_series =  audio_sampled.time_series
+            time_series /= 1.414
+            time_series *= 32767
+            audio_numpy = time_series.astype(np.int16)
 
-            transcript = self.model.stt(audioNumpy)
+            transcript = self.model.stt(audio_numpy)
 
         sentence = Sentence(transcript, audio.id)
         return sentence
 
-    def loadDeepspeech(self, modelPath: str):
-        model = Model(modelPath+"/output_graph.pb")
-        model.enableExternalScorer(modelPath+"/kenlm.scorer")
-        desiredSamplingRate = model.sampleRate()
-        return model, desiredSamplingRate
+    def load_deepspeech(self, model_path: str):
+        model = Model(model_path+"/output_graph.pb")
+        model.enable_external_scorer(model_path+"/kenlm.scorer")
+        desired_sampling_rate = model.sample_rate()
+        return model, desired_sampling_rate
 
 
 if __name__ == "__main__":
     import librosa
     path = '/media/ppuchtler/LangsameSSD/Projekte/textToSpeech/datasetWorkflow/Step2_SplitAudio/audio/'
     
-    addAudio = AudioPersistenz(path).load('acht_gesichter_am_biwasee_01_f000177')
+    add_audio = AudioPersistenz(path).load('acht_gesichter_am_biwasee_01_f000177')
     audio = AudioPersistenz(path).load('acht_gesichter_am_biwasee_01_f000077')
 
     audio = AudioPersistenz(path).load('acht_gesichter_am_biwasee_01_f000030')
     audio1 = AudioPersistenz(path).load('acht_gesichter_am_biwasee_01_f000105')
     audio = AudioPersistenz(path).load('acht_gesichter_am_biwasee_01_f000166')
 
-    #audioRemove = AudioPersistenz(path).load('acht_gesichter_am_biwasee_01_f000001')
+    #audio_remove = AudioPersistenz(path).load('acht_gesichter_am_biwasee_01_f000001')
     #audio = AudioAddSilenceTransformer(10, 10).transform(audio)
     #audio = audio + audio
 
     converter = AudioToSentenceConverter() 
-    transcript = converter.convert(addAudio +audio + addAudio)
+    transcript = converter.convert(add_audio + audio + add_audio)
 
     print(transcript.sentence)

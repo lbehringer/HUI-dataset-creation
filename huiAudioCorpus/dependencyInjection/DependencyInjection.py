@@ -67,147 +67,139 @@ from huiAudioCorpus.calculator.TextNormalizer import TextNormalizer
 import inspect
 
 disableLog()
-
-
-defaultConfig = {
-    'audioAddSilenceTransformer': {
-        'endDurationSeconds': 0.7,
-        'startDurationSeconds': 0
+default_config = {
+    'audio_add_silence_transformer': {
+        'end_duration_seconds': 0.7,
+        'start_duration_seconds': 0
     },
-    'listToHistogramConverter': {
-        'stepSize':1
+    'list_to_histogram_converter': {
+        'step_size': 1
     }
 }
 
 class DependencyInjection:
     # assign all the __annotations__ to DependencyInjection.__dict__
-    #Calculators
-    alignSentencesIntoTextCalculator: AlignSentencesIntoTextCalculator
-    textNormalizer: TextNormalizer
+    # Calculators
+    align_sentences_into_text_calculator: AlignSentencesIntoTextCalculator
+    text_normalizer: TextNormalizer
 
-        
-    #Components
-    audioStatisticComponent: AudioStatisticComponent
-    textStatisticComponent: TextStatisticComponent
+    # Components
+    audio_statistic_component: AudioStatisticComponent
+    text_statistic_component: TextStatisticComponent
 
-    #Converters
-    phoneticSentenceToSymbolSentenceConverter:PhoneticSentenceToSymbolSentenceConverter
-    sentenceToPhoneticSentenceConverter:SentenceToPhoneticSentenceConverter
-    transcriptsToSentencesConverter:TranscriptsToSentencesConverter
-    listToStatisticConverter:ListToStatisticConverter
-    listToHistogramConverter: ListToHistogramConverter
-    stringToSentencesConverter: StringToSentencesConverter
-    audioToSentenceConverter: AudioToSentenceConverter
+    # Converters
+    phonetic_sentence_to_symbol_sentence_converter: PhoneticSentenceToSymbolSentenceConverter
+    sentence_to_phonetic_sentence_converter: SentenceToPhoneticSentenceConverter
+    transcripts_to_sentences_converter: TranscriptsToSentencesConverter
+    list_to_statistic_converter: ListToStatisticConverter
+    list_to_histogram_converter: ListToHistogramConverter
+    string_to_sentences_converter: StringToSentencesConverter
+    audio_to_sentence_converter: AudioToSentenceConverter
 
+    # Filters
+    audio_filter: AudioFilter
 
-    #Filters
-    audioFilter:AudioFilter
-    
-    #Persistence
-    audioPersistenz:AudioPersistenz
+    # Persistence
     audio_persistenz: AudioPersistenz
-    audioTranscriptPairPersistenz:AudioTranscriptPairPersistenz
-    transcriptsPersistenz:TranscriptsPersistenz
-    audiosFromLibrivoxPersistenz:AudiosFromLibrivoxPersistenz
-    GutenbergBookPersistenz: GutenbergBookPersistenz
+    audio_persistenz: AudioPersistenz
+    audio_transcript_pair_persistenz: AudioTranscriptPairPersistenz
+    transcripts_persistenz: TranscriptsPersistenz
+    audios_from_librivox_persistenz: AudiosFromLibrivoxPersistenz
+    gutenberg_book_persistenz: GutenbergBookPersistenz
 
-    #Transformers
-    audioAddSilenceTransformer:AudioAddSilenceTransformer
-    audioSamplingRateTransformer:AudioSamplingRateTransformer
+    # Transformers
+    audio_add_silence_transformer: AudioAddSilenceTransformer
+    audio_sampling_rate_transformer: AudioSamplingRateTransformer
     audio_sr_transformer: AudioSamplingRateTransformer
-    transcriptsSelectionTransformer:TranscriptsSelectionTransformer
-    audioSplitTransformer: AudioSplitTransformer
-    sentenceDistanceTransformer: SentenceDistanceTransformer
-    audioLoudnessTransformer: AudioLoudnessTransformer
+    transcripts_selection_transformer: TranscriptsSelectionTransformer
+    audio_split_transformer: AudioSplitTransformer
+    sentence_distance_transformer: SentenceDistanceTransformer
     audio_loudness_transformer: AudioLoudnessTransformer
-    audioFadeTransformer: AudioFadeTransformer
+    audio_loudness_transformer: AudioLoudnessTransformer
+    audio_fade_transformer: AudioFadeTransformer
 
+    # Utilities
+    path_util: PathUtil
+    file_list_util: FileListUtil
 
-    #Utilities
-    pathUtil:PathUtil
-    fileListUtil: FileListUtil
+    # Workflows
+    step0_overview: Step0_Overview
+    step1_download_audio: Step1_DownloadAudio
+    step2_split_audio: Step2_SplitAudio
+    step2_1_audio_statistic: Step2_1_AudioStatistic
+    step3_download_text: Step3_DownloadText
+    step3_1_prepare_text: Step3_1_PrepareText
+    step4_transcript_audio: Step4_TranscriptAudio
+    step4_1_normalize_transcript: Step4_1_NormalizeTranscript
+    step5_align_text: Step5_AlignText
+    step6_finalize_dataset: Step6_FinalizeDataset
+    step7_audio_raw_statistic: Step7_AudioRawStatistic
+    step8_dataset_statistic: Step8_DatasetStatistic
+    step9_generate_clean_dataset: Step9_GenerateCleanDataset
+    qa1_hifi_bandwidth: QA1_HifiBandwidth
+    qa2_hifi_snr: QA2_HifiSNR
+    qa3_wvmos: QA3_WVMOS
 
-    #Workflows
-    step0_Overview: Step0_Overview
-    step1_DownloadAudio: Step1_DownloadAudio
-    step2_SplitAudio: Step2_SplitAudio
-    step2_1_AudioStatistic: Step2_1_AudioStatistic
-    step3_DowloadText: Step3_DownloadText
-    step3_1_PrepareText: Step3_1_PrepareText
-    step4_TranscriptAudio: Step4_TranscriptAudio
-    step4_1_NormalizeTranscript: Step4_1_NormalizeTranscript
-    step5_AlignText: Step5_AlignText
-    step6_FinalizeDataset: Step6_FinalizeDataset
-    step7_AudioRawStatistic: Step7_AudioRawStatistic
-    step8_DatasetStatistic: Step8_DatasetStatistic
-    step9_GenerateCleanDataset: Step9_GenerateCleanDataset
-    QA1_HifiBandwidth: QA1_HifiBandwidth
-    QA2_HifiSNR: QA2_HifiSNR
-    QA3_WVMOS: QA3_WVMOS
-
-    #plot
+    # Plot
     plot: Plot
-    
+
     def __init__(self, config={}):
-        configWithDefault = defaultConfig.copy()
-        configWithDefault.update(config)
-        self.allClassReferences = self.getAllClassReferences(configWithDefault)
-        initialedClasses = {}
-        for name, classInstance in self.allClassReferences.items():
-            def getLambda (name, classInstance):
-                return property(lambda _: self.initClass(name, classInstance, self.classConstructor, initialedClasses, configWithDefault, name ))
-            setattr(DependencyInjection, name, getLambda(name, classInstance))
+        config_with_default = default_config.copy()
+        config_with_default.update(config)
+        self.all_class_references = self.get_all_class_references(config_with_default)
+        initialed_classes = {}
+        for name, class_instance in self.all_class_references.items():
+            def get_lambda(name, class_instance):
+                return property(lambda _: self.init_class(name, class_instance, self.class_constructor, initialed_classes, config_with_default, name))
+            setattr(DependencyInjection, name, get_lambda(name, class_instance))
 
-    def initClass(self, className, classReference , classConstructorMethod, initialedClasses, config , requestedClass = ''):
-        if className in initialedClasses:
-            return initialedClasses[className]
-        arguments = self.getConstructorReferenceClasses(classReference)
+    def init_class(self, class_name, class_reference, class_constructor_method, initialed_classes, config, requested_class=''):
+        if class_name in initialed_classes:
+            return initialed_classes[class_name]
+        arguments = self.get_constructor_reference_classes(class_reference)
         for argument in arguments:
-            if argument not in initialedClasses.values() and arguments[argument] is not None:
-                self.initClass(argument, arguments[argument], classConstructorMethod, initialedClasses, config, requestedClass)
-        
-        classConfig = config[className].copy() if className in config else {}
-        if '#' in classConfig:
-            classConfig.pop('#')
-        classConfig
+            if argument not in initialed_classes.values() and arguments[argument] is not None:
+                self.init_class(argument, arguments[argument], class_constructor_method, initialed_classes, config, requested_class)
+
+        class_config = config[class_name].copy() if class_name in config else {}
+        if '#' in class_config:
+            class_config.pop('#')
+        class_config
         try:
-
-            newClassInstance = classConstructorMethod(classReference, initialedClasses, classConfig)
+            new_class_instance = class_constructor_method(class_reference, initialed_classes, class_config)
         except Exception as e:
-            raise DependencyInjectionError(e, classConfig, classReference.__name__, requestedClass)
-        initialedClasses[className] = newClassInstance
-        return newClassInstance
+            raise DependencyInjectionError(e, class_config, class_reference.__name__, requested_class)
+        initialed_classes[class_name] = new_class_instance
+        return new_class_instance
 
-
-    def classConstructor(self,classReference, initialedClasses , classConfig):
-        classConstructor = classConfig.copy()
-        references = self.getConstructorReferenceClasses(classReference)
+    def class_constructor(self, class_reference, initialed_classes, class_config):
+        class_constructor = class_config.copy()
+        references = self.get_constructor_reference_classes(class_reference)
         for ref in references:
             if references[ref] is not None:
-                classConstructor[ref] = initialedClasses[ref]
-        classInstance = classReference(**classConstructor)
+                class_constructor[ref] = initialed_classes[ref]
+        class_instance = class_reference(**class_constructor)
 
-        return classInstance
+        return class_instance
 
-    def getConstructorReferenceClasses(self, classReference):
-        arguments = self.getAllConstructorArguments(classReference)
+    def get_constructor_reference_classes(self, class_reference):
+        arguments = self.get_all_constructor_arguments(class_reference)
 
         references = {}
         for argument in arguments:
-            if argument in ["self","args","kwargs"]:
+            if argument in ["self", "args", "kwargs"]:
                 continue
-            references[argument] = self.allClassReferences[argument] if argument in self.allClassReferences.keys() else None
+            references[argument] = self.all_class_references[argument] if argument in self.all_class_references.keys() else None
         return references
 
-    def getAllConstructorArguments(self, classInstance):
-        return list(inspect.signature(classInstance.__init__).parameters.keys())
+    def get_all_constructor_arguments(self, class_instance):
+        return list(inspect.signature(class_instance.__init__).parameters.keys())
 
-    def getAllClassReferences(self,configWithDefault):
-        classes = globalClassesAtImportTime.copy()
-        for className in configWithDefault:
-            if '#' in configWithDefault[className]:
-                classes[className] = configWithDefault[className]['#']
+    def get_all_class_references(self, config_with_default):
+        classes = global_classes_at_import_time.copy()
+        for class_name in config_with_default:
+            if '#' in config_with_default[class_name]:
+                classes[class_name] = config_with_default[class_name]['#']
         return classes
 
-
-globalClassesAtImportTime = DependencyInjection.__dict__.get("__annotations__")
+global_classes_at_import_time = DependencyInjection.__dict__.get("__annotations__")

@@ -1,4 +1,3 @@
-
 from pathlib import Path
 from huiAudioCorpus.model.Sentence import Sentence
 from huiAudioCorpus.model.Transcripts import Transcripts

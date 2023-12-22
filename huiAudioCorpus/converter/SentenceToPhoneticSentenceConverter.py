@@ -5,111 +5,109 @@ from huiAudioCorpus.model.PhoneticSentence import PhoneticSentence
 import pandas as pd
 
 class SentenceToPhoneticSentenceConverter:
-    def __init__(self, libraryPath: str , useEmphasis: bool = True):
-        self.library = self.createLibrary(libraryPath)
-        self.useEmphasis = useEmphasis
+    def __init__(self, library_path: str, use_emphasis: bool = True):
+        self.library = self.create_library(library_path)
+        self.use_emphasis = use_emphasis
 
     def convert(self, sentence: Sentence):
         words = sentence.words
-        ipaWords, subWords = self.transformSentencesToIpa(words)
-        ipaText = ' '.join(ipaWords)
-        ipaText = self.removeEmphasis(ipaText)
-        return PhoneticSentence(ipaText, subWords)
+        ipa_words, sub_words = self.transform_sentences_to_ipa(words)
+        ipa_text = ' '.join(ipa_words)
+        ipa_text = self.remove_emphasis(ipa_text)
+        return PhoneticSentence(ipa_text, sub_words)
 
-
-    def createLibrary(self, libraryPath: str):
-        pointLibrary = pd.DataFrame({
-            "text": [",", ".", "?", "-", ";", "!", ":", "'", "s", "ste", "(", ")", ">", "<", '›', '‹', 'é','è', '&'],
-            "ipa": [",", ".","?", ",", ",", "!", ":", "'", "s", "stə", ",", ",", "'", "'", "'", "'", 'e', 'e', 'ʊnt']
+    def create_library(self, library_path: str):
+        point_library = pd.DataFrame({
+            "text": [",", ".", "?", "-", ";", "!", ":", "'", "s", "ste", "(", ")", ">", "<", '›', '‹', 'é', 'è', '&'],
+            "ipa": [",", ".", "?", ",", ",", "!", ":", "'", "s", "stə", ",", ",", "'", "'", "'", "'", 'e', 'e', 'ʊnt']
         })
-        library = pd.read_csv(libraryPath,keep_default_na=False)
+        library = pd.read_csv(library_path, keep_default_na=False)
 
-        libraryLowerCase = library.copy(deep=True)
-        libraryLowerCase['text'] = libraryLowerCase['text'].apply(str.lower)
-        library = library.append(pointLibrary)
-        library = library.append(libraryLowerCase)
+        library_lower_case = library.copy(deep=True)
+        library_lower_case['text'] = library_lower_case['text'].apply(str.lower)
+        library = library.append(point_library)
+        library = library.append(library_lower_case)
 
-        library.set_index('text', inplace = True)
-        library.sort_index(inplace = True)
+        library.set_index('text', inplace=True)
+        library.sort_index(inplace=True)
         return library
 
-    def transformSentencesToIpa(self, words:List[str]):
-            ipaWords: List[str] = []
-            subWords: List[str] = []
-            index = 0
-            while index < len(words):
-                word = words[index]
-                remainingWords = words[index:]
-                countMultiwords, multiwords, multiWord = self.findMultiwordIpa(remainingWords)
-                if countMultiwords>0 and multiwords is not None:
-                    index += countMultiwords
-                    subWords.append(multiWord)
-                    ipaWords.append(multiwords)
-                    continue
-                ipa, subWord = self.transformWordToIpa(word)
-                subWords.append(subWord)
-                ipaWords.append(ipa)
-                index +=1
-            return ipaWords, subWords
-    
-    def findMultiwordIpa(self, words:List[str]):
-        if len(words)<2:
+    def transform_sentences_to_ipa(self, words: List[str]):
+        ipa_words: List[str] = []
+        sub_words: List[str] = []
+        index = 0
+        while index < len(words):
+            word = words[index]
+            remaining_words = words[index:]
+            count_multi_words, multi_words, multi_word = self.find_multiword_ipa(remaining_words)
+            if count_multi_words > 0 and multi_words is not None:
+                index += count_multi_words
+                sub_words.append(multi_word)
+                ipa_words.append(multi_words)
+                continue
+            ipa, sub_word = self.transform_word_to_ipa(word)
+            sub_words.append(sub_word)
+            ipa_words.append(ipa)
+            index += 1
+        return ipa_words, sub_words
+
+    def find_multiword_ipa(self, words: List[str]):
+        if len(words) < 2:
             return 0, None, ""
-        for count in range(5,1,-1):
-            multiWord = ' '.join(words[:count])
-            multiwordIpa = self.getIpaFromLibrary(multiWord)
-            if multiwordIpa is not None:
-                return count, multiwordIpa, multiWord
+        for count in range(5, 1, -1):
+            multi_word = ' '.join(words[:count])
+            multi_word_ipa = self.get_ipa_from_library(multi_word)
+            if multi_word_ipa is not None:
+                return count, multi_word_ipa, multi_word
         return 0, None, ""
 
-    def transformWordToIpa(self, word:str):
-        completeIpaLeft = ''
-        completeIpaRight = ''
-        completeWordLeft = []
-        completeWordRight = []
+    def transform_word_to_ipa(self, word: str):
+        complete_ipa_left = ''
+        complete_ipa_right = ''
+        complete_word_left = []
+        complete_word_right = []
         while word != '':
-            remainingWordFirst, ipaFirst, firstPart = self.findFirstPartInWord(word)
-            remainingWordLast, ipaLast, lastPart = self.findLastPartInWord(word)
-            if len(remainingWordLast) < len(remainingWordFirst):
-                completeIpaLeft = ipaLast + completeIpaLeft
-                completeWordLeft.insert(0,lastPart)
-                word = remainingWordLast
+            remaining_word_first, ipa_first, first_part = self.find_first_part_in_word(word)
+            remaining_word_last, ipa_last, last_part = self.find_last_part_in_word(word)
+            if len(remaining_word_last) < len(remaining_word_first):
+                complete_ipa_left = ipa_last + complete_ipa_left
+                complete_word_left.insert(0, last_part)
+                word = remaining_word_last
             else:
-                completeIpaRight = completeIpaRight + ipaFirst
-                completeWordRight.append(firstPart)                
-                word = remainingWordFirst
-        completeIpa = completeIpaRight + completeIpaLeft
-        completeWordRight.extend(completeWordLeft)
-        completeWords = '|'.join(completeWordRight)
-        return completeIpa, completeWords
+                complete_ipa_right = complete_ipa_right + ipa_first
+                complete_word_right.append(first_part)
+                word = remaining_word_first
+        complete_ipa = complete_ipa_right + complete_ipa_left
+        complete_word_right.extend(complete_word_left)
+        complete_words = '|'.join(complete_word_right)
+        return complete_ipa, complete_words
 
-
-    def findFirstPartInWord(self, word:str):
-        for wordPart in range(len(word), 0, -1):
-            part = word[:wordPart]
-            ipa = self.getIpaFromLibrary(part)
+    def find_first_part_in_word(self, word: str):
+        for word_part in range(len(word), 0, -1):
+            part = word[:word_part]
+            ipa = self.get_ipa_from_library(part)
             if ipa is not None:
-                remainingWord = word[wordPart:]
-                return remainingWord, ipa, part
-        raise Error('we have no match for single char in library with char: ' + word[0] + 'with full text:' + word)# pragma: no cover
+                remaining_word = word[word_part:]
+                return remaining_word, ipa, part
+        raise Error('we have no match for single char in library with char: ' + word[0] + 'with full text:' + word)  # pragma: no cover
 
-    def findLastPartInWord(self, word:str):
-        for wordPart in range(0,len(word)):
-            part = word[wordPart:]
-            ipa = self.getIpaFromLibrary(part)
+    def find_last_part_in_word(self, word: str):
+        for word_part in range(0, len(word)):
+            part = word[word_part:]
+            ipa = self.get_ipa_from_library(part)
             if ipa is not None:
-                remainingWord = word[:wordPart]
-                return remainingWord, ipa, part
-        raise Error('we have no match for single char in library with char: ' + word[-1])# pragma: no cover
+                remaining_word = word[:word_part]
+                return remaining_word, ipa, part
+        raise Error('we have no match for single char in library with char: ' + word[-1])  # pragma: no cover
 
-    def getIpaFromLibrary(self, word:str):
-        ipa = self.getIpaFromLibraryExcactString(word)
-        if ipa is  None:
+    def get_ipa_from_library(self, word: str):
+        ipa = self.get_ipa_from_library_exact_string(word)
+        if ipa is None:
             word = word.lower()
-            ipa = self.getIpaFromLibraryExcactString(word)
+            ipa = self.get_ipa_from_library_exact_string(word)
         return ipa
-    
-    def getIpaFromLibraryExcactString(self,word:str):
+
+    def get_ipa_from_library_exact_string(self, word: str):
         if word in self.library.index:
             ipa: str
             ipa = self.library.loc[word].values[0]
@@ -118,9 +116,8 @@ class SentenceToPhoneticSentenceConverter:
             return ipa
         return None
 
-    def removeEmphasis(self, text: str):
-        if self.useEmphasis:
+    def remove_emphasis(self, text: str):
+        if self.use_emphasis:
             return text
-        withoutEmphasis = text.replace("ˈ","")
-        return withoutEmphasis
-        
+        without_emphasis = text.replace("ˈ", "")
+        return without_emphasis

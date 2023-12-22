@@ -1,56 +1,58 @@
+from huiAudioCorpus.DependencyInjection.DependencyInjection import DependencyInjection
 from huiAudioCorpus.utils.DoneMarker import DoneMarker
 from huiAudioCorpus.utils.PathUtil import PathUtil
 import pandas as pd
 import os
 
 
-class Step7_AudioRawStatistic:
-    def __init__(self, savePath: str, loadPath: str, pathUtil: PathUtil):
-        self.savePath = savePath
-        self.pathUtil = pathUtil
-        self.loadPath = loadPath
+class Step7AudioRawStatistic:
+    def __init__(self, save_path: str, load_path: str, path_util: PathUtil):
+        self.save_path = save_path
+        self.path_util = path_util
+        self.load_path = load_path
 
     def run(self):
-        doneMarker = DoneMarker(self.savePath)
-        result = doneMarker.run(self.script, deleteFolder=False)
+        done_marker = DoneMarker(self.save_path)
+        result = done_marker.run(self.script, delete_folder=False)
         return result
 
     def script(self):
-        from huiAudioCorpus.dependencyInjection.DependencyInjection import DependencyInjection
-        speakers = os.listdir(self.loadPath)
-        audioInfos = []
+        speakers = os.listdir(self.load_path)
+        audio_infos = []
+
         for speaker in speakers:
             if speaker == '.done':
                 continue
-            print('finalSummary: ' + speaker)
-            loadPath = self.loadPath  + '/' + speaker
-            savePath = self.savePath + '/' + speaker
-            saveFile = savePath + '/overview.csv'
-            self.pathUtil.createFolderForFile(saveFile)
-            localDoneMarker = DoneMarker(savePath)
-            if localDoneMarker.isDone():
-                rawDataAudio = pd.read_csv(saveFile, sep='|' , index_col='id')
+            print('final_summary: ' + speaker)
+            load_path = os.path.join(self.load_path, speaker)
+            save_path = os.path.join(self.save_path, speaker)
+            save_file = os.path.join(save_path, 'overview.csv')
+            self.path_util.create_folder_for_file(save_file)
+            local_done_marker = DoneMarker(save_path)
+
+            if local_done_marker.is_done():
+                raw_data_audio = pd.read_csv(save_file, sep='|', index_col='id')
             else:
-                diConfig = {
-                    'audioPersistenz': {
-                        'loadPath': loadPath,
+                di_config_audio = {
+                    'audio_persistenz': {
+                        'load_path': load_path,
                     }
                 }
-                rawDataAudio = DependencyInjection(diConfig).audioStatisticComponent.loadAudioFiles()
-                rawDataAudio['speaker'] = speaker
+                raw_data_audio = DependencyInjection(di_config_audio).audio_statistic_component.load_audio_files()
+                raw_data_audio['speaker'] = speaker
 
-                diConfig = {
-                    'transcriptsPersistenz': {
-                        'loadPath': loadPath,
+                di_config_text = {
+                    'transcripts_persistenz': {
+                        'load_path': load_path,
                     }
                 }
-                rawDataText = DependencyInjection(diConfig).textStatisticComponent.loadTextFiles()
-                rawData = rawDataAudio.merge(rawDataText, how='outer', on='id' )
-                rawData.to_csv(saveFile , sep='|')
+                raw_data_text = DependencyInjection(di_config_text).text_statistic_component.load_text_files()
+                raw_data = raw_data_audio.merge(raw_data_text, how='outer', on='id')
+                raw_data.to_csv(save_file, sep='|')
 
-                localDoneMarker.setDone()
+                local_done_marker.set_done()
 
-            audioInfos.append(rawDataAudio)
+            audio_infos.append(raw_data_audio)
 
-        audio = pd.concat(audioInfos)
-        audio.to_csv(self.savePath  + '/overview.csv', sep='|')
+        audio = pd.concat(audio_infos)
+        audio.to_csv(os.path.join(self.save_path, 'overview.csv'), sep='|')

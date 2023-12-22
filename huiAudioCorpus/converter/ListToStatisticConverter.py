@@ -3,20 +3,19 @@ from huiAudioCorpus.model.Statistic import Statistic
 
 from typing import List, TypeVar
 
-number = TypeVar('number', int, float)
+Number = TypeVar('Number', int, float)
 
 class ListToStatisticConverter:
 
-    def convert(self, list: List[number]):
-        count = len(list)
-        maximum = max(list)
-        minimum = min(list)
-        total = sum(list)
+    def convert(self, input_list: List[Number]):
+        count = len(input_list)
+        maximum = max(input_list)
+        minimum = min(input_list)
+        total = sum(input_list)
         median: float
-        median = np.median(list)
-        std = np.std(list)
-        var = np.var(list)
-        average = total/count
-        statistic = Statistic(count,maximum,minimum,median,average,total, std, var)
+        median = np.median(input_list)
+        std = np.std(input_list)
+        var = np.var(input_list)
+        average = total / count
+        statistic = Statistic(count, maximum, minimum, median, average, total, std, var)
         return statistic
-    

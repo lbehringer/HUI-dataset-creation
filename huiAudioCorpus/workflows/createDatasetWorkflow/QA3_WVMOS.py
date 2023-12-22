@@ -27,7 +27,7 @@ class QA3_WVMOS:
         return DoneMarker(self.save_path).run(self.script)
     
     def script(self):
-        audios = self.audio_persistenz.loadAll()
+        audios = self.audio_persistenz.load_all()
         for idx, audio in enumerate(audios):
             # only load model if there are any audios to be analyzed
             if idx == 0:
@@ -35,7 +35,7 @@ class QA3_WVMOS:
                 self.wvmos_model = get_wvmos()
             speech_timestamps = self.apply_vad(audio)
             wvmos_scores = []
-            if audio.samplingRate != self.target_sr:
+            if audio.sampling_rate != self.target_sr:
                 audio_for_wvmos = self.audio_sr_transformer.transform(audio=audio)
             # if more than 1 element, remove first segment to avoid cut-off samples
                 if len(speech_timestamps) > 1:
@@ -43,13 +43,13 @@ class QA3_WVMOS:
                         speech_timestamps.pop(0)
                     # if still more than 1 element, potentially remove last segment
                     if len(speech_timestamps) > 1:
-                        if speech_timestamps[-1]["end"] > len(audio_for_wvmos.timeSeries) - 1000:
+                        if speech_timestamps[-1]["end"] > len(audio_for_wvmos.time_series) - 1000:
                             speech_timestamps.pop()
                     
             for idx, segment in enumerate(speech_timestamps):
-                score = self.wvmos_model.calculate_signal(audio_for_wvmos.timeSeries[segment["start"]:segment["end"]], audio_for_wvmos.samplingRate)
+                score = self.wvmos_model.calculate_signal(audio_for_wvmos.time_series[segment["start"]:segment["end"]], audio_for_wvmos.sampling_rate)
                 # segment_audio = deepcopy(audio_for_wvmos)
-                # segment_audio.timeSeries = audio_for_wvmos.timeSeries[segment["start"]:segment["end"]]
+                # segment_audio.time_series = audio_for_wvmos.time_series[segment["start"]:segment["end"]]
                 # segment_audio.id = audio_for_wvmos.id + f"_{idx}"
                 # self.audio_persistenz.save(segment_audio)
                 wvmos_scores.append(score)
@@ -78,7 +78,7 @@ class QA3_WVMOS:
         """
         
         audio = self.audio_sr_transformer.transform(audio=audio)
-        wav = torch.from_numpy(audio.timeSeries)
+        wav = torch.from_numpy(audio.time_series)
         min_silence_duration_ms = 500
         min_speech_duration_ms = 250
         # get speech_timestamps with a config that will yield at least one speech chunk and at least one silence chunk
