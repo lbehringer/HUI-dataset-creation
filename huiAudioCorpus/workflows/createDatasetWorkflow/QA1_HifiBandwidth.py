@@ -38,7 +38,6 @@ class QA1_HifiBandwidth:
             audio.bandwidth = self.get_bandwidth(audio)
             # filter out audios which don't meet the minimum bandwidth threshold
             if audio.bandwidth >= self.bandwidth_hz_threshold:
-                audio = self.set_x_seconds_id(audio, self.book_name, idx+1, self.seconds_to_analyze)
                 self.audio_persistenz.save(audio)
 
 
