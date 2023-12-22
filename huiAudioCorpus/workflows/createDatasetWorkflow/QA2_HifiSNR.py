@@ -32,12 +32,6 @@ class QA2_HifiSNR:
         self.audio_sr_transformer = audio_sr_transformer
         self.audio_loudness_transformer = audio_loudness_transformer
         self.target_sr = target_sr
-        self.vad_model, utils = torch.hub.load(repo_or_dir='snakers4/silero-vad',
-                                model='silero_vad',
-                                force_reload=False,
-                                onnx=False)
-        (self.get_speech_timestamps, _, self.read_audio, _, _) = utils
-        self.vad_models = dict()
 
     def run(self):
         return DoneMarker(self.save_path).run(self.script)
@@ -45,28 +39,46 @@ class QA2_HifiSNR:
     def script(self):
         audios = self.audio_persistenz.loadAll(duration=self.seconds_to_analyze)
         for idx, audio in enumerate(audios):
+            # only load VAD model if there are any audios to be analyzed
+            if idx == 0:
+                self.load_vad_model()
             audio = self.audio_loudness_transformer.transform(audio)
             speech_timestamps, silence_timestamps = self.apply_vad(audio)
             audio = self.set_x_seconds_id(audio, self.book_name, idx+1, self.seconds_to_analyze)
+            sufficient_snr = False
+            snr_threshold = 32
             frequency_bands = [(100, 1000), (300, 4000), (4000, 10000), (10000, 15000)]
-
-            for lower_freq, upper_freq in frequency_bands:
-                print(f"SNR for freq band {lower_freq}-{upper_freq}:")
-                print(self.get_snr(
-                    audio=audio, 
-                    speech_timestamps=speech_timestamps, 
-                    silence_timestamps=silence_timestamps, 
-                    lower_freq_threshold=lower_freq, 
-                    upper_freq_threshold=upper_freq,
-                    ))
 
             # TODO: Find a way to identify whether a noise-removal algorithm has been applied
 
-            self.audio_persistenz.save(audio)
+            for lower_freq, upper_freq in frequency_bands:
+                # TODO: we could analyze the other frequency bands too
+                if lower_freq == 300 and upper_freq == 4000:
+                    snr = self.get_snr(
+                        audio=audio, 
+                        speech_timestamps=speech_timestamps, 
+                        silence_timestamps=silence_timestamps, 
+                        lower_freq_threshold=lower_freq, 
+                        upper_freq_threshold=upper_freq,
+                    )
+                    print(f"{audio.id} | SNR for freq band {lower_freq}-{upper_freq}: {snr}")
+                    if snr >= snr_threshold:
+                        sufficient_snr = True
+
+            if sufficient_snr:
+                self.audio_persistenz.save(audio)
+            else:
+                print(f"SNR {snr} is < required threshold ({snr_threshold}). Skipping {audio.id}")
             
+            
+            """
+            for now, we don't store the speech-only or silence-only audio because 
+            the "uncut" samples get the highest WVMOS score
+
             upsample_factor = audio.samplingRate / self.target_sr
             speech_signal_segments = [audio.timeSeries[int(ts['start']*upsample_factor):int(ts['end']*upsample_factor)] for ts in speech_timestamps]
             silence_signal_segments =  [audio.timeSeries[int(ts['start']*upsample_factor):int(ts['end']*upsample_factor)] for ts in silence_timestamps]
+
             speech_signal = np.concatenate(speech_signal_segments)
             silence_signal = np.concatenate(silence_signal_segments)
             speech_audio = deepcopy(audio)
@@ -75,10 +87,15 @@ class QA2_HifiSNR:
             silence_audio.timeSeries, silence_audio.id = silence_signal, audio.id+"silence"
             self.audio_persistenz.save(speech_audio)
             self.audio_persistenz.save(silence_audio)
+            """
                 
 
-            # TODO: generate 4 timeSeries, one for each frequency band that we want to analyze
+            """
+            For now, we don't use a butterworth filter because
+            we can instead compute the SNR for different frequency bands.
+            # generate 4 timeSeries, one for each frequency band that we want to analyze
             # TODO: Is it better to just compute the mel spectrogram, "cut off" all frequencies outside the passband, and then do an inverse mel transform and an inverse STFT?
+
             # design band-pass Butterworth filter
             lowcut = 300
             highcut = 4000
@@ -100,7 +117,17 @@ class QA2_HifiSNR:
             plt.savefig("butterworth.png")
             sf.write("original_audio.wav", audio.timeSeries, audio.samplingRate)
             sf.write("filtered_audio.wav", filtered_signal, audio.samplingRate)
+            """
     
+    def load_vad_model(self):
+        """Load Silero VAD model and corresponding functions"""
+        self.vad_model, utils = torch.hub.load(repo_or_dir='snakers4/silero-vad',
+                            model='silero_vad',
+                            force_reload=False,
+                            onnx=False)
+        (self.get_speech_timestamps, _, self.read_audio, _, _) = utils
+        self.vad_models = dict()
+
     def set_x_seconds_id(self, audio: Audio, book_name: str, chapter: int, seconds_to_analyze):
         """Assigns an ID to an Audio object, following the format `<book_name>_<chapter>_<seconds_to_analyze>sec`. 
         Returns the Audio with the attributes `id` and `name` (with identical values)."""

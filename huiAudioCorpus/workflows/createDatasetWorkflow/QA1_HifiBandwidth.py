@@ -14,6 +14,7 @@ class QA1_HifiBandwidth:
             save_path: str, 
             book_name: str,
             seconds_to_analyze: int,
+            analysis_offset: float,
             bandwidth_hz_threshold: int,
             audio_loudness_transformer: AudioLoudnessTransformer = None,
             ):
@@ -21,6 +22,7 @@ class QA1_HifiBandwidth:
         self.save_path = save_path
         self.book_name = book_name
         self.seconds_to_analyze = seconds_to_analyze
+        self.analysis_offset = analysis_offset
         self.audio_loudness_transformer = audio_loudness_transformer
         self.bandwidth_hz_threshold = bandwidth_hz_threshold
 
@@ -28,7 +30,7 @@ class QA1_HifiBandwidth:
         return DoneMarker(self.save_path).run(self.script)
     
     def script(self):
-        audios = self.audio_persistenz.loadAll(duration=self.seconds_to_analyze)
+        audios = self.audio_persistenz.loadAll(duration=self.seconds_to_analyze, offset=self.analysis_offset)
         for idx, audio in enumerate(audios):
             # only perform loudness normalization if specified in config
             if self.audio_loudness_transformer:
@@ -36,7 +38,6 @@ class QA1_HifiBandwidth:
             audio.bandwidth = self.get_bandwidth(audio)
             # filter out audios which don't meet the minimum bandwidth threshold
             if audio.bandwidth >= self.bandwidth_hz_threshold:
-                audio = self.set_x_seconds_id(audio, self.book_name, idx+1, self.seconds_to_analyze)
                 self.audio_persistenz.save(audio)
 
 
@@ -61,7 +62,7 @@ class QA1_HifiBandwidth:
 
         # get highest frequency which is at least -50 dB (or higher) relative to the peak value (peak value should be <= 0)
         peak_value = np.max(power_spec_db)
-        threshold = peak_value - 50  # -50 dB level relative to the peak value
+        threshold = peak_value - 60  # -50 dB level relative to the peak value
         frequencies_above_threshold = np.where(power_spec_db >= threshold)[0]
         if len(frequencies_above_threshold) > 0:
             bandwidth_start = frequencies_above_threshold[0]
@@ -69,8 +70,7 @@ class QA1_HifiBandwidth:
             start_hz = librosa.fft_frequencies(sr=audio.samplingRate)[bandwidth_start]
             end_hz = librosa.fft_frequencies(sr=audio.samplingRate)[bandwidth_end]
             # TODO: test correct function of bandwidth estimation
-            print(f"Estimated speech signal's bandwidth: {start_hz:.2f} Hz to {end_hz:.2f} Hz")
-            print(f"Mean of power spectrogram: {mean_power:.2f}")
+            print(f"{audio.id} | Estimated bandwidth: {start_hz:.2f} Hz to {end_hz:.2f} Hz | Mean of power spectrogram: {mean_power:.2f}")
             return end_hz - start_hz
         else:
             print("No continuous frequency range falls below the specified threshold.")

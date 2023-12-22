@@ -10,7 +10,7 @@ from typing import Union
 
 class AudiosFromLibrivoxPersistenz:
 
-    def __init__ (self, bookName: str, savePath: str, chapterPath: str, url: str = 'https://librivox.org/', solo_reading: bool = None, sections: Union[list, str] = None):
+    def __init__ (self, bookName: str, savePath: str, chapterPath: str, url: str = 'https://librivox.org/', solo_reading: bool = None, sections: Union[list, str] = None, max_chapters_per_reader=None):
         self.bookName = bookName
         self.url = url
         self.savePath = savePath
@@ -20,14 +20,16 @@ class AudiosFromLibrivoxPersistenz:
         self.pathUtil = PathUtil()
         self.limitPerIteration = 1000
         self.numberOfIterations = 20
+        self.max_chapters_per_reader = max_chapters_per_reader
         # self.minimumUploadTimestamp = 1625672626 # 7 July 2021 (which is the date of the last change in the HUI repo)
         # self.minimumUploadTimestamp = 1672527600 # 1 January 2023
         # self.minimumUploadTimestamp = 1698184800 # 25 October 2023
-        self.minimumUploadTimestamp = 1699225200 # 6 November 2023
+        # self.minimumUploadTimestamp = 1699225200 # 6 November 2023
+        self.minimumUploadTimestamp = 1702162800 # 10 December 2023 
 
     def save(self):
         chapters, chapterDownloadLinks = self.getChapters(self.bookName, get_download_links=True)
-        Parallel(n_jobs=4)(delayed(self.pathUtil.copyFileFromUrl)(link ,self.savePath+ '/' + link.split('/')[-1]) for link in chapterDownloadLinks)
+        Parallel(n_jobs=1)(delayed(self.pathUtil.copyFileFromUrl)(link ,self.savePath+ '/' + link.split('/')[-1]) for link in chapterDownloadLinks[:self.max_chapters_per_reader])
         chapters.to_csv(self.chapterPath)
         
 

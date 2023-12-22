@@ -203,6 +203,7 @@ class Step0_Overview:
                         reader[chapter['reader']][title] = {
                             'solo_reading': solo_reading,
                             'sections': 'all' if solo_reading else [chapter['section']],
+                            'reader': chapter['reader'],
                             'title': title,
                             'librivox_book_name': bookTitle,
                             'gutenberg_id': gutenbergId,
