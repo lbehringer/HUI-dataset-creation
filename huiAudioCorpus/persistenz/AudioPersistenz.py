@@ -6,7 +6,7 @@ from huiAudioCorpus.utils.FileListUtil import FileListUtil
 from huiAudioCorpus.utils.PathUtil import PathUtil
 from natsort import natsorted
 
-class AudioPersistenz:
+class AudioPersistence:
     def __init__(self, load_path: str, save_path: str = None, file_extension: str = 'wav'):
         self.save_path = load_path if save_path is None else save_path
         self.load_path = load_path

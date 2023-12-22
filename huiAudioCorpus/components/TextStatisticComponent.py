@@ -1,15 +1,15 @@
 from tqdm import tqdm  
 from huiAudioCorpus.converter.ListToHistogramConverter import ListToHistogramConverter
 from huiAudioCorpus.converter.ListToStatisticConverter import ListToStatisticConverter
-from huiAudioCorpus.persistenz.TranscriptsPersistenz import TranscriptsPersistenz
+from huiAudioCorpus.persistence.TranscriptsPersistence import TranscriptsPersistence
 from huiAudioCorpus.converter.TranscriptsToSentencesConverter import TranscriptsToSentencesConverter
 from pandas.core.frame import DataFrame
 from collections import Counter
 from huiAudioCorpus.model.Sentence import Sentence
 
 class TextStatisticComponent:
-    def __init__(self, transcripts_persistenz: TranscriptsPersistenz, transcripts_to_sentences_converter: TranscriptsToSentencesConverter, list_to_statistic_converter: ListToStatisticConverter, list_to_histogram_converter: ListToHistogramConverter):
-        self.transcripts_persistenz = transcripts_persistenz
+    def __init__(self, transcripts_persistence: TranscriptsPersistence, transcripts_to_sentences_converter: TranscriptsToSentencesConverter, list_to_statistic_converter: ListToStatisticConverter, list_to_histogram_converter: ListToHistogramConverter):
+        self.transcripts_persistence = transcripts_persistence
         self.transcripts_to_sentences_converter = transcripts_to_sentences_converter
         self.list_to_statistic_converter = list_to_statistic_converter
         self.list_to_histogram_converter = list_to_histogram_converter
@@ -51,7 +51,7 @@ class TextStatisticComponent:
         return statistics, raw_data, counter, unique_words_with_minimum
 
     def load_text_files(self):
-        all_sentences = [sentence for transcripts in tqdm(self.transcripts_persistenz.load_all(), total=len(self.transcripts_persistenz.get_ids())) for sentence in  self.transcripts_to_sentences_converter.convert(transcripts)]
+        all_sentences = [sentence for transcripts in tqdm(self.transcripts_persistence.load_all(), total=len(self.transcripts_persistence.get_ids())) for sentence in  self.transcripts_to_sentences_converter.convert(transcripts)]
         result = [[sentence.id.split("\\")[-1].split("/")[-1], sentence.words_count, sentence.char_count, sentence.sentence] for sentence in  tqdm(all_sentences)]
         raw_data = DataFrame(result, columns=['id', 'wordCount', 'charCount', 'text'])
         raw_data = raw_data.set_index('id')

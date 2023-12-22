@@ -24,7 +24,7 @@ if __name__ == "__main__":
     timestamp = time.strftime("%Y%m%d_%H%M%S")
     step0_path = os.path.join(database_path, f"overview_{timestamp}")
     config = {
-        'audios_from_librivox_persistenz': {
+        'audios_from_librivox_persistence': {
             'book_name': '',
             'save_path': '',
             'chapter_path': ''

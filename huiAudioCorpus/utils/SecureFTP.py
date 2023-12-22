@@ -1,12 +1,12 @@
-from huiAudioCorpus.persistenz.CredentialsPersistenz import CredentialsPersistenz
+from huiAudioCorpus.persistence.CredentialsPersistence import CredentialsPersistence
 from huiAudioCorpus.utils.PathUtil import PathUtil
 import pysftp
 
 # This class is hard to test. Because the risk is not so high I decided not to test this class automatically. Pascal
 class SecureFTP:  # pragma: no cover
-    def __init__(self, path_util: PathUtil, server: str, credentials_persistenz: CredentialsPersistenz):
+    def __init__(self, path_util: PathUtil, server: str, credentials_persistence: CredentialsPersistence):
         cnopts = pysftp.CnOpts()
-        credentials = credentials_persistenz.load(server)
+        credentials = credentials_persistence.load(server)
         cnopts.hostkeys = None
         self.connection = pysftp.Connection(server, username=credentials.username, password=credentials.password,
                                             cnopts=cnopts)

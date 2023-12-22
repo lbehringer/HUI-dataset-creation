@@ -34,7 +34,7 @@ class Step7AudioRawStatistic:
                 raw_data_audio = pd.read_csv(save_file, sep='|', index_col='id')
             else:
                 di_config_audio = {
-                    'audio_persistenz': {
+                    'audio_persistence': {
                         'load_path': load_path,
                     }
                 }
@@ -42,7 +42,7 @@ class Step7AudioRawStatistic:
                 raw_data_audio['speaker'] = speaker
 
                 di_config_text = {
-                    'transcripts_persistenz': {
+                    'transcripts_persistence': {
                         'load_path': load_path,
                     }
                 }

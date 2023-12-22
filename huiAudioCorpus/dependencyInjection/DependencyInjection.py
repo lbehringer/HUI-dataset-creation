@@ -25,12 +25,12 @@ from huiAudioCorpus.calculator.AlignSentencesIntoTextCalculator import AlignSent
 from huiAudioCorpus.workflows.createDatasetWorkflow.Step5_AlignText import Step5_AlignText
 from huiAudioCorpus.converter.AudioToSentenceConverter import AudioToSentenceConverter
 from huiAudioCorpus.workflows.createDatasetWorkflow.Step4_TranscriptAudio import Step4_TranscriptAudio
-from huiAudioCorpus.persistenz.GutenbergBookPersistenz import GutenbergBookPersistenz
+from huiAudioCorpus.persistence.GutenbergBookPersistence import GutenbergBookPersistence
 from huiAudioCorpus.workflows.createDatasetWorkflow.Step3_DownloadText import Step3_DownloadText
 from huiAudioCorpus.transformer.AudioSplitTransformer import AudioSplitTransformer
 from huiAudioCorpus.transformer.AudioLoudnessTransformer import AudioLoudnessTransformer
 from huiAudioCorpus.workflows.createDatasetWorkflow.Step2_SplitAudio import Step2_SplitAudio
-from huiAudioCorpus.persistenz.AudiosFromLibrivoxPersistenz import AudiosFromLibrivoxPersistenz
+from huiAudioCorpus.persistence.AudiosFromLibrivoxPersistence import AudiosFromLibrivoxPersistence
 from huiAudioCorpus.workflows.createDatasetWorkflow.Step1_DownloadAudio import Step1_DownloadAudio
 from huiAudioCorpus.converter.StringToSentencesConverter import StringToSentencesConverter
 from huiAudioCorpus.workflows.createDatasetWorkflow.QA1_HifiBandwidth import QA1_HifiBandwidth
@@ -52,14 +52,14 @@ from huiAudioCorpus.components.AudioStatisticComponent import AudioStatisticComp
 from huiAudioCorpus.utils.PathUtil import PathUtil
 from huiAudioCorpus.utils.FileListUtil import FileListUtil
 from huiAudioCorpus.converter.TranscriptsToSentencesConverter import TranscriptsToSentencesConverter
-from huiAudioCorpus.persistenz.AudioTranscriptPairPersistenz import AudioTranscriptPairPersistenz
+from huiAudioCorpus.persistence.AudioTranscriptPairPersistence import AudioTranscriptPairPersistence
 from huiAudioCorpus.converter.PhoneticSentenceToSymbolSentenceConverter import PhoneticSentenceToSymbolSentenceConverter
 from huiAudioCorpus.converter.SentenceToPhoneticSentenceConverter import SentenceToPhoneticSentenceConverter
 from huiAudioCorpus.transformer.AudioAddSilenceTransformer import AudioAddSilenceTransformer
 from huiAudioCorpus.transformer.TranscriptsSelectionTransformer import TranscriptsSelectionTransformer
 from huiAudioCorpus.transformer.AudioSamplingRateTransformer import AudioSamplingRateTransformer
-from huiAudioCorpus.persistenz.TranscriptsPersistenz import TranscriptsPersistenz
-from huiAudioCorpus.persistenz.AudioPersistenz import AudioPersistenz
+from huiAudioCorpus.persistence.TranscriptsPersistence import TranscriptsPersistence
+from huiAudioCorpus.persistence.AudioPersistence import AudioPersistence
 from huiAudioCorpus.filter.AudioFilter import AudioFilter
 from huiAudioCorpus.transformer.AudioFadeTransformer import AudioFadeTransformer
 from huiAudioCorpus.calculator.TextNormalizer import TextNormalizer
@@ -100,12 +100,12 @@ class DependencyInjection:
     audio_filter: AudioFilter
 
     # Persistence
-    audio_persistenz: AudioPersistenz
-    audio_persistenz: AudioPersistenz
-    audio_transcript_pair_persistenz: AudioTranscriptPairPersistenz
-    transcripts_persistenz: TranscriptsPersistenz
-    audios_from_librivox_persistenz: AudiosFromLibrivoxPersistenz
-    gutenberg_book_persistenz: GutenbergBookPersistenz
+    audio_persistence: AudioPersistence
+    audio_persistence: AudioPersistence
+    audio_transcript_pair_persistence: AudioTranscriptPairPersistence
+    transcripts_persistence: TranscriptsPersistence
+    audios_from_librivox_persistence: AudiosFromLibrivoxPersistence
+    gutenberg_book_persistence: GutenbergBookPersistence
 
     # Transformers
     audio_add_silence_transformer: AudioAddSilenceTransformer

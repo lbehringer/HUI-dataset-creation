@@ -2,15 +2,15 @@ from huiAudioCorpus.model.Transcripts import Transcripts
 from pandas.core.frame import DataFrame
 from huiAudioCorpus.model.Sentence import Sentence
 from huiAudioCorpus.calculator.AlignSentencesIntoTextCalculator import AlignSentencesIntoTextCalculator
-from huiAudioCorpus.persistenz.TranscriptsPersistenz import TranscriptsPersistenz
+from huiAudioCorpus.persistence.TranscriptsPersistence import TranscriptsPersistence
 from huiAudioCorpus.utils.DoneMarker import DoneMarker
 
 class Step5AlignText:
 
-    def __init__(self, save_path: str, align_sentences_into_text_calculator: AlignSentencesIntoTextCalculator, transcripts_persistenz: TranscriptsPersistenz, text_to_align_path: str):
+    def __init__(self, save_path: str, align_sentences_into_text_calculator: AlignSentencesIntoTextCalculator, transcripts_persistence: TranscriptsPersistence, text_to_align_path: str):
         self.save_path = save_path
         self.align_sentences_into_text_calculator = align_sentences_into_text_calculator
-        self.transcripts_persistenz = transcripts_persistenz
+        self.transcripts_persistence = transcripts_persistence
         self.text_to_align_path = text_to_align_path
 
     def run(self):
@@ -20,7 +20,7 @@ class Step5AlignText:
 
     def script(self):
         # load (normalized) ASR-generated transcripts (from step 4_1)
-        transcripts = list(self.transcripts_persistenz.load_all())
+        transcripts = list(self.transcripts_persistence.load_all())
         sentences = transcripts[0].sentences()
 
         # load prepared source text (from step 3_1)
@@ -46,9 +46,9 @@ class Step5AlignText:
         results = [[align.source_text.id, align.aligned_text.sentence, align.source_text.sentence, align.distance] for align in alignments if align.is_perfect]
         csv = DataFrame(results)
         transcripts = Transcripts(csv, 'transcripts', 'transcripts')
-        self.transcripts_persistenz.save(transcripts)
+        self.transcripts_persistence.save(transcripts)
 
         results_not_perfect = [[align.source_text.id, align.aligned_text.sentence, align.source_text.sentence, align.distance] for align in alignments if not align.is_perfect]
         csv = DataFrame(results_not_perfect)
         transcripts = Transcripts(csv, 'transcripts_not_perfect', 'transcripts_not_perfect')
-        self.transcripts_persistenz.save(transcripts)
+        self.transcripts_persistence.save(transcripts)

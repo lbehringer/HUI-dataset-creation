@@ -2,25 +2,25 @@ from huiAudioCorpus.model.AudioTranscriptPair import AudioTranscriptPair
 from huiAudioCorpus.error.MatchingNotFoundError import MatchingNotFoundError
 from typing import List
 from huiAudioCorpus.converter.TranscriptsToSentencesConverter import TranscriptsToSentencesConverter
-from huiAudioCorpus.persistenz.AudioPersistenz import AudioPersistenz
-from huiAudioCorpus.persistenz.TranscriptsPersistenz import TranscriptsPersistenz
+from huiAudioCorpus.persistence.AudioPersistence import AudioPersistence
+from huiAudioCorpus.persistence.TranscriptsPersistence import TranscriptsPersistence
 
-class AudioTranscriptPairPersistenz:
+class AudioTranscriptPairPersistence:
 
-    def __init__(self, audio_persistenz: AudioPersistenz, transcripts_persistenz: TranscriptsPersistenz, transcripts_to_sentences_converter: TranscriptsToSentencesConverter, check_for_consistency: bool = True):
-        self.audio_persistenz = audio_persistenz
-        self.transcripts_persistenz = transcripts_persistenz
+    def __init__(self, audio_persistence: AudioPersistence, transcripts_persistence: TranscriptsPersistence, transcripts_to_sentences_converter: TranscriptsToSentencesConverter, check_for_consistency: bool = True):
+        self.audio_persistence = audio_persistence
+        self.transcripts_persistence = transcripts_persistence
         self.transcripts_to_sentences_converter = transcripts_to_sentences_converter
 
     def load(self, audio_id: str, sentence_id: str):
-        audio = self.audio_persistenz.load(audio_id)
+        audio = self.audio_persistence.load(audio_id)
         sentence = self.get_all_sentences()[sentence_id]
         element_pair = AudioTranscriptPair(sentence, audio)
         return element_pair
 
     def get_ids(self, check_for_consistency=True):
-        audio_ids = self.audio_persistenz.get_ids()
-        audio_names = self.audio_persistenz.get_names()
+        audio_ids = self.audio_persistence.get_ids()
+        audio_names = self.audio_persistence.get_names()
         sentences_ids = list(self.get_all_sentences().keys())
 
         if check_for_consistency:
@@ -44,7 +44,7 @@ class AudioTranscriptPairPersistenz:
             yield self.load(audio_id, sentence_id)
 
     def get_all_sentences(self):
-        transcripts = list(self.transcripts_persistenz.load_all())
+        transcripts = list(self.transcripts_persistence.load_all())
         sentences = [sentence for transcript in transcripts for sentence in self.transcripts_to_sentences_converter.convert(transcript)]
         sentence_dict = {sentence.id: sentence for sentence in sentences}
         return sentence_dict

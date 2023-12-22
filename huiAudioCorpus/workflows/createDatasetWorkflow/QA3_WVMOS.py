@@ -1,4 +1,4 @@
-from huiAudioCorpus.persistenz.AudioPersistenz import AudioPersistenz
+from huiAudioCorpus.persistence.AudioPersistence import AudioPersistence
 from huiAudioCorpus.transformer.AudioSamplingRateTransformer import AudioSamplingRateTransformer
 from huiAudioCorpus.utils.DoneMarker import DoneMarker
 from huiAudioCorpus.model.Audio import Audio
@@ -14,11 +14,11 @@ from copy import deepcopy
 class QA3_WVMOS:
     def __init__(
             self, 
-            audio_persistenz: AudioPersistenz, 
+            audio_persistence: AudioPersistence, 
             audio_sr_transformer: AudioSamplingRateTransformer,
             save_path: str, 
             target_sr=16000):
-        self.audio_persistenz = audio_persistenz
+        self.audio_persistence = audio_persistence
         self.audio_sr_transformer = audio_sr_transformer
         self.save_path = save_path
         self.target_sr = target_sr
@@ -27,7 +27,7 @@ class QA3_WVMOS:
         return DoneMarker(self.save_path).run(self.script)
     
     def script(self):
-        audios = self.audio_persistenz.load_all()
+        audios = self.audio_persistence.load_all()
         for idx, audio in enumerate(audios):
             # only load model if there are any audios to be analyzed
             if idx == 0:
@@ -51,12 +51,12 @@ class QA3_WVMOS:
                 # segment_audio = deepcopy(audio_for_wvmos)
                 # segment_audio.time_series = audio_for_wvmos.time_series[segment["start"]:segment["end"]]
                 # segment_audio.id = audio_for_wvmos.id + f"_{idx}"
-                # self.audio_persistenz.save(segment_audio)
+                # self.audio_persistence.save(segment_audio)
                 wvmos_scores.append(score)
             sufficient_wvmos = np.mean(wvmos_scores) > 4 and min(wvmos_scores) > 3.5
             print(f"{audio.id} | sufficient: {sufficient_wvmos} | {wvmos_scores}")
             if sufficient_wvmos:
-                self.audio_persistenz.save(audio)
+                self.audio_persistence.save(audio)
     
     def load_vad_model(self):
         self.vad_model, utils = torch.hub.load(repo_or_dir='snakers4/silero-vad',

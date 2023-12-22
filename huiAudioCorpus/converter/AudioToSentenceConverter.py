@@ -1,5 +1,5 @@
 from typing import List
-from huiAudioCorpus.persistenz.AudioPersistenz import AudioPersistenz
+from huiAudioCorpus.persistence.AudioPersistence import AudioPersistence
 from huiAudioCorpus.transformer.AudioSamplingRateTransformer import AudioSamplingRateTransformer
 from huiAudioCorpus.model.Audio import Audio
 from huiAudioCorpus.model.Sentence import Sentence
@@ -72,14 +72,14 @@ if __name__ == "__main__":
     import librosa
     path = '/media/ppuchtler/LangsameSSD/Projekte/textToSpeech/datasetWorkflow/Step2_SplitAudio/audio/'
     
-    add_audio = AudioPersistenz(path).load('acht_gesichter_am_biwasee_01_f000177')
-    audio = AudioPersistenz(path).load('acht_gesichter_am_biwasee_01_f000077')
+    add_audio = AudioPersistence(path).load('acht_gesichter_am_biwasee_01_f000177')
+    audio = AudioPersistence(path).load('acht_gesichter_am_biwasee_01_f000077')
 
-    audio = AudioPersistenz(path).load('acht_gesichter_am_biwasee_01_f000030')
-    audio1 = AudioPersistenz(path).load('acht_gesichter_am_biwasee_01_f000105')
-    audio = AudioPersistenz(path).load('acht_gesichter_am_biwasee_01_f000166')
+    audio = AudioPersistence(path).load('acht_gesichter_am_biwasee_01_f000030')
+    audio1 = AudioPersistence(path).load('acht_gesichter_am_biwasee_01_f000105')
+    audio = AudioPersistence(path).load('acht_gesichter_am_biwasee_01_f000166')
 
-    #audio_remove = AudioPersistenz(path).load('acht_gesichter_am_biwasee_01_f000001')
+    #audio_remove = AudioPersistence(path).load('acht_gesichter_am_biwasee_01_f000001')
     #audio = AudioAddSilenceTransformer(10, 10).transform(audio)
     #audio = audio + audio
 

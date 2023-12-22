@@ -8,7 +8,7 @@ from joblib import Parallel, delayed
 from urllib.parse import quote
 from typing import Union
 
-class AudiosFromLibrivoxPersistenz:
+class AudiosFromLibrivoxPersistence:
 
     def __init__ (self, book_name: str, save_path: str, chapter_path: str, url: str = 'https://librivox.org/', solo_reading: bool = None, sections: Union[list, str] = None, max_chapters_per_reader=None):
         self.book_name = book_name

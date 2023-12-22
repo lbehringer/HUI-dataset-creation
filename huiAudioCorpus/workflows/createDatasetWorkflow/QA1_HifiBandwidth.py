@@ -1,4 +1,4 @@
-from huiAudioCorpus.persistenz.AudioPersistenz import AudioPersistenz
+from huiAudioCorpus.persistence.AudioPersistence import AudioPersistence
 from huiAudioCorpus.utils.DoneMarker import DoneMarker
 from huiAudioCorpus.model.Audio import Audio
 from huiAudioCorpus.transformer.AudioLoudnessTransformer import AudioLoudnessTransformer
@@ -8,7 +8,7 @@ import numpy as np
 class QA1_HifiBandwidth:
     def __init__(
             self,
-            audio_persistenz: AudioPersistenz,
+            audio_persistence: AudioPersistence,
             save_path: str,
             book_name: str,
             seconds_to_analyze: int,
@@ -16,7 +16,7 @@ class QA1_HifiBandwidth:
             bandwidth_hz_threshold: int,
             audio_loudness_transformer: AudioLoudnessTransformer = None,
             ):
-        self.audio_persistenz = audio_persistenz
+        self.audio_persistence = audio_persistence
         self.save_path = save_path
         self.book_name = book_name
         self.seconds_to_analyze = seconds_to_analyze
@@ -28,7 +28,7 @@ class QA1_HifiBandwidth:
         return DoneMarker(self.save_path).run(self.script)
     
     def script(self):
-        audios = self.audio_persistenz.load_all(duration=self.seconds_to_analyze, offset=self.analysis_offset)
+        audios = self.audio_persistence.load_all(duration=self.seconds_to_analyze, offset=self.analysis_offset)
         for idx, audio in enumerate(audios):
             # only perform loudness normalization if specified in config
             if self.audio_loudness_transformer:
@@ -36,7 +36,7 @@ class QA1_HifiBandwidth:
             audio.bandwidth = self.get_bandwidth(audio)
             # filter out audios which don't meet the minimum bandwidth threshold
             if audio.bandwidth >= self.bandwidth_hz_threshold:
-                self.audio_persistenz.save(audio)
+                self.audio_persistence.save(audio)
 
     def set_x_seconds_id(self, audio: Audio, book_name: str, chapter: int, seconds_to_analyze):
         """Assigns an ID to an Audio object, following the format `<book_name>_<chapter>_<seconds_to_analyze>sec`. 

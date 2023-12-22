@@ -102,7 +102,7 @@ def run_workflow(params: Dict, workflow_config: Dict):
     if workflow_config['prepare_audio']:
         log_step('step1_download_audio')
         config = {
-            'audios_from_librivox_persistenz': {
+            'audios_from_librivox_persistence': {
                 'book_name': params['librivox_book_name'],
                 'solo_reading': params['solo_reading'],
                 'sections': params['sections'],
@@ -121,7 +121,7 @@ def run_workflow(params: Dict, workflow_config: Dict):
                 'min_audio_duration': 5,
                 'max_audio_duration': 40
             },
-            'audio_persistenz': {
+            'audio_persistence': {
                 'load_path': step1_path_audio,
                 'save_path': step2_path_audio,
                 'file_extension': 'mp3'
@@ -142,7 +142,7 @@ def run_workflow(params: Dict, workflow_config: Dict):
             'step2_1_audio_statistic': {
                 'save_path': step2_1_path,
             },
-            'audio_persistenz': {
+            'audio_persistence': {
                 'load_path': step2_path_audio
             },
             'plot': {
@@ -155,7 +155,7 @@ def run_workflow(params: Dict, workflow_config: Dict):
     if workflow_config['prepare_text']:
         log_step('step3_download_text')
         config = {
-            'gutenberg_book_persistenz': {
+            'gutenberg_book_persistence': {
                 'text_id': params['gutenberg_id'],
                 'save_path': step3_path_text
             },
@@ -186,10 +186,10 @@ def run_workflow(params: Dict, workflow_config: Dict):
             'step4_transcript_audio': {
                 'save_path': step4_path,
             },
-            'audio_persistenz': {
+            'audio_persistence': {
                 'load_path': step2_path_audio
             },
-            'transcripts_persistenz': {
+            'transcripts_persistence': {
                 'load_path': step4_path,
             }
         }
@@ -202,7 +202,7 @@ def run_workflow(params: Dict, workflow_config: Dict):
                 'save_path': step5_path,
                 'text_to_align_path': step3_1_path_text
             },
-            'transcripts_persistenz': {
+            'transcripts_persistence': {
                 'load_path': step4_path,
                 'save_path': step5_path
             }
@@ -216,11 +216,11 @@ def run_workflow(params: Dict, workflow_config: Dict):
                 'save_path': step6_path,
                 'chapter_path': step1_path_chapter
             },
-            'audio_persistenz': {
+            'audio_persistence': {
                 'load_path': step2_path_audio,
                 'save_path': final_dataset_path
             },
-            'transcripts_persistenz': {
+            'transcripts_persistence': {
                 'load_path': step5_path,
                 'save_path': final_dataset_path
             }
@@ -268,10 +268,10 @@ if __name__ == "__main__":
                 'special_speakers': special_speakers,
                 'filter': None
             },
-            'audio_persistenz': {
+            'audio_persistence': {
                 'load_path': ''
             },
-            'transcripts_persistenz': {
+            'transcripts_persistence': {
                 'load_path': ''
             },
             'plot': {
@@ -289,10 +289,10 @@ if __name__ == "__main__":
                 'special_speakers': special_speakers,
                 'filter': clean_filter
             },
-            'audio_persistenz': {
+            'audio_persistence': {
                 'load_path': ''
             },
-            'transcripts_persistenz': {
+            'transcripts_persistence': {
                 'load_path': ''
             },
             'plot': {
@@ -309,11 +309,11 @@ if __name__ == "__main__":
                 'info_file': step7_path + '/overview.csv',
                 'filter': clean_filter
             },
-            'transcripts_persistenz': {
+            'transcripts_persistence': {
                 'load_path': final_dataset_path,
                 'save_path': final_dataset_path_clean
             },
-            'audio_persistenz': {
+            'audio_persistence': {
                 'load_path': final_dataset_path,
                 'save_path': final_dataset_path_clean
             },

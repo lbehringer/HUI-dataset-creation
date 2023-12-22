@@ -5,7 +5,7 @@ from huiAudioCorpus.utils.PathUtil import PathUtil
 import pandas as pd
 import os
 
-class TranscriptsPersistenz:
+class TranscriptsPersistence:
     def __init__(self, load_path:str, save_path: str = None, file_extension:str = 'csv'):
         self.save_path = load_path if save_path is None else save_path
         self.load_path = load_path

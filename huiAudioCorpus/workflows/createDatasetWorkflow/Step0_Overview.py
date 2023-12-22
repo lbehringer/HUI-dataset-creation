@@ -1,14 +1,14 @@
 from huiAudioCorpus.utils.PathUtil import PathUtil
-from huiAudioCorpus.persistenz.AudiosFromLibrivoxPersistenz import AudiosFromLibrivoxPersistenz
+from huiAudioCorpus.persistence.AudiosFromLibrivoxPersistence import AudiosFromLibrivoxPersistence
 from huiAudioCorpus.utils.DoneMarker import DoneMarker
 from tqdm import tqdm
 import os
 
 class Step0_Overview:
 
-    def __init__(self, audios_from_librivox_persistenz: AudiosFromLibrivoxPersistenz, save_path: str, path_util: PathUtil, request_url: str = None, language: str ="English"):
+    def __init__(self, audios_from_librivox_persistence: AudiosFromLibrivoxPersistence, save_path: str, path_util: PathUtil, request_url: str = None, language: str ="English"):
         self.save_path = save_path
-        self.audios_from_librivox_persistenz = audios_from_librivox_persistenz
+        self.audios_from_librivox_persistence = audios_from_librivox_persistence
         self.path_util = path_util
         self.request_url = request_url
         self.language = language
@@ -69,7 +69,7 @@ class Step0_Overview:
         librivox_path = self.save_path + '/booksLibrivox.json'
         if not os.path.isfile(librivox_path):
             print('Download Overview from Librivox')
-            books_librivox  = self.audios_from_librivox_persistenz.get_ids(request_url=request_url)
+            books_librivox  = self.audios_from_librivox_persistence.get_ids(request_url=request_url)
             self.path_util.save_json(librivox_path, books_librivox)
 
         books_librivox = self.path_util.load_json(librivox_path)
@@ -107,7 +107,7 @@ class Step0_Overview:
             # write gutenberg-hosted books to file
             print("Processing books with Gutenberg-hosted texts.")
             for book in tqdm(gutenberg_books):
-                chapters, _ = self.audios_from_librivox_persistenz.get_chapters(book['title'], get_download_links=False)
+                chapters, _ = self.audios_from_librivox_persistence.get_chapters(book['title'], get_download_links=False)
                 book['chapters'] = []
                 for idx, chapter in chapters.iterrows():
                     book['chapters'].append({
@@ -122,7 +122,7 @@ class Step0_Overview:
             if not only_use_gutenberg_books:
                 print("Processing books with texts from other hosts.")
                 for book in tqdm(non_gutenberg_books):
-                    chapters, _ = self.audios_from_librivox_persistenz.get_chapters(book['title'], get_download_links=False)
+                    chapters, _ = self.audios_from_librivox_persistence.get_chapters(book['title'], get_download_links=False)
                     book['chapters'] = []
                     for idx, chapter in chapters.iterrows():
                         book['chapters'].append({
