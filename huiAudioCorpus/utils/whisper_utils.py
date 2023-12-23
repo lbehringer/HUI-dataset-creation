@@ -104,6 +104,11 @@ LANGUAGES = {
 
 def get_language_code(language):
     for lang_abbr, lang_expanded in LANGUAGES.items():
-        if language == lang_expanded:
+        if language.lower() == lang_expanded:
             return lang_abbr
     return language
+
+def get_language_expanded(lang_abbr):
+    if lang_abbr in LANGUAGES.keys():
+        return LANGUAGES[lang_abbr]
+    return lang_abbr

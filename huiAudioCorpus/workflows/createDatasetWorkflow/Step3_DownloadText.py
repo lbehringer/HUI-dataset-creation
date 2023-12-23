@@ -2,7 +2,7 @@
 from huiAudioCorpus.persistence.GutenbergBookPersistence import GutenbergBookPersistence
 from huiAudioCorpus.utils.DoneMarker import DoneMarker
 
-class Step3DownloadText:
+class Step3_DownloadText:
 
     def __init__(self, gutenberg_book_persistence: GutenbergBookPersistence, save_path: str):
         self.save_path = save_path

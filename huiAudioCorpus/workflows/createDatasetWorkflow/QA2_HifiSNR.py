@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 import soundfile as sf
 from copy import deepcopy
 
-class QA2HifiSNR:
+class QA2_HifiSNR:
     def __init__(
             self, 
             audio_persistence: AudioPersistence, 

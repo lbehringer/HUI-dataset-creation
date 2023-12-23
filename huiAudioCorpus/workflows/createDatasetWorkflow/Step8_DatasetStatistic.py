@@ -7,14 +7,14 @@ from typing import List
 from huiAudioCorpus.ui.Plot import Plot
 from pandas_profiling import ProfileReport
 
-class Step8DatasetStatistic:
-    def __init__(self, save_path: str, load_path: str, special_speakers: List[str], data_filter, path_util: PathUtil,
+class Step8_DatasetStatistic:
+    def __init__(self, save_path: str, load_path: str, special_speakers: List[str], filter, path_util: PathUtil,
                  audio_statistic_component: AudioStatisticComponent, text_statistic_component: TextStatisticComponent, plot: Plot):
         self.save_path = save_path
         self.path_util = path_util
         self.load_path = load_path
         self.special_speakers = special_speakers
-        self.data_filter = data_filter
+        self.filter = filter
         self.audio_statistic_component = audio_statistic_component
         self.text_statistic_component = text_statistic_component
         self.plot = plot
@@ -29,9 +29,9 @@ class Step8DatasetStatistic:
 
         print('Audios before: ', raw_data.shape[0])
         info_text = " - full"
-        if self.data_filter is not None:
+        if self.filter is not None:
             info_text = " - clean"
-            raw_data = self.data_filter(raw_data)
+            raw_data = self.filter(raw_data)
         print('Audios after: ', raw_data.shape[0])
 
         print(raw_data)

@@ -1,6 +1,7 @@
 from huiAudioCorpus.utils.PathUtil import PathUtil
 from huiAudioCorpus.persistence.AudiosFromLibrivoxPersistence import AudiosFromLibrivoxPersistence
 from huiAudioCorpus.utils.DoneMarker import DoneMarker
+from huiAudioCorpus.utils.whisper_utils import get_language_code, get_language_expanded
 from tqdm import tqdm
 import os
 
@@ -157,7 +158,7 @@ class Step0_Overview:
         Returns a boolean."""
         if book['totaltimesecs']<=0:
             return False
-        if book['language'] != self.language:
+        if book['language'] not in [self.language, get_language_expanded(self.language)]:
             return False
         return True
     
@@ -173,6 +174,7 @@ class Step0_Overview:
             for book in usable_books:
                 book_title = book['title']
                 catalog_date = book['catalog_date']
+                language = get_language_code(book['language'])
                 # determine if book is solo or collaborative reading
                 readers = set([chapter['reader'] for chapter in book['chapters']])
                 solo_reading = len(readers) == 1
@@ -206,6 +208,7 @@ class Step0_Overview:
                             'librivox_book_name': book_title,
                             'gutenberg_id': gutenberg_id,
                             'catalog_date': catalog_date,
+                            'language': language,
                             'gutenberg_start': '',
                             'gutenberg_end': '',
                             'text_replacement':{}

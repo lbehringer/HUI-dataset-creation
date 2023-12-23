@@ -6,7 +6,7 @@ from huiAudioCorpus.persistence.AudioPersistence import AudioPersistence
 from huiAudioCorpus.persistence.TranscriptsPersistence import TranscriptsPersistence
 from tqdm import tqdm
 
-class Step6FinalizeDataset:
+class Step6_FinalizeDataset:
 
     def __init__(self, save_path: str, chapter_path: str, audio_persistence: AudioPersistence, transcripts_persistence: TranscriptsPersistence, transcripts_selection_transformer: TranscriptsSelectionTransformer):
         self.save_path = save_path

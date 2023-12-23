@@ -7,7 +7,7 @@ import numpy as np
 from tqdm import tqdm
 import whisper
 # from whisper.tokenizer import get_tokenizer
-# from huiAudioCorpus.utils.whisper_utils import get_language_code
+from huiAudioCorpus.utils.whisper_utils import get_language_code
 
 try:
     from deepspeech import Model
@@ -17,13 +17,13 @@ except:
 from huiAudioCorpus.sttInference import deepspeechModel
 
 class AudioToSentenceConverter:
-    def __init__(self, use_whisper=True, whisper_decode_lang="fr"):
+    def __init__(self, language, use_whisper=True):
         self.model = None
         self.use_whisper = use_whisper
         if self.use_whisper:
             self.whisper_sr = 16000
-            self.whisper_sr_transformer = AudioSamplingRateTransformer(targetSamplingRate=self.whisper_sr)
-            self.decode_lang = whisper_decode_lang
+            self.whisper_sr_transformer = AudioSamplingRateTransformer(target_sampling_rate=self.whisper_sr)
+            self.language = get_language_code(language)
             # self.tokenizer = get_tokenizer(multilingual=True, language=whisper_decode_lang)
             # get number tokens so we can suppress them to enforce literal transcription (cf. https://github.com/openai/whisper/discussions/1041)
             # this helps with getting correct transcriptions for languages in which numbers can be pronounced in various ways
@@ -36,7 +36,7 @@ class AudioToSentenceConverter:
             self.model_path = deepspeechModel.__path__[0]
         
 
-    def convert(self, audio: Audio, sampling_rate:int = 15000):
+    def convert(self, audio: Audio):
         if self.use_whisper:
             if self.model is None:
                 print("Loading Whisper model")
@@ -44,7 +44,7 @@ class AudioToSentenceConverter:
             audio_sampling_rate_transformer = self.whisper_sr_transformer
             audio_sampled = audio_sampling_rate_transformer.transform(audio)
             # decode_options = {"language": self.decode_lang, "suppress_tokens": [-1] + self.number_tokens}
-            decode_options = {"language": self.decode_lang}
+            decode_options = {"language": self.language}
             transcript = self.model.transcribe(audio_sampled.time_series, **decode_options)["text"]
         else:
             if self.model is None:

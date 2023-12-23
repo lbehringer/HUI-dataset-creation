@@ -12,7 +12,7 @@ from tqdm import tqdm
 import numpy as np
 from joblib import Parallel, delayed
 
-class Step4TranscriptAudio:
+class Step4_TranscriptAudio:
 
     def __init__(self, save_path: str, audio_to_sentence_converter: AudioToSentenceConverter, audio_persistence: AudioPersistence, transcripts_persistence: TranscriptsPersistence, number_worker=4):
         self.save_path = save_path
@@ -36,6 +36,7 @@ class Step4TranscriptAudio:
         results = [[sentence.id, sentence.sentence] for sentence in results]
 
         df = DataFrame(results)
+        df.columns = ['id', 'asr_sentence']
         transcripts = Transcripts(df, 'transcripts', 'transcripts')
         self.transcripts_persistence.save(transcripts)
 

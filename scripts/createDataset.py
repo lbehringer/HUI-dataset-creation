@@ -7,7 +7,7 @@ import os
 
 
 path_util = PathUtil()
-base_path = create_dataset_config.__path__[0]  # type: ignore
+base_path = createDatasetConfig.__path__[0]  # type: ignore
 
 # set external path where database should be created
 external_paths = ["/mnt/c/Users/lyone/Documents/_ComputationalLinguistics/HUI_accent/HUI-Audio-Corpus-German/database"]
@@ -36,6 +36,7 @@ friedrich = path_util.load_json(base_path + '/Friedrich.json')
 eva = path_util.load_json(base_path + '/Eva.json')
 karlsson = path_util.load_json(base_path + '/Karlsson.json')
 sonja = path_util.load_json(base_path + '/Sonja.json')
+christian_culp = path_util.load_json(os.path.join(base_path, 'Christian_Culp_latest.json'))
 
 all_libribox_ids = [author[key]['librivox_book_name'] for author in [
     bernd, hokuspokus, friedrich, eva, karlsson, redaer] for key in author]
@@ -46,9 +47,10 @@ if len(duplicate_ids) > 0:
 
 # configure this object to only create a single speaker
 # all_configs = {**bernd, **hokuspokus, **friedrich, **eva, **karlsson, **sonja}
-all_configs = sonja
-# all_configs = friedrich
+# all_configs = sonja
+all_configs = friedrich
 # all_configs = redaer
+all_configs = christian_culp
 
 # this is needed for the statistic and split into others
 special_speakers = ['Bernd_Ungerer', 'Eva_K', 'Friedrich', 'Hokuspokus', 'Karlsson']
@@ -74,7 +76,7 @@ step8_path_clean = data_base_path + '/dataset_statistic_clean'
 
 def clean_filter(input):
     """Described in the HUI paper in section 4.2"""
-    input = input[input['min_silence_db'] < -50]
+    input = input[input['min_silence_db'] < -47]
     input = input[input['silence_percent'] < 45]
     input = input[input['silence_percent'] > 10]
     return input
@@ -96,6 +98,7 @@ def run_workflow(params: Dict, workflow_config: Dict):
     step3_1_path_text  = step3_1_path + '/text.txt'
 
     step4_path  = book_base_path + params['title'] + '/Step4_TranscriptAudio'
+    step4_1_path = os.path.join(book_base_path + params['title'], "step4_1_normalize_transcript")
     step5_path  = book_base_path + params['title'] + '/Step5_AlignText'
     step6_path  = book_base_path + params['title'] + '/Step6_FinalizeDataset'
         
@@ -189,11 +192,27 @@ def run_workflow(params: Dict, workflow_config: Dict):
             'audio_persistence': {
                 'load_path': step2_path_audio
             },
+            'audio_to_sentence_converter': {
+                'language': params['language']
+            },
             'transcripts_persistence': {
                 'load_path': step4_path,
             }
         }
         DependencyInjection(config).step4_transcript_audio.run()
+
+        log_step('step4_1_normalize_transcript')
+        config = {
+            "step4_1_normalize_transcript": {
+                'save_path': step4_1_path,
+                'text_replacement': params['text_replacement'],
+            },
+            "transcripts_persistence": {
+                "load_path": step4_path,
+                "save_path": step4_1_path
+            }
+        }
+        DependencyInjection(config).step4_1_normalize_transcript.run()
 
     if workflow_config['align_text']:
         log_step('step5_align_text')
@@ -203,7 +222,7 @@ def run_workflow(params: Dict, workflow_config: Dict):
                 'text_to_align_path': step3_1_path_text
             },
             'transcripts_persistence': {
-                'load_path': step4_path,
+                'load_path': step4_1_path,
                 'save_path': step5_path
             }
         }

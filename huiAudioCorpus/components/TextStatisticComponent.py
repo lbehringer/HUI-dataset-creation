@@ -20,7 +20,7 @@ class TextStatisticComponent:
 
     def get_statistic(self, raw_data):
         descriptions = ['Words count in audio', 'Chars count in audio']
-        ids = ['wordCount', 'charCount']
+        ids = ['word_count', 'char_count']
         statistics = {}
         for column in raw_data:
             if column not in ids:
@@ -51,8 +51,8 @@ class TextStatisticComponent:
         return statistics, raw_data, counter, unique_words_with_minimum
 
     def load_text_files(self):
-        all_sentences = [sentence for transcripts in tqdm(self.transcripts_persistence.load_all(), total=len(self.transcripts_persistence.get_ids())) for sentence in  self.transcripts_to_sentences_converter.convert(transcripts)]
+        all_sentences = [sentence for transcripts in tqdm(self.transcripts_persistence.load_all(), total=len(self.transcripts_persistence.get_ids())) for sentence in self.transcripts_to_sentences_converter.convert(transcripts)]
         result = [[sentence.id.split("\\")[-1].split("/")[-1], sentence.words_count, sentence.char_count, sentence.sentence] for sentence in  tqdm(all_sentences)]
-        raw_data = DataFrame(result, columns=['id', 'wordCount', 'charCount', 'text'])
+        raw_data = DataFrame(result, columns=['id', 'word_count', 'char_count', 'text'])
         raw_data = raw_data.set_index('id')
         return raw_data

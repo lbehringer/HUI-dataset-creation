@@ -5,7 +5,7 @@ from huiAudioCorpus.calculator.AlignSentencesIntoTextCalculator import AlignSent
 from huiAudioCorpus.persistence.TranscriptsPersistence import TranscriptsPersistence
 from huiAudioCorpus.utils.DoneMarker import DoneMarker
 
-class Step5AlignText:
+class Step5_AlignText:
 
     def __init__(self, save_path: str, align_sentences_into_text_calculator: AlignSentencesIntoTextCalculator, transcripts_persistence: TranscriptsPersistence, text_to_align_path: str):
         self.save_path = save_path
@@ -20,8 +20,8 @@ class Step5AlignText:
 
     def script(self):
         # load (normalized) ASR-generated transcripts (from step 4_1)
-        transcripts = list(self.transcripts_persistence.load_all())
-        sentences = transcripts[0].sentences()
+        transcripts = next(iter(self.transcripts_persistence.load_all()))
+        sentences = transcripts.sentences()
 
         # load prepared source text (from step 3_1)
         with open(self.text_to_align_path, 'r', encoding='utf8') as f:
@@ -45,10 +45,12 @@ class Step5AlignText:
 
         results = [[align.source_text.id, align.aligned_text.sentence, align.source_text.sentence, align.distance] for align in alignments if align.is_perfect]
         csv = DataFrame(results)
+        csv.columns = ['id', 'aligned_text_sentence', 'source_text_sentence', 'alignment_distance']      
         transcripts = Transcripts(csv, 'transcripts', 'transcripts')
         self.transcripts_persistence.save(transcripts)
 
         results_not_perfect = [[align.source_text.id, align.aligned_text.sentence, align.source_text.sentence, align.distance] for align in alignments if not align.is_perfect]
         csv = DataFrame(results_not_perfect)
+        csv.columns = ['id', 'aligned_text_sentence', 'source_text_sentence', 'alignment_distance']
         transcripts = Transcripts(csv, 'transcripts_not_perfect', 'transcripts_not_perfect')
         self.transcripts_persistence.save(transcripts)

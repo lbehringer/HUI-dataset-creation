@@ -40,5 +40,5 @@ class AudioStatisticComponent:
     def load_audio(self, audio_id: str):
         audio = self.audio_persistence.load(audio_id)
         return [audio.id.split("\\")[-1].split("/")[-1], round(audio.duration, 1), round(audio.loudness, 1),
-                round(audio.silence_DB, 1), audio.sampling_rate, round(audio.silence_percent * 100),
+                round(audio.silence_db, 1), audio.sampling_rate, round(audio.silence_percent * 100),
                 round(audio.average_frequency)]

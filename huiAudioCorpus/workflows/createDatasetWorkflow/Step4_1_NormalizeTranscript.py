@@ -11,7 +11,7 @@ import numpy as np
 import pandas as pd
 from joblib import Parallel, delayed
 
-class Step4_1NormalizeTranscript:
+class Step4_1_NormalizeTranscript:
 
     def __init__(self, save_path: str, text_replacement: Dict[str, str], transcripts_persistence: TranscriptsPersistence):
         self.save_path = save_path
@@ -31,7 +31,7 @@ class Step4_1NormalizeTranscript:
             normalized_transcripts = []
             for _, row in tqdm(df.iterrows(), total=df.shape[0], desc="Normalizing transcript"):
                 normalized_transcripts.append(self.replace(row[1], self.text_replacement))
-            df[1] = normalized_transcripts
+            df['asr_sentence'] = normalized_transcripts
             t.transcripts = df
 
             self.transcripts_persistence.save(t)

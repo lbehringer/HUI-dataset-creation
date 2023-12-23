@@ -10,7 +10,7 @@ from nemo_text_processing.text_normalization import Normalizer
 
 class Step3_1_PrepareText:
 
-    def __init__(self, save_path: str, load_file: str, save_file: str, start_sentence: str, end_sentence: str, text_replacement: Dict[str, str], text_normalizer: TextNormalizer, moves: List[Dict[str, str]], removes: List[Dict[str, str]], language: str = "en"):
+    def __init__(self, save_path: str, load_file: str, save_file: str, start_sentence: str, end_sentence: str, text_replacement: Dict[str, str], text_normalizer: TextNormalizer, moves: List[Dict[str, str]], remove: List[Dict[str, str]], language: str = "en"):
         self.save_path = save_path
         self.text_normalizer = text_normalizer
         self.load_file = load_file
@@ -21,7 +21,7 @@ class Step3_1_PrepareText:
         self.start_sentence = start_sentence
         self.end_sentence = end_sentence
         self.moves = moves
-        self.removes = removes
+        self.removes = remove
         self.language = language
 
     def run(self):
@@ -31,17 +31,19 @@ class Step3_1_PrepareText:
         input_text = self.path_util.load_file(self.load_file)
         cut_text = self.cut_text(input_text, self.start_sentence, self.end_sentence)
         removed_text = self.remove(cut_text, self.removes)
-        # TODO: Figure out why Nemo Normalizer doesn't work in French
-        # lines = removed_text.split("\n")
-        # nemo_norm = Normalizer(
-        #     input_case="cased", 
-        #     lang=self.language,
-        #     )
-        # normalized = nemo_norm.normalize_list(lines)
-        # normalized = "\n".join(normalized)
-        # moved_text = self.move(normalized, self.moves)
-        replaced_text = self.replace(removed_text, self.text_replacement)
-        moved_text = self.move(replaced_text, self.moves)
+        if self.language == "en" or "de":
+            # TODO: Figure out why Nemo Normalizer doesn't work in French
+            lines = removed_text.split("\n")
+            nemo_norm = Normalizer(
+                input_case="cased", 
+                lang=self.language,
+                )
+            normalized = nemo_norm.normalize_list(lines)
+            normalized = "\n".join(normalized)
+            moved_text = self.move(normalized, self.moves)
+        else:
+            replaced_text = self.replace(removed_text, self.text_replacement)
+            moved_text = self.move(replaced_text, self.moves)
         self.path_util.write_file(moved_text, self.save_file)
 
     def move(self, text: str, moves: List[Dict[str, str]]):

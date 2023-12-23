@@ -6,18 +6,19 @@ from huiAudioCorpus.persistence.AudioPersistence import AudioPersistence
 from huiAudioCorpus.transformer.AudioSamplingRateTransformer import AudioSamplingRateTransformer
 from tqdm.std import tqdm
 import pandas as pd
+import os
 
-class Step9GenerateCleanDataset:
+class Step9_GenerateCleanDataset:
 
     def __init__(self, save_path: str, info_file: str, audio_persistence: AudioPersistence, transcripts_persistence: TranscriptsPersistence,
-                 audio_sampling_rate_transformer: AudioSamplingRateTransformer, transcripts_selection_transformer: TranscriptsSelectionTransformer, data_filter):
+                 audio_sampling_rate_transformer: AudioSamplingRateTransformer, transcripts_selection_transformer: TranscriptsSelectionTransformer, filter):
         self.audio_sampling_rate_transformer = audio_sampling_rate_transformer
         self.audio_persistence = audio_persistence
         self.transcripts_persistence = transcripts_persistence
         self.transcripts_selection_transformer = transcripts_selection_transformer
         self.save_path = save_path
         self.info_file = info_file
-        self.data_filter = data_filter
+        self.filter = filter
 
     def run(self):
         done_marker = DoneMarker(self.save_path)
@@ -26,13 +27,17 @@ class Step9GenerateCleanDataset:
 
     def script(self):
         df = pd.read_csv(self.info_file, sep='|', index_col=0)
+        book = df.index[0].split("_")[0]
+        speaker = df.loc[df.index[0], 'speaker']
+        self.transcripts_persistence.load_path = os.path.join(self.transcripts_persistence.load_path, speaker, book)
+        self.transcripts_persistence.save_path = os.path.join(self.transcripts_persistence.save_path, speaker, book)
         try:
             df = df.set_index('id')
         except:
             pass
 
         print('Audios before: ', df.shape[0])
-        filtered_audios = self.data_filter(df)
+        filtered_audios = self.filter(df)
         print('Audios after: ', filtered_audios.shape[0])
         audios_allowed = filtered_audios.index.tolist()
 

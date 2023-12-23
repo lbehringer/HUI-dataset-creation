@@ -21,16 +21,16 @@ class TranscriptsPersistence:
     
     def load(self, transcript_id: str):
         target_path = self.load_path +'/' +  transcript_id + '.' + self.file_extension
-        df = pd.read_csv(target_path, sep='|', header=None) # type: ignore
+        df = pd.read_csv(target_path, sep='|') # type: ignore
         name = self.path_util.filename_without_extension(target_path)
         transcripts = Transcripts(df, transcript_id, name)
         return transcripts
     
     def save(self, transcripts: Transcripts):
-        target_path = self.save_path +'/' +  transcripts.transcript_id + '.' + self.file_extension
+        target_path = self.save_path +'/' +  transcripts.id + '.' + self.file_extension
         self.path_util.create_folder_for_file(target_path)
         trans = transcripts.transcripts
-        trans.to_csv(target_path, sep='|', header=None, index=False) # type: ignore
+        trans.to_csv(target_path, sep='|', index=False) # type: ignore
 
     def load_all(self):
         ids = self.get_ids()
