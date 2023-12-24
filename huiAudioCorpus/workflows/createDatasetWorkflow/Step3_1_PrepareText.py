@@ -31,7 +31,7 @@ class Step3_1_PrepareText:
         input_text = self.path_util.load_file(self.load_file)
         cut_text = self.cut_text(input_text, self.start_sentence, self.end_sentence)
         removed_text = self.remove(cut_text, self.removes)
-        if self.language == "en" or "de":
+        if self.language == "en":
             # TODO: Figure out why Nemo Normalizer doesn't work in French
             lines = removed_text.split("\n")
             nemo_norm = Normalizer(

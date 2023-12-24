@@ -50,7 +50,7 @@ if len(duplicate_ids) > 0:
 # all_configs = sonja
 all_configs = friedrich
 # all_configs = redaer
-all_configs = christian_culp
+# all_configs = christian_culp
 
 # this is needed for the statistic and split into others
 special_speakers = ['Bernd_Ungerer', 'Eva_K', 'Friedrich', 'Hokuspokus', 'Karlsson']
@@ -177,6 +177,7 @@ def run_workflow(params: Dict, workflow_config: Dict):
                 'text_replacement': params['text_replacement'],
                 'start_sentence': params['gutenberg_start'],
                 'end_sentence': params['gutenberg_end'],
+                'language': params['language'],
                 'moves': params['moves'] if 'moves' in params else [],
                 'remove': params['remove'] if 'remove' in params else []
             }
