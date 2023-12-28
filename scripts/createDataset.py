@@ -76,7 +76,7 @@ step8_path_clean = data_base_path + '/dataset_statistic_clean'
 
 def clean_filter(input):
     """Described in the HUI paper in section 4.2"""
-    input = input[input['min_silence_db'] < -47]
+    input = input[input['min_silence_db'] < -50]
     input = input[input['silence_percent'] < 45]
     input = input[input['silence_percent'] > 10]
     return input

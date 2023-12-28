@@ -15,31 +15,31 @@ class AudioSplitTransformer:
     def transform(self, audio: Audio, book_name: str, chapter: int):
         """Splits an Audio (i.e. one book chapter) into Audios within the min/max duration thresholds and assigns them IDs.
         Returns the split Audios as a list."""
-        splitted = self.split_with_best_dezibel(audio, self.max_audio_duration - self.min_audio_duration)
+        splitted = self.split_with_best_decibel(audio, self.max_audio_duration - self.min_audio_duration)
         splitted = self.merge_audio_to_target_duration(splitted, self.min_audio_duration)
         merged = self.merge_last_audio_if_too_short(splitted, self.min_audio_duration)
         with_ids = self.set_ids(merged, book_name, chapter)
         with_fading = self.fade(with_ids)
         return with_ids
 
-    def split_with_best_dezibel(self, audio: Audio, max_audio_duration: float):
+    def split_with_best_decibel(self, audio: Audio, max_audio_duration: float):
         """Determine the highest-possible db threshold for getting audio splits that stay below the maximum audio duration.
         Returns list of non-silent Audio splits below the maximum audio duration."""
         splitted_audio: List[Audio] = []
         max_duration: float = 0
-        for silence_dezibel in range(70, -20, -5):
-            splitted_audio = self.split(audio, silence_dezibel)
+        for silence_decibel in range(70, -20, -5):
+            splitted_audio = self.split(audio, silence_decibel)
             max_duration = max([audio.duration for audio in splitted_audio])
             if max_duration < max_audio_duration:
-                print(audio.name, 'used DB:', silence_dezibel)
+                print(audio.name, 'used DB:', silence_decibel)
                 return splitted_audio
         return splitted_audio
 
-    def split(self, audio: Audio, silence_dezibel: int):
-        """Splits an Audio instance into non-silent intervals, based on a threshold `silence_dezibel`. 
+    def split(self, audio: Audio, silence_decibel: int):
+        """Splits an Audio instance into non-silent intervals, based on a threshold `silence_decibel`. 
         Returns list of non-silent Audio splits derived from the input Audio."""
         frame_length = int(self.silence_duration_in_seconds * audio.sampling_rate)
-        splitted = librosa.effects.split(y=audio.time_series, top_db=silence_dezibel, frame_length=frame_length, hop_length=int(frame_length/4))
+        splitted = librosa.effects.split(y=audio.time_series, top_db=silence_decibel, frame_length=frame_length, hop_length=int(frame_length/4))
         audios = []
         for i in range(len(splitted)):
             (start, end) = splitted[i]

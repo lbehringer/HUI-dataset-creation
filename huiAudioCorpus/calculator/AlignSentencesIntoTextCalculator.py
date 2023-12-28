@@ -53,7 +53,6 @@ class AlignSentencesIntoTextCalculator:
             additional_range = 0
             distance_threshold = 0.2
             for asr_sent in tqdm(sentences_to_align):
-
                 range_start = max(0, start - word_range - additional_range)
                 range_end = min(range_start + 2 * (word_range + additional_range) + asr_sent.words_count, original_text.words_count + 1)
 

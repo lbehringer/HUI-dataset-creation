@@ -20,7 +20,7 @@ class AudioStatisticComponent:
         descriptions = ['Length in seconds', 'Loudness in DB', 'Minimum silence in DB', 'Sampling rate in Hz', 'Silence in percent', 'Average frequency in Hz']
         statistics = {}
         for column in raw_data:
-            if column not in self.columns:
+            if column not in self.columns or column == 'id':
                 continue
             statistics[column] = {
                 'name': column,

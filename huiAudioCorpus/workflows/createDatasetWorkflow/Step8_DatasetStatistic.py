@@ -78,7 +78,7 @@ class Step8_DatasetStatistic:
         extract_histogram = lambda hist: {'bins': hist.bins, 'values': hist.values}
 
         for statistic in statistics.values():
-            if statistic['name'] == 'samplingrate':
+            if statistic['name'] == 'sampling_rate':
                 continue
             self.plot.histogram(statistic['histogram'], statistic['description'])
             self.plot.save_path = save_path

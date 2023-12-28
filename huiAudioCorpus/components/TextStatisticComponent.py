@@ -37,7 +37,7 @@ class TextStatisticComponent:
             unique_words_with_minimum = {}
 
         else:
-            counter = Counter([word for sentence in tqdm(raw_data['text']) for word in Sentence(sentence).wordsWithoutPunct])
+            counter = Counter([word for sentence in tqdm(raw_data['text']) for word in Sentence(sentence).words_without_punct])
 
             counter_values = counter.values()
             unique_words_with_minimum = {}

@@ -2,6 +2,8 @@ from os import error
 from textblob import TextBlob
 from huiAudioCorpus.utils.ModelToStringConverter import ToString
 from typing import List, Union
+from string import punctuation
+import re
 
 class Sentence(ToString):
     """
@@ -33,7 +35,7 @@ class Sentence(ToString):
 
         self.words_count = len(self.words_without_punct)
         self.char_count = len(self.sentence)
-        self.words_matching_with_chars = self.generate_words_matching_with_chars(self.words, self.words_without_punct)
+        self.words_matching_with_punct = self.generate_words_matching_with_punct(self.words, self.words_without_punct)
         self.raw_chars = "".join(self.words_without_punct)
 
 
@@ -67,11 +69,20 @@ class Sentence(ToString):
         """        
 
         words = list(text_blob.tokenize())
+        for idx, word in enumerate(words):
+            # we need to double-check that punctuation was correctly split (TextBlob.tokenize() seems to have issues with hyphen)
+            if len(word) > 1:
+                # search for punctuation at the beginning of string which was not correctly tokenized
+                if re.search(r"^[\!\"#\$%&\'\(\)\*\+,\-\.\/:;<=>\?@\[\\\]\^_`{\|}~]", word):
+                    words[idx:idx+1] = (word[0], word[1:])
+                # search for punctuation at the end  of string
+                if re.search(r"[\!\"#\$%&\'\(\)\*\+,\-\.\/:;<=>\?@\[\\\]\^_`{\|}~]$", word):
+                    words[idx:idx+1] = (word[:-1], word[-1])     
         return words
     
     def __getitem__(self, k):
         """
-        Get an item from `words_matching_with_chars` at index k.
+        Get an item from `words_matching_with_punct` at index k.
 
         Params:
             k: the index of the item to retrieve
@@ -79,29 +90,29 @@ class Sentence(ToString):
         Returns:
             Sentence: a new Sentence object
         """
-        return Sentence(" ".join(self.words_matching_with_chars[k]))
+        return Sentence(" ".join(self.words_matching_with_punct[k]))
 
-    def generate_words_matching_with_chars(self, words:List[str], words_without_punct: List[str]):
+    def generate_words_matching_with_punct(self, words:List[str], words_without_punct: List[str]):
         """
-        Generate words matching with characters.
+        Generate words matching with punctuation.
 
         Params:
             words (List[str]): list of words
             words_without_punct (List[str]): list of words without punctuation
 
         Returns:
-            word_matching (List[str]): list of words matching with characters
+            word_matching (List[str]): list of words matching with punctuation
         """        
         word_matching = []
         word_pointer = 0
         for word in words:
-            if word_pointer<len(words_without_punct) and words_without_punct[word_pointer] == word.lower():
+            if word_pointer < len(words_without_punct) and words_without_punct[word_pointer] == word.lower():
                 word_pointer+=1
                 word_matching.append(word)
             else:
                 if len(word_matching) == 0:
                     continue
-                # if the last element of word_matching is longer than 1000, there is something wrong
+                # if the last element of word_matching has more than 1000 characters, there is something wrong
                 if len(word_matching[-1]) > 1000:
                     print(word_matching[-1])
                     raise Exception("Problems during creation of word matchings.")

@@ -120,7 +120,7 @@ class Step3_1_PrepareText:
             #"'": '',
             '"': ' ',
             '_': ' ',
-            #'-': ' ',
+            #'-': ' ', # hyphen is not correctly separated by TextBlob at the beginning of words, e.g. `-ja`
             ':': ':',
             '’': ' ',
             '‘': ' ',
