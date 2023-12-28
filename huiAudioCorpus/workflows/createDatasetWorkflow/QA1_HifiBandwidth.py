@@ -4,6 +4,7 @@ from huiAudioCorpus.model.Audio import Audio
 from huiAudioCorpus.transformer.AudioLoudnessTransformer import AudioLoudnessTransformer
 import librosa
 import numpy as np
+import pandas as pd
 
 class QA1_HifiBandwidth:
     def __init__(
@@ -14,10 +15,14 @@ class QA1_HifiBandwidth:
             seconds_to_analyze: int,
             analysis_offset: float,
             bandwidth_hz_threshold: int,
+            hifi_qa_load_path: str,
+            hifi_qa_save_path: str,
             audio_loudness_transformer: AudioLoudnessTransformer = None,
             ):
         self.audio_persistence = audio_persistence
         self.save_path = save_path
+        self.hifi_qa_load_path = hifi_qa_load_path
+        self.hifi_qa_save_path = hifi_qa_save_path
         self.book_name = book_name
         self.seconds_to_analyze = seconds_to_analyze
         self.analysis_offset = analysis_offset
@@ -29,14 +34,23 @@ class QA1_HifiBandwidth:
     
     def script(self):
         audios = self.audio_persistence.load_all(duration=self.seconds_to_analyze, offset=self.analysis_offset)
+        hifi_qa_stat_dict = {}
+
         for idx, audio in enumerate(audios):
             # only perform loudness normalization if specified in config
             if self.audio_loudness_transformer:
                 audio = self.audio_loudness_transformer.transform(audio)
-            audio.bandwidth = self.get_bandwidth(audio)
+            audio.bandwidth, lowest_hz, highest_hz = self.get_bandwidth(audio)
+            hifi_qa_stat_dict[idx] = [audio.id, audio.bandwidth, lowest_hz, highest_hz]
             # filter out audios which don't meet the minimum bandwidth threshold
             if audio.bandwidth >= self.bandwidth_hz_threshold:
                 self.audio_persistence.save(audio)
+
+        # save hifi_qa stats
+        hifi_step1_df = pd.read_csv(self.hifi_qa_load_path, sep="|")
+        hifi_qa_df = pd.DataFrame.from_dict(hifi_qa_stat_dict, orient="index", columns=["id", "bandwidth", "lowest_hz", "highest_hz"])
+        hifi_qa_df = hifi_step1_df.merge(hifi_qa_df, how="outer", on="id")
+        hifi_qa_df.to_csv(self.hifi_qa_save_path, sep="|", index=False)
 
     def set_x_seconds_id(self, audio: Audio, book_name: str, chapter: int, seconds_to_analyze):
         """Assigns an ID to an Audio object, following the format `<book_name>_<chapter>_<seconds_to_analyze>sec`. 
@@ -48,7 +62,7 @@ class QA1_HifiBandwidth:
 
     def get_bandwidth(self, audio: Audio):
         """Computes the bandwidth of a signal by finding the lowest and highest frequencies which are at least -50 dB relative to the peak value of the power spectrogram.
-        Returns the bandwidth as a float."""
+        Returns a tuple of floats bandwidth, lowest Hz, and highest Hz."""
         stft_result = librosa.stft(audio.time_series)
 
         # compute power spectrogram from magnitude of the STFT result
@@ -68,7 +82,7 @@ class QA1_HifiBandwidth:
             end_hz = librosa.fft_frequencies(sr=audio.sampling_rate)[bandwidth_end]
             # TODO: test correct function of bandwidth estimation
             print(f"{audio.id} | Estimated bandwidth: {start_hz:.2f} Hz to {end_hz:.2f} Hz | Mean of power spectrogram: {mean_power:.2f}")
-            return end_hz - start_hz
+            return end_hz - start_hz, start_hz, end_hz
         else:
             print("No continuous frequency range falls below the specified threshold.")
             return None

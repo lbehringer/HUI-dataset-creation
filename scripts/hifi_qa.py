@@ -110,6 +110,7 @@ def run_workflow(params: Dict, workflow_config: Dict):
 
     qa1_path = os.path.join(readers_base_path, params["reader"], "QA1_HifiBandwidth")
     qa1_path_audio = os.path.join(qa1_path, "audio")
+    qa1_path_hifi_qa = os.path.join(qa1_path, "hifi_qa.csv")
 
     qa2_path = os.path.join(readers_base_path, params["reader"], "QA2_HifiSNR")
     qa2_path_audio = os.path.join(qa2_path, "audio")
@@ -151,7 +152,9 @@ def run_workflow(params: Dict, workflow_config: Dict):
                 "book_name": params["title"],
                 "seconds_to_analyze": 30,
                 "analysis_offset": 30,
-                "bandwidth_hz_threshold": 13000
+                "bandwidth_hz_threshold": 13000,
+                "hifi_qa_load_path": step1_path_hifi_qa,
+                "hifi_qa_save_path": qa1_path_hifi_qa                
             },
         }
         DependencyInjection(config_qa1).qa1_hifi_bandwidth.run()

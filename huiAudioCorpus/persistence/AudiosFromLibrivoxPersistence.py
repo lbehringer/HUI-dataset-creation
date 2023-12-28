@@ -16,6 +16,7 @@ class AudiosFromLibrivoxPersistence:
                   save_path: str, 
                   chapter_path: str, 
                   hifi_qa_path: str = None,
+                  file_extension: str = None,
                   url: str = 'https://librivox.org/', 
                   solo_reading: bool = None, 
                   sections: Union[list, str] = None, 
@@ -42,8 +43,8 @@ class AudiosFromLibrivoxPersistence:
         chapters.to_csv(self.chapter_path)
 
         # save hifi_qa_stats
-        hifi_qa_stat_dict = {key: [self.book_name, self.reader, key, download_link_dict[key]] for key in sorted(download_link_dict)[:self.max_chapters_per_reader]}
-        hifi_qa_df = pd.DataFrame.from_dict(hifi_qa_stat_dict, orient='index', columns=['book_name', 'reader', 'section', 'section_url'])
+        hifi_qa_stat_dict = {key: [download_link_dict[key].split("/")[-1].split(".")[0], self.book_name, key, self.reader] for key in sorted(download_link_dict)[:self.max_chapters_per_reader]}
+        hifi_qa_df = pd.DataFrame.from_dict(hifi_qa_stat_dict, orient='index', columns=['id', 'book_name', 'section', 'reader'])
         hifi_qa_df.to_csv(self.hifi_qa_path, sep="|", index=False)
         
     def get_chapters(self, book_name: str, get_download_links):
