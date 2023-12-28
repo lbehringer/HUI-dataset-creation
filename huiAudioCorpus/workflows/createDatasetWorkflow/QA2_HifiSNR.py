@@ -70,8 +70,50 @@ class QA2_HifiSNR:
             else:
                 print(f"SNR {snr} is < required threshold ({snr_threshold}). Skipping {audio.id}")
             
-            # ... (remaining code unchanged)
+            """
+            for now, we don't store the speech-only or silence-only audio because 
+            the "uncut" samples get the highest WVMOS score
+            upsample_factor = audio.sampling_rate / self.target_sr
+            speech_signal_segments = [audio.time_series[int(ts['start']*upsample_factor):int(ts['end']*upsample_factor)] for ts in speech_timestamps]
+            silence_signal_segments =  [audio.time_series[int(ts['start']*upsample_factor):int(ts['end']*upsample_factor)] for ts in silence_timestamps]
+            speech_signal = np.concatenate(speech_signal_segments)
+            silence_signal = np.concatenate(silence_signal_segments)
+            speech_audio = deepcopy(audio)
+            silence_audio = deepcopy(audio)
+            speech_audio.time_series, speech_audio.id = speech_signal, audio.id+"speech"
+            silence_audio.time_series, silence_audio.id = silence_signal, audio.id+"silence"
+            self.audio_persistenz.save(speech_audio)
+            self.audio_persistenz.save(silence_audio)
+            """
 
+
+            """
+            For now, we don't use a butterworth filter because
+            we can instead compute the SNR for different frequency bands.
+            # generate 4 time_series, one for each frequency band that we want to analyze
+            # TODO: Is it better to just compute the mel spectrogram, "cut off" all frequencies outside the passband, and then do an inverse mel transform and an inverse STFT?
+            # design band-pass Butterworth filter
+            lowcut = 300
+            highcut = 4000
+            nyquist = 0.5 * audio.sampling_rate
+            low = lowcut / nyquist
+            high = highcut / nyquist
+            b, a = butter(N=4, Wn=[low, high], btype="bandpass")
+            # apply filter to signal
+            filtered_signal = lfilter(b, a, audio.time_series)
+            t = np.linspace(0, 1, len(audio.time_series), endpoint=False)  # Time vector
+            # Plot the original and filtered signals
+            plt.figure(figsize=(10, 6))
+            plt.plot(t, audio.time_series, label='Original Signal')
+            plt.plot(t, filtered_signal, label='Filtered Signal')
+            plt.xlabel('Time (s)')
+            plt.ylabel('Amplitude')
+            plt.legend()
+            plt.savefig("butterworth.png")
+            sf.write("original_audio.wav", audio.time_series, audio.sampling_rate)
+            sf.write("filtered_audio.wav", filtered_signal, audio.sampling_rate)
+            """
+            
     def load_vad_model(self):
         """Load Silero VAD model and corresponding functions"""
         self.vad_model, utils = torch.hub.load(repo_or_dir='snakers4/silero-vad',
@@ -98,12 +140,70 @@ class QA2_HifiSNR:
         self.vad_models[pid] = model
 
     def vad_process(self, audio: Audio):
-        """Adapted from https://github.com/snakers4/silero-vad"""
-        # ... (remaining code unchanged)
+        """Adapted from https://github.com/snakers4/silero-vad/blob/master/examples/parallel_example.ipynb.
+        Takes a loaded Audio object as input and splits it into speech chunks.
+        Returns
+        -------
+        speeches: list of dicts
+        list containing ends and beginnings of speech chunks (samples or seconds based on return_seconds)"""
+        audio = self.audio_sr_transformer.transform(audio=audio)
+
+        pid = multiprocessing.current_process().pid
+        wav = torch.from_numpy(audio.time_series)
+        with torch.no_grad():
+            # wav = self.read_audio(audio, sampling_rate=self.target_sr)
+            return self.get_speech_timestamps(
+                wav,
+                self.vad_model,
+                threshold=0.5,  # speech prob threshold
+                sampling_rate=self.target_sr,  # sample rate
+                min_speech_duration_ms=300,  # min speech duration in ms
+                # max_speech_duration_s=20,  # max speech duration in seconds
+                min_silence_duration_ms=400,  # min silence duration
+                window_size_samples=512,  # window size
+                speech_pad_ms=150,  # speech pad ms
+            )       
+
 
     def apply_vad(self, audio: Audio):
-        """Adapted from https://github.com/snakers4/silero-vad"""
-        # ... (remaining code unchanged)
+        """Adapted from https://github.com/snakers4/silero-vad/blob/master/examples/parallel_example.ipynb.
+        Takes a loaded Audio object as input and splits it into speech chunks.
+        Returns
+        -------
+        speech_timestamps: list of dicts
+            list containing ends and beginnings of speech chunks (samples or seconds based on return_seconds)
+        silence_timestamps: list of dicts
+            list containing ends and beginning of each silence chunk
+        """
+
+        audio = self.audio_sr_transformer.transform(audio=audio)
+        wav = torch.from_numpy(audio.time_series)
+        min_silence_duration_ms = 150
+        min_speech_duration_ms = 250
+        # get speech_timestamps with a config that will yield at least one speech chunk and at least one silence chunk
+        # we assume that a very short chunk (~10ms) for either speech or silence will result in a too low SNR so the sample will be filtered out        
+        while min_speech_duration_ms > 10 and min_silence_duration_ms > 10:        
+            with torch.no_grad():
+                speech_timestamps = self.get_speech_timestamps(
+                        wav,
+                        self.vad_model,
+                        threshold=0.5,  # speech prob threshold
+                        sampling_rate=self.target_sr,  # sample rate
+                        min_speech_duration_ms=min_speech_duration_ms,  # min speech duration in ms
+                        max_speech_duration_s=float('inf'),  # max speech duration in seconds
+                        min_silence_duration_ms=min_silence_duration_ms,  # min silence duration
+                        window_size_samples=512,  # window size
+                        speech_pad_ms=30,  # speech pad ms
+                    )
+
+            silence_timestamps = self.get_silence_timestamps(speech_timestamps)
+            if len(speech_timestamps) == 0:
+                min_speech_duration_ms = int(min_speech_duration_ms / 2)
+            if len(silence_timestamps) == 0:
+                min_silence_duration_ms = int(min_silence_duration_ms / 2)
+            else:
+                return speech_timestamps, silence_timestamps
+        return
 
     def get_silence_timestamps(self, speech_timestamps: list):
         """Takes as input a list of dicts `speech_timestamps`, containing "start" and "end" of each speech segment.
@@ -122,7 +222,20 @@ class QA2_HifiSNR:
 
     def get_snr(self, audio: Audio, speech_timestamps: list, silence_timestamps: list, lower_freq_threshold: float, upper_freq_threshold: float):
         """Estimates the signal-plus-noise power in speech segments and the noise power in silence segments, then computes the signal-to-noise ratio (SNR)."""
-        # ... (remaining code unchanged)
+        # get speech-only audio and silence-only audio
+        # upsample timestamps to match audio's sampling rate (factor is 1 if they already match)
+        upsample_factor = audio.sampling_rate / self.target_sr
+        speech_signal_segments = [audio.time_series[int(ts['start']*upsample_factor):int(ts['end']*upsample_factor)] for ts in speech_timestamps]
+        silence_signal_segments =  [audio.time_series[int(ts['start']*upsample_factor):int(ts['end']*upsample_factor)] for ts in silence_timestamps]
+        speech_signal = np.concatenate(speech_signal_segments)
+        silence_signal = np.concatenate(silence_signal_segments)
+
+        # get signal-plus-noise power in speech audio
+        speech_power = self.get_average_power(speech_signal, audio.sampling_rate, lower_freq_threshold, upper_freq_threshold)
+        # get noise power in silence audio
+        silence_power = self.get_average_power(silence_signal, audio.sampling_rate, lower_freq_threshold, upper_freq_threshold)
+        # compute SNR
+        return speech_power / silence_power
 
     def get_average_power(self, y: np.ndarray, sr: int, lower_freq_threshold: float, upper_freq_threshold: float):
         """Calculates the average power of an audio signal.
