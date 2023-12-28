@@ -2,10 +2,10 @@
     "vierzehnte_dezember": {
         "title": "vierzehnte_dezember",
         "librivox_book_name": "vierzehnte Dezember",
-        "GutenbergId": "mereschk/14dezemb/14dezemb.html",
-        "GutenbergStart": "",
-        "GutenbergEnd": "",
-        "textReplacement": {
+        "gutenberg_id": "mereschk/14dezemb/14dezemb.html",
+        "gutenberg_start": "",
+        "gutenberg_end": "",
+        "text_replacement": {
             "III.": "der dritte",
             "II.": "der zweite",
             "I.": "der erste",
@@ -53,10 +53,10 @@
     "lustige_geschichten": {
         "title": "lustige_geschichten",
         "librivox_book_name": "Lustige Geschichten",
-        "GutenbergId": "cechov/novel5/novel5.html",
-        "GutenbergStart": "",
-        "GutenbergEnd": "",
-        "textReplacement": {
+        "gutenberg_id": "cechov/novel5/novel5.html",
+        "gutenberg_start": "",
+        "gutenberg_end": "",
+        "text_replacement": {
             " d. h.": " das heißt ",
             " z. B.": " zum Beispiel ",
             " usw.": "  und so weiter",
@@ -83,10 +83,10 @@
     "saemtliche_schriften6": {
         "title": "saemtliche_schriften6",
         "librivox_book_name": "Sämtliche Schriften 1911-1921, Teil 6",
-        "GutenbergId": "ossietzk/schrift1/chap251.html",
-        "GutenbergStart": "",
-        "GutenbergEnd": "",
-        "textReplacement": {
+        "gutenberg_id": "ossietzk/schrift1/chap251.html",
+        "gutenberg_start": "",
+        "gutenberg_end": "",
+        "text_replacement": {
             " u.a.": " unter anderem ",
             " d.h.": " das heißt ",
             " z.B.": " zum Beispiel ",
@@ -146,10 +146,10 @@
     "saemtliche_schriften5": {
         "title": "saemtliche_schriften5",
         "librivox_book_name": "Sämtliche Schriften 1911-1921, Teil 5",
-        "GutenbergId": "ossietzk/schrift1/chap201.html",
-        "GutenbergStart": "",
-        "GutenbergEnd": "dieses Abends gelernt haben. Es wird noch einiges über diesen Trauerfall zu sagen sein.",
-        "textReplacement": {
+        "gutenberg_id": "ossietzk/schrift1/chap201.html",
+        "gutenberg_start": "",
+        "gutenberg_end": "dieses Abends gelernt haben. Es wird noch einiges über diesen Trauerfall zu sagen sein.",
+        "text_replacement": {
             " d. h.": " das heißt ",
             " usw.": "  und so weiter",
             " dgl.": " dergleichen ",
@@ -201,10 +201,10 @@
     "homo_sapiens": {
         "title": "homo_sapiens",
         "librivox_book_name": "Homo sapiens - Romantrilogie",
-        "GutenbergId": "przybysz/homosapi/homosapi.html",
-        "GutenbergStart": "",
-        "GutenbergEnd": "",
-        "textReplacement": {
+        "gutenberg_id": "przybysz/homosapi/homosapi.html",
+        "gutenberg_start": "",
+        "gutenberg_end": "",
+        "text_replacement": {
             "IV.": " vierten ",
             "ô": "o",
             "ó": "o",
@@ -230,10 +230,10 @@
     "aus_allen_winkeln": {
         "title": "aus_allen_winkeln",
         "librivox_book_name": "Aus allen Winkeln - Erzählungen",
-        "GutenbergId": "heiberg/erzaehlg/erzaehlg.html",
-        "GutenbergStart": "In einer der besten Gegenden der Stadt",
-        "GutenbergEnd": "",
-        "remapSort": [
+        "gutenberg_id": "heiberg/erzaehlg/erzaehlg.html",
+        "gutenberg_start": "In einer der besten Gegenden der Stadt",
+        "gutenberg_end": "",
+        "remap_sort": [
             5,
             7,
             13,
@@ -252,7 +252,7 @@
             2,
             3
         ],
-        "textReplacement": {
+        "text_replacement": {
             " H. ": " H ",
             " v.": " von ",
             "&": " und ",
@@ -283,10 +283,10 @@
     "falsches_geld": {
         "title": "falsches_geld",
         "librivox_book_name": "Falsches Geld",
-        "GutenbergId": "zapp/falsgeld/falsgeld.html",
-        "GutenbergStart": "",
-        "GutenbergEnd": "",
-        "textReplacement": {
+        "gutenberg_id": "zapp/falsgeld/falsgeld.html",
+        "gutenberg_start": "",
+        "gutenberg_end": "",
+        "text_replacement": {
             " d. h.": " das heißt ",
             " z. B.": " zum Beispiel ",
             " geb.": " geboren ",
@@ -342,36 +342,36 @@
     "judith_trachtenberg": {
         "title": "judith_trachtenberg",
         "librivox_book_name": "Judith Trachtenberg",
-        "GutenbergId": "franzos/trachten/trachten.html",
-        "GutenbergStart": "",
-        "GutenbergEnd": "",
-        "textReplacement": {
+        "gutenberg_id": "franzos/trachten/trachten.html",
+        "gutenberg_start": "",
+        "gutenberg_end": "",
+        "text_replacement": {
             "&": " und "
         }
     },
     "verbrechen": {
         "title": "verbrechen",
         "librivox_book_name": "Verbrechen",
-        "GutenbergId": "gorki/verbrec1/verbrec1.html",
-        "GutenbergStart": "",
-        "GutenbergEnd": "",
-        "textReplacement": {}
+        "gutenberg_id": "gorki/verbrec1/verbrec1.html",
+        "gutenberg_start": "",
+        "gutenberg_end": "",
+        "text_replacement": {}
     },
     "furchtbare_rache": {
         "title": "furchtbare_rache",
         "librivox_book_name": "Furchtbare Rache",
-        "GutenbergId": "gogol/rache/rache.html",
-        "GutenbergStart": "",
-        "GutenbergEnd": "",
-        "textReplacement": {}
+        "gutenberg_id": "gogol/rache/rache.html",
+        "gutenberg_start": "",
+        "gutenberg_end": "",
+        "text_replacement": {}
     },
     "gruene_nachtigall": {
         "title": "gruene_nachtigall",
         "librivox_book_name": "grüne Nachtigall und andere Novellen",
-        "GutenbergId": "kusmin/grnachti/grnachti.html",
-        "GutenbergStart": "Das grüne Haus glich so sehr",
-        "GutenbergEnd": "",
-        "textReplacement": {
+        "gutenberg_id": "kusmin/grnachti/grnachti.html",
+        "gutenberg_start": "Das grüne Haus glich so sehr",
+        "gutenberg_end": "",
+        "text_replacement": {
             "1811": "achtzehnhundertelf",
             "1.": "erstens",
             "2.": "zweitens",
