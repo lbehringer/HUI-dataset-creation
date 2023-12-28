@@ -1,11 +1,14 @@
 {
     "schrei": {
         "title": "schrei",
+        "solo_reading": true,
+        "sections": "all",
         "librivox_book_name": "Schrei",
-        "GutenbergId": "przybysz/schrei/schrei.html",
-        "GutenbergStart": "",
-        "GutenbergEnd": "",
-        "textReplacement": {
+        "gutenberg_id": "przybysz/schrei/schrei.html",
+        "gutenberg_start": "",
+        "gutenberg_end": "",
+        "language": "de",
+        "text_replacement": {
             " z. B.": " zum Beispiel ",
             " usw.": "  und so weiter"
         }
