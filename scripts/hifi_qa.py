@@ -54,8 +54,8 @@ all_configs = sonja
 # all_configs = friedrich
 # all_configs = redaer
 all_configs = christian_culp_latest
-all_configs = two_readers_latest
-all_configs = overview_20231215_212809
+#all_configs = two_readers_latest
+#all_configs = overview_20231215_212809
 
 # this is needed for the statistic and split into others
 special_speakers = ['Bernd_Ungerer', 'Eva_K', 'Friedrich', 'Hokuspokus', 'Karlsson']
@@ -94,6 +94,7 @@ def run_workflow(params: Dict, workflow_config: Dict):
     step1_path = os.path.join(readers_base_path, params["reader"], "Step1_DownloadAudio")
     step1_path_audio = step1_path + '/audio'
     step1_path_chapter = step1_path + '/chapter.csv'
+    step1_path_hifi_qa = step1_path + '/hifi_qa.csv'
     step2_path = os.path.join(readers_base_path, params["reader"], "Step2_SplitAudio")
     step2_1_path = os.path.join(readers_base_path, params["reader"], "Step2_1_AudioStatistic")
 
@@ -120,11 +121,13 @@ def run_workflow(params: Dict, workflow_config: Dict):
         log_step('Step1_DownloadAudio')
         config_step1 = {
             'audios_from_librivox_persistence': {
+                'reader': params['reader'],
                 'book_name': params['librivox_book_name'],
                 'solo_reading': params['solo_reading'],
                 'sections': params['sections'],
                 'save_path': step1_path_audio + '/',
                 'chapter_path': step1_path_chapter,
+                'hifi_qa_path': step1_path_hifi_qa,
                 'max_chapters_per_reader': 2
             },
             'step1_download_audio': {

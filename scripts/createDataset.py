@@ -106,6 +106,7 @@ def run_workflow(params: Dict, workflow_config: Dict):
         log_step('step1_download_audio')
         config = {
             'audios_from_librivox_persistence': {
+                'reader': params['reader'],
                 'book_name': params['librivox_book_name'],
                 'solo_reading': params['solo_reading'],
                 'sections': params['sections'],
