@@ -16,7 +16,6 @@ class AudiosFromLibrivoxPersistence:
                   save_path: str, 
                   chapter_path: str, 
                   hifi_qa_path: str = None,
-                  file_extension: str = None,
                   url: str = 'https://librivox.org/', 
                   solo_reading: bool = None, 
                   sections: Union[list, str] = None, 
