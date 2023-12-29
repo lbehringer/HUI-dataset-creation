@@ -53,17 +53,6 @@ Installation of dependencies
 pip install -r requirements.txt 
 ```
 
-Download: https://opendata.iisys.de/opendata/Datasets/deepspeechModel/deepspeechModel.zip and copy the content of the downloaded zip into the folder:
-
-```
-/huiAudioCorpus/sttInference/deepspeechModel
-```
-### Optional installation step
-The deepspeech model runs by default on CPU. This could lead to a long pipeline processing pipeline. If you have a compatible GPU you can install a special version from deepspeech.
-More infos can be found at:
-```
-https://deepspeech.readthedocs.io/en/r0.9/USING.html
-```
 ## Recreate dataset
 
 ```
