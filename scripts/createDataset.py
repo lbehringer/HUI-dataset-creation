@@ -37,6 +37,7 @@ eva = path_util.load_json(base_path + '/Eva.json')
 karlsson = path_util.load_json(base_path + '/Karlsson.json')
 sonja = path_util.load_json(base_path + '/Sonja.json')
 christian_culp = path_util.load_json(os.path.join(base_path, 'Christian_Culp_latest.json'))
+christian_culp_one_section = path_util.load_json(os.path.join(base_path, 'Christian_Culp_one_section.json'))
 
 all_libribox_ids = [author[key]['librivox_book_name'] for author in [
     bernd, hokuspokus, friedrich, eva, karlsson, redaer] for key in author]
@@ -51,6 +52,7 @@ if len(duplicate_ids) > 0:
 all_configs = friedrich
 # all_configs = redaer
 # all_configs = christian_culp
+all_configs = christian_culp_one_section
 
 # this is needed for the statistic and split into others
 special_speakers = ['Bernd_Ungerer', 'Eva_K', 'Friedrich', 'Hokuspokus', 'Karlsson']
@@ -208,6 +210,7 @@ def run_workflow(params: Dict, workflow_config: Dict):
             "step4_1_normalize_transcript": {
                 'save_path': step4_1_path,
                 'text_replacement': params['text_replacement'],
+                'language': params['language']
             },
             "transcripts_persistence": {
                 "load_path": step4_path,
