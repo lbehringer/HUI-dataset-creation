@@ -52,15 +52,63 @@ class AlignSentencesIntoTextCalculator:
             start = 0
             additional_range = 0
             distance_threshold = 0.2
-            for asr_sent in tqdm(sentences_to_align):
+            max_range_threshold = 2000
+            first_alignment_found = False
+            max_consecutive_unaligned_sents_threshold = 5
+            consecutive_unaligned_sents = 0
+            for idx, asr_sent in enumerate(tqdm(sentences_to_align)):
+                # Find the best position for the current text within the given range
                 range_start = max(0, start - word_range - additional_range)
                 range_end = min(range_start + 2 * (word_range + additional_range) + asr_sent.words_count, original_text.words_count + 1)
 
-                # Find the best position for the current text within the given range
-                if range_end - range_start > 2000:
-                    raise Exception('more than 2000 Words in search text')
+                # if no alignment below distance threshold is found, move start of search range or raise error
+                if range_end - range_start > max_range_threshold:
+                    if not first_alignment_found:
+                        start = max_range_threshold
+                        range_start += max_range_threshold
+                        additional_range = 0
+                    else:
+                        raise Exception(f'more than {max_range_threshold} Words in search text')
+                    
+                # update start of search range if too many consecutive sentences are above alignment threshold
+                if consecutive_unaligned_sents >= max_consecutive_unaligned_sents_threshold:
+                    start = end
+                    range_start = start
+                    range_end = max(range_start + word_range, range_end) # to avoid search range <= 0
+                    
+                    at_least_one_below_alignment_threshold = False
+                    # while none of sentences_to_align[-max_consecutive_unaligned_sents_threshold:] align, move search range
+                    # until at least one of the last sentences aligns below the threshold
+                    print("Too many consecutive sentences above alignment threshold.\nMoving search range to align most recent sentences.")
+                    while not at_least_one_below_alignment_threshold:
+                        for recent_asr_sent in sentences_to_align[idx-max_consecutive_unaligned_sents_threshold:idx]:
+                            (new_start, end), distance = self.best_position(parallel, 
+                                                                            original_text=original_text[range_start:range_end], 
+                                                                            sentence_to_align=recent_asr_sent, 
+                                                                            range_start=0, 
+                                                                            range_end=range_end - range_start)
+                            new_start += range_start
+                            end += range_start
+                            align = SentenceAlignment(recent_asr_sent, original_text[new_start: end], new_start, end, distance)       
 
-                (new_start, end), distance = self.best_position(parallel, original_text[range_start:range_end], asr_sent, 0, range_end - range_start)
+                            if distance <= distance_threshold:
+                                at_least_one_below_alignment_threshold = True
+                                first_alignment_found = True
+                                start = end
+                                additional_range = 0
+                                consecutive_unaligned_sents = 0
+                                break
+                            additional_range += 30 + recent_asr_sent.words_count
+                        if not at_least_one_below_alignment_threshold:
+                            range_start += additional_range
+                            range_end = min(range_start + max_range_threshold, range_start + 2 * (word_range + additional_range) + asr_sent.words_count, original_text.words_count + 1)
+
+
+                (new_start, end), distance = self.best_position(parallel, 
+                                                                original_text=original_text[range_start:range_end], 
+                                                                sentence_to_align=asr_sent, 
+                                                                range_start=0, 
+                                                                range_end=range_end - range_start)
                 new_start += range_start
                 end += range_start
 
@@ -79,9 +127,12 @@ class AlignSentencesIntoTextCalculator:
 
                     align.is_above_threshold = True
                     additional_range += 30 + asr_sent.words_count
+                    consecutive_unaligned_sents += 1
                 else: 
+                    first_alignment_found = True
                     start = end
                     additional_range = 0
+                    consecutive_unaligned_sents = 0
 
                 alignments.append(align)
             return alignments

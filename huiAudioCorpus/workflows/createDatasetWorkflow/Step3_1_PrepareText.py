@@ -125,8 +125,8 @@ class Step3_1_PrepareText:
             '|': ' ',
             "[": " ",
             "]": " ",       
-            "/": "slash",     
-            '+': 'plus',
+            "/": " slash ",     
+            '+': ' plus ',
             # replace em-dash by dash
             '–': '-',
 
