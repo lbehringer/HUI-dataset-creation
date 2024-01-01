@@ -51,8 +51,8 @@ if len(duplicate_ids) > 0:
 # all_configs = sonja
 all_configs = friedrich
 # all_configs = redaer
-# all_configs = christian_culp
-all_configs = christian_culp_one_section
+all_configs = christian_culp
+# all_configs = christian_culp_one_section
 
 # this is needed for the statistic and split into others
 special_speakers = ['Bernd_Ungerer', 'Eva_K', 'Friedrich', 'Hokuspokus', 'Karlsson']
@@ -100,7 +100,7 @@ def run_workflow(params: Dict, workflow_config: Dict):
     step3_1_path_text  = step3_1_path + '/text.txt'
 
     step4_path  = book_base_path + params['title'] + '/Step4_TranscriptAudio'
-    step4_1_path = os.path.join(book_base_path + params['title'], "step4_1_normalize_transcript")
+    step4_1_path = os.path.join(book_base_path + params['title'], "Step4_1_NormalizeTranscript")
     step5_path  = book_base_path + params['title'] + '/Step5_AlignText'
     step6_path  = book_base_path + params['title'] + '/Step6_FinalizeDataset'
         
@@ -229,6 +229,9 @@ def run_workflow(params: Dict, workflow_config: Dict):
             'transcripts_persistence': {
                 'load_path': step4_1_path,
                 'save_path': step5_path
+            },
+            'align_sentences_into_text_calculator': {
+                'sections': params['sections']
             }
         }
         DependencyInjection(config).step5_align_text.run()

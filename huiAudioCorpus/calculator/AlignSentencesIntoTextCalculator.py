@@ -15,8 +15,16 @@ class AlignSentencesIntoTextCalculator:
     A class for aligning sentences to text based on distance metrics.
     """
 
-    def __init__(self, sentence_distance_transformer: SentenceDistanceTransformer):
+    def __init__(self, sentence_distance_transformer: SentenceDistanceTransformer, sections: List):
         self.sentence_distance_transformer = sentence_distance_transformer
+        self.total_allowed_moving_of_search_range = 1 # 1 default for beginning of source text
+        # for every non-consecutive section, allow moving of search range once more
+        for idx, section in enumerate(sorted(sections)):
+            if idx > 0:
+                if section > sections[idx-1] + 1:
+                    self.total_allowed_moving_of_search_range += 1
+                elif section <= sections[idx-1]:
+                    raise Exception(f"Succeeding section needs to have larger value than previous section.")
 
     def calculate(self, original_text: Sentence, sentences_to_align: List[Sentence]):
         """
@@ -30,19 +38,20 @@ class AlignSentencesIntoTextCalculator:
             alignments (List[SentenceAlignment]): list of SentenceAlignment objects representing the alignments
         """
 
-        alignments = self.calculate_alignments(original_text, sentences_to_align)
+        alignments = self.calculate_alignments(original_text, sentences_to_align, self.total_allowed_moving_of_search_range)
         alignments = self.evaluate_if_perfect_start_and_end(alignments, original_text.words_count)
         alignments = self.get_missing_words_between_alignments(alignments, original_text)
         return alignments
 
 
-    def calculate_alignments(self, original_text: Sentence, sentences_to_align: List[Sentence]):
+    def calculate_alignments(self, original_text: Sentence, sentences_to_align: List[Sentence], remaining_allowed_moving_of_search_range: int):
         """
         Calculate sentence alignments based on distance metrics.
 
         Params:
             original_text (Sentence): original text to which sentences should be aligned
             sentences_to_align (List[Sentence]): list of sentences to align
+            remaining_allowed_moving_of_search_range: int, determines how often the search range can be moved due to consecutive unaligned sentences
 
         Returns:
             alignments (List[SentenceAlignment]): list of SentenceAlignment objects representing the alignments
@@ -72,6 +81,10 @@ class AlignSentencesIntoTextCalculator:
                     
                 # update start of search range if too many consecutive sentences are above alignment threshold
                 if consecutive_unaligned_sents >= max_consecutive_unaligned_sents_threshold:
+                    remaining_allowed_moving_of_search_range -= 1
+                    if remaining_allowed_moving_of_search_range < 0:
+                        raise Exception(f"Too many attempts of moving the search range due to consecutive unaligned sentences. \
+                                        Moving the search range is only allowed {self.total_allowed_moving_of_search_range} times across the complete source text.")
                     start = end
                     range_start = start
                     range_end = max(range_start + word_range, range_end) # to avoid search range <= 0
