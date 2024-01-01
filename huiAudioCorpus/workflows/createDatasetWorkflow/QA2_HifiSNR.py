@@ -14,6 +14,8 @@ from scipy.signal import butter, lfilter
 import matplotlib.pyplot as plt
 import soundfile as sf
 from copy import deepcopy
+import pandas as pd
+import os
 
 class QA2_HifiSNR:
     def __init__(
@@ -23,12 +25,26 @@ class QA2_HifiSNR:
             audio_loudness_transformer: AudioLoudnessTransformer,
             save_path: str, 
             book_name: str,
-            seconds_to_analyze=30,
+            hifi_qa_load_path: str,
+            hifi_qa_save_path: str,            
+            seconds_to_analyze: int,
+            vad_threshold: float,
+            vad_min_speech_duration_ms: float,
+            vad_min_silence_duration_ms: float,
+            vad_window_size_samples: int,
+            vad_speech_pad_ms: int,        
             target_sr=16000):
         self.audio_persistence = audio_persistence
         self.save_path = save_path
         self.book_name = book_name
+        self.hifi_qa_load_path = hifi_qa_load_path
+        self.hifi_qa_save_path = hifi_qa_save_path        
         self.seconds_to_analyze = seconds_to_analyze
+        self.vad_threshold = vad_threshold
+        self.vad_min_speech_duration_ms = vad_min_speech_duration_ms
+        self.vad_min_silence_duration_ms = vad_min_silence_duration_ms
+        self.vad_window_size_samples = vad_window_size_samples
+        self.vad_speech_pad_ms = vad_speech_pad_ms
         self.audio_sr_transformer = audio_sr_transformer
         self.audio_loudness_transformer = audio_loudness_transformer
         self.target_sr = target_sr
@@ -38,13 +54,15 @@ class QA2_HifiSNR:
     
     def script(self):
         audios = self.audio_persistence.load_all(duration=self.seconds_to_analyze)
+        hifi_qa_stat_dict = {}
+
         for idx, audio in enumerate(audios):
             # only load VAD model if there are any audios to be analyzed
             if idx == 0:
                 self.load_vad_model()
             audio = self.audio_loudness_transformer.transform(audio)
             speech_timestamps, silence_timestamps = self.apply_vad(audio)
-            audio = self.set_x_seconds_id(audio, self.book_name, idx+1, self.seconds_to_analyze)
+            # audio = self.set_x_seconds_id(audio, self.book_name, idx+1, self.seconds_to_analyze)
             sufficient_snr = False
             snr_threshold = 32
             frequency_bands = [(100, 1000), (300, 4000), (4000, 10000), (10000, 15000)]
@@ -64,12 +82,20 @@ class QA2_HifiSNR:
                     print(f"{audio.id} | SNR for freq band {lower_freq}-{upper_freq}: {snr}")
                     if snr >= snr_threshold:
                         sufficient_snr = True
-
+                    hifi_qa_stat_dict[idx] = [audio.id, snr]
+                    snr_label = f"snr_{lower_freq}_to_{upper_freq}_hz"
             if sufficient_snr:
                 self.audio_persistence.save(audio)
             else:
                 print(f"SNR {snr} is < required threshold ({snr_threshold}). Skipping {audio.id}")
-            
+
+            # save hifi_qa stats
+            loaded_df = pd.read_csv(self.hifi_qa_load_path, sep="|")
+            hifi_qa_df = pd.DataFrame.from_dict(hifi_qa_stat_dict, orient="index", columns=["id", snr_label])
+            hifi_qa_df = hifi_qa_df.merge(loaded_df, how="outer", on="id")
+            os.makedirs(self.save_path, exist_ok=True)
+            hifi_qa_df.to_csv(self.hifi_qa_save_path, sep="|", index=False)            
+
             """
             for now, we don't store the speech-only or silence-only audio because 
             the "uncut" samples get the highest WVMOS score
@@ -178,29 +204,28 @@ class QA2_HifiSNR:
 
         audio = self.audio_sr_transformer.transform(audio=audio)
         wav = torch.from_numpy(audio.time_series)
-        min_silence_duration_ms = 150
-        min_speech_duration_ms = 250
+
         # get speech_timestamps with a config that will yield at least one speech chunk and at least one silence chunk
         # we assume that a very short chunk (~10ms) for either speech or silence will result in a too low SNR so the sample will be filtered out        
-        while min_speech_duration_ms > 10 and min_silence_duration_ms > 10:        
+        while self.vad_min_speech_duration_ms > 10 and self.vad_min_silence_duration_ms > 10:        
             with torch.no_grad():
                 speech_timestamps = self.get_speech_timestamps(
                         wav,
                         self.vad_model,
-                        threshold=0.5,  # speech prob threshold
+                        threshold=self.vad_threshold,  # speech prob threshold
                         sampling_rate=self.target_sr,  # sample rate
-                        min_speech_duration_ms=min_speech_duration_ms,  # min speech duration in ms
+                        min_speech_duration_ms=self.vad_min_speech_duration_ms,  # min speech duration in ms
                         max_speech_duration_s=float('inf'),  # max speech duration in seconds
-                        min_silence_duration_ms=min_silence_duration_ms,  # min silence duration
-                        window_size_samples=512,  # window size
-                        speech_pad_ms=30,  # speech pad ms
+                        min_silence_duration_ms=self.vad_min_silence_duration_ms,  # min silence duration
+                        window_size_samples=self.vad_window_size_samples,  # window size
+                        speech_pad_ms=self.vad_speech_pad_ms,  # speech pad ms
                     )
 
             silence_timestamps = self.get_silence_timestamps(speech_timestamps)
             if len(speech_timestamps) == 0:
-                min_speech_duration_ms = int(min_speech_duration_ms / 2)
+                self.vad_min_speech_duration_ms = int(self.vad_min_speech_duration_ms / 2)
             if len(silence_timestamps) == 0:
-                min_silence_duration_ms = int(min_silence_duration_ms / 2)
+                self.vad_min_silence_duration_ms = int(self.vad_min_silence_duration_ms / 2)
             else:
                 return speech_timestamps, silence_timestamps
         return

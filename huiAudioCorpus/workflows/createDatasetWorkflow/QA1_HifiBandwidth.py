@@ -5,6 +5,7 @@ from huiAudioCorpus.transformer.AudioLoudnessTransformer import AudioLoudnessTra
 import librosa
 import numpy as np
 import pandas as pd
+import os
 
 class QA1_HifiBandwidth:
     def __init__(
@@ -15,6 +16,7 @@ class QA1_HifiBandwidth:
             seconds_to_analyze: int,
             analysis_offset: float,
             bandwidth_hz_threshold: int,
+            min_db_threshold_wrt_peak: int,
             hifi_qa_load_path: str,
             hifi_qa_save_path: str,
             audio_loudness_transformer: AudioLoudnessTransformer = None,
@@ -28,6 +30,7 @@ class QA1_HifiBandwidth:
         self.analysis_offset = analysis_offset
         self.audio_loudness_transformer = audio_loudness_transformer
         self.bandwidth_hz_threshold = bandwidth_hz_threshold
+        self.min_db_threshold_wrt_peak = min_db_threshold_wrt_peak
 
     def run(self):
         return DoneMarker(self.save_path).run(self.script)
@@ -47,9 +50,10 @@ class QA1_HifiBandwidth:
                 self.audio_persistence.save(audio)
 
         # save hifi_qa stats
-        hifi_step1_df = pd.read_csv(self.hifi_qa_load_path, sep="|")
+        loaded_df = pd.read_csv(self.hifi_qa_load_path, sep="|")
         hifi_qa_df = pd.DataFrame.from_dict(hifi_qa_stat_dict, orient="index", columns=["id", "bandwidth", "lowest_hz", "highest_hz"])
-        hifi_qa_df = hifi_step1_df.merge(hifi_qa_df, how="outer", on="id")
+        hifi_qa_df = loaded_df.merge(hifi_qa_df, how="outer", on="id")
+        os.makedirs(self.save_path, exist_ok=True)
         hifi_qa_df.to_csv(self.hifi_qa_save_path, sep="|", index=False)
 
     def set_x_seconds_id(self, audio: Audio, book_name: str, chapter: int, seconds_to_analyze):
@@ -73,7 +77,7 @@ class QA1_HifiBandwidth:
 
         # get highest frequency which is at least -50 dB (or higher) relative to the peak value (peak value should be <= 0)
         peak_value = np.max(power_spec_db)
-        threshold = peak_value - 60  # -50 dB level relative to the peak value
+        threshold = peak_value + self.min_db_threshold_wrt_peak  # -50 dB level relative to the peak value
         frequencies_above_threshold = np.where(power_spec_db >= threshold)[0]
         if len(frequencies_above_threshold) > 0:
             bandwidth_start = frequencies_above_threshold[0]

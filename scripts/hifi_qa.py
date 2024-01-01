@@ -4,7 +4,7 @@ from huiAudioCorpus.dependencyInjection.DependencyInjection import DependencyInj
 import scripts.createDatasetConfig as createDatasetConfig
 from huiAudioCorpus.utils.PathUtil import PathUtil
 import os
-
+import yaml
 path_util = PathUtil()
 base_path = createDatasetConfig.__path__[0]  # type: ignore
 
@@ -91,6 +91,7 @@ def clean_filter(input_data):
 def run_workflow(params: Dict, workflow_config: Dict):
     print(params)
     readers_base_path = os.path.join(database_path, "readers")
+    config_save_path = os.path.join(readers_base_path, params["reader"], "config.yaml")
     step1_path = os.path.join(readers_base_path, params["reader"], "Step1_DownloadAudio")
     step1_path_audio = step1_path + '/audio'
     step1_path_chapter = step1_path + '/chapter.csv'
@@ -114,9 +115,34 @@ def run_workflow(params: Dict, workflow_config: Dict):
 
     qa2_path = os.path.join(readers_base_path, params["reader"], "QA2_HifiSNR")
     qa2_path_audio = os.path.join(qa2_path, "audio")
+    qa2_path_hifi_qa = os.path.join(qa2_path, "hifi_qa.csv")
 
     qa3_path = os.path.join(readers_base_path, params["reader"], "QA3_WVMOS")
     qa3_path_audio = os.path.join(qa3_path, "audio")
+    qa3_path_hifi_qa = os.path.join(qa3_path, "hifi_qa.csv")
+
+
+    # hifi_qa_params
+    hifi_qa_params = {
+        "analysis_offset": 30,
+        "seconds_to_analyze": 30,
+        "loudness": -20,
+        "bandwidth_hz_threshold": 13000,
+        "min_db_threshold_wrt_peak": -60,
+        "qa2_vad_min_speech_duration_ms": 250,
+        "qa2_vad_min_silence_duration_ms": 150,
+        "qa2_vad_window_size_samples": 512,
+        "qa2_vad_speech_pad_ms": 30,            
+        "qa2_vad_threshold": 0.5,
+        "qa3_vad_min_speech_duration_ms": 250,
+        "qa3_vad_min_silence_duration_ms": 500,
+        "qa3_vad_window_size_samples": 512,
+        "qa3_vad_speech_pad_ms": 50,            
+        "qa3_vad_threshold": 0.5
+        }
+    with open(config_save_path, "w") as f:
+        yaml.dump(hifi_qa_params, f)
+
 
     if workflow_config["hifi_qa"]:
         log_step('Step1_DownloadAudio')
@@ -145,14 +171,15 @@ def run_workflow(params: Dict, workflow_config: Dict):
                 "file_extension": "mp3"
             },
             "audio_loudness_transformer": {
-                "loudness": -20
+                "loudness": hifi_qa_params["loudness"]
             },
             "qa1_hifi_bandwidth": {
                 "save_path": qa1_path_audio,
                 "book_name": params["title"],
-                "seconds_to_analyze": 30,
-                "analysis_offset": 30,
-                "bandwidth_hz_threshold": 13000,
+                "seconds_to_analyze": hifi_qa_params["seconds_to_analyze"],
+                "analysis_offset": hifi_qa_params["analysis_offset"],
+                "bandwidth_hz_threshold": hifi_qa_params["bandwidth_hz_threshold"],
+                "min_db_threshold_wrt_peak": hifi_qa_params["min_db_threshold_wrt_peak"],
                 "hifi_qa_load_path": step1_path_hifi_qa,
                 "hifi_qa_save_path": qa1_path_hifi_qa                
             },
@@ -176,6 +203,13 @@ def run_workflow(params: Dict, workflow_config: Dict):
                 "save_path": qa2_path_audio,
                 'book_name': params['title'],
                 "seconds_to_analyze": 30,
+                "hifi_qa_load_path": qa1_path_hifi_qa,
+                "hifi_qa_save_path": qa2_path_hifi_qa,
+                "vad_min_speech_duration_ms": hifi_qa_params["qa2_vad_min_speech_duration_ms"],
+                "vad_min_silence_duration_ms": hifi_qa_params["qa2_vad_min_silence_duration_ms"],
+                "vad_window_size_samples": hifi_qa_params["qa2_vad_window_size_samples"],
+                "vad_speech_pad_ms": hifi_qa_params["qa2_vad_speech_pad_ms"],            
+                "vad_threshold": hifi_qa_params["qa2_vad_threshold"]                
             },
         }
         DependencyInjection(config_qa2).qa2_hifi_snr.run()
@@ -188,7 +222,14 @@ def run_workflow(params: Dict, workflow_config: Dict):
                 "file_extension": "wav"
             },
             "qa3_wvmos": {
-                "save_path": qa3_path_audio
+                "save_path": qa3_path_audio,
+                "hifi_qa_load_path": qa2_path_hifi_qa,
+                "hifi_qa_save_path": qa3_path_hifi_qa,
+                "vad_min_speech_duration_ms": hifi_qa_params["qa3_vad_min_speech_duration_ms"],
+                "vad_min_silence_duration_ms": hifi_qa_params["qa3_vad_min_silence_duration_ms"],
+                "vad_window_size_samples": hifi_qa_params["qa3_vad_window_size_samples"],
+                "vad_speech_pad_ms": hifi_qa_params["qa3_vad_speech_pad_ms"],            
+                "vad_threshold": hifi_qa_params["qa3_vad_threshold"]                               
             },
             "audio_sr_transformer": {
                 "target_sampling_rate": 16000
