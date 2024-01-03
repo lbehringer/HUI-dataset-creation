@@ -15,7 +15,7 @@ class AudiosFromLibrivoxPersistence:
                   book_name: str, 
                   save_path: str, 
                   chapter_path: str, 
-                  hifi_qa_path: str = None,
+                  hifi_qa_save_path: str,
                   url: str = 'https://librivox.org/', 
                   solo_reading: bool = None, 
                   sections: Union[list, str] = None, 
@@ -27,7 +27,7 @@ class AudiosFromLibrivoxPersistence:
         self.solo_reading = solo_reading
         self.sections = sections
         self.chapter_path = chapter_path
-        self.hifi_qa_path = hifi_qa_path
+        self.hifi_qa_save_path = hifi_qa_save_path
         self.path_util = PathUtil()
         self.limit_per_iteration = 1000
         self.number_of_iterations = 20
@@ -41,10 +41,10 @@ class AudiosFromLibrivoxPersistence:
                            (download_link_dict[key], self.save_path + '/' + download_link_dict[key].split('/')[-1]) for key in sorted(download_link_dict)[:self.max_chapters_per_reader])
         chapters.to_csv(self.chapter_path)
 
-        # save hifi_qa_stats
-        hifi_qa_stat_dict = {key: [download_link_dict[key].split("/")[-1].split(".")[0], self.book_name, key, self.reader] for key in sorted(download_link_dict)[:self.max_chapters_per_reader]}
-        hifi_qa_df = pd.DataFrame.from_dict(hifi_qa_stat_dict, orient='index', columns=['id', 'book_name', 'section', 'reader'])
-        hifi_qa_df.to_csv(self.hifi_qa_path, sep="|", index=False)
+        # save hifi_qa stats (reader specific)
+        hifi_qa_stat_dict = {key: [download_link_dict[key].split("/")[-1].split(".")[0], self.book_name, key, self.reader, self.solo_reading] for key in sorted(download_link_dict)[:self.max_chapters_per_reader]}
+        hifi_qa_df = pd.DataFrame.from_dict(hifi_qa_stat_dict, orient='index', columns=['id', 'book_name', 'section', 'reader', 'solo_reading'])
+        hifi_qa_df.to_csv(self.hifi_qa_save_path, sep="|", index=False)      
         
     def get_chapters(self, book_name: str, get_download_links):
         search_url = self.get_search_url(book_name, self.url)

@@ -36,6 +36,7 @@ from huiAudioCorpus.converter.StringToSentencesConverter import StringToSentence
 from huiAudioCorpus.workflows.createDatasetWorkflow.QA1_HifiBandwidth import QA1_HifiBandwidth
 from huiAudioCorpus.workflows.createDatasetWorkflow.QA2_HifiSNR import QA2_HifiSNR
 from huiAudioCorpus.workflows.createDatasetWorkflow.QA3_WVMOS import QA3_WVMOS
+from huiAudioCorpus.workflows.createDatasetWorkflow.QA4_HifiQAOverview import QA4_HifiQAOverview
 from huiAudioCorpus.workflows.createDatasetWorkflow.Step4_1_NormalizeTranscript import Step4_1_NormalizeTranscript
 
 from frosch import hook
@@ -139,6 +140,7 @@ class DependencyInjection:
     qa1_hifi_bandwidth: QA1_HifiBandwidth
     qa2_hifi_snr: QA2_HifiSNR
     qa3_wvmos: QA3_WVMOS
+    qa_4_hifi_qa_overview: QA4_HifiQAOverview
 
     # Plot
     plot: Plot

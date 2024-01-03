@@ -89,7 +89,7 @@ class QA2_HifiSNR:
             else:
                 print(f"SNR {snr} is < required threshold ({snr_threshold}). Skipping {audio.id}")
 
-            # save hifi_qa stats
+            # save hifi_qa stats (reader specific)
             loaded_df = pd.read_csv(self.hifi_qa_load_path, sep="|")
             hifi_qa_df = pd.DataFrame.from_dict(hifi_qa_stat_dict, orient="index", columns=["id", snr_label])
             hifi_qa_df = hifi_qa_df.merge(loaded_df, how="outer", on="id")

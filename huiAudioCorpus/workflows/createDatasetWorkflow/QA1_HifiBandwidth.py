@@ -49,7 +49,7 @@ class QA1_HifiBandwidth:
             if audio.bandwidth >= self.bandwidth_hz_threshold:
                 self.audio_persistence.save(audio)
 
-        # save hifi_qa stats
+        # save hifi_qa stats (reader specific)
         loaded_df = pd.read_csv(self.hifi_qa_load_path, sep="|")
         hifi_qa_df = pd.DataFrame.from_dict(hifi_qa_stat_dict, orient="index", columns=["id", "bandwidth", "lowest_hz", "highest_hz"])
         hifi_qa_df = loaded_df.merge(hifi_qa_df, how="outer", on="id")

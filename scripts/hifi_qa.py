@@ -5,6 +5,8 @@ import scripts.createDatasetConfig as createDatasetConfig
 from huiAudioCorpus.utils.PathUtil import PathUtil
 import os
 import yaml
+import time
+
 path_util = PathUtil()
 base_path = createDatasetConfig.__path__[0]  # type: ignore
 
@@ -90,6 +92,9 @@ def clean_filter(input_data):
 
 def run_workflow(params: Dict, workflow_config: Dict):
     print(params)
+
+    timestamp = time.strftime("%Y%m%d_%H%M%S")
+
     readers_base_path = os.path.join(database_path, "readers")
     config_save_path = os.path.join(readers_base_path, params["reader"], "config.yaml")
     step1_path = os.path.join(readers_base_path, params["reader"], "Step1_DownloadAudio")
@@ -121,6 +126,8 @@ def run_workflow(params: Dict, workflow_config: Dict):
     qa3_path_audio = os.path.join(qa3_path, "audio")
     qa3_path_hifi_qa = os.path.join(qa3_path, "hifi_qa.csv")
 
+    qa_4_path = os.path.join(database_path, "hifi_qa_overview")
+    hifi_qa_overview_filepath = os.path.join(qa_4_path, f"hifi_qa_overview_{timestamp}.csv")
 
     # hifi_qa_params
     hifi_qa_params = {
@@ -154,7 +161,7 @@ def run_workflow(params: Dict, workflow_config: Dict):
                 'sections': params['sections'],
                 'save_path': step1_path_audio + '/',
                 'chapter_path': step1_path_chapter,
-                'hifi_qa_path': step1_path_hifi_qa,
+                'hifi_qa_save_path': step1_path_hifi_qa,
                 'max_chapters_per_reader': 2
             },
             'step1_download_audio': {
@@ -237,138 +244,23 @@ def run_workflow(params: Dict, workflow_config: Dict):
         }
         DependencyInjection(config_qa3).qa3_wvmos.run()
 
+        log_step("QA4_HifiQAOverview")
+        config_qa4 = {
+            "qa_4_hifi_qa_overview": {
+                "save_path": qa_4_path,
+                "hifi_qa_overview_filepath": hifi_qa_overview_filepath,
+                "readers_dir": readers_base_path,
+                "qa3_dir_basename": os.path.basename(qa3_path),
+                "csv_basename": os.path.basename(qa3_path_hifi_qa)
+            }
+        }
+        DependencyInjection(config_qa4).qa_4_hifi_qa_overview.run()
 
 
 
 ############################################################################################
 ############################################################################################
         
-
-    if workflow_config['prepare_audio']:
-        log_step('Step1_DownloadAudio')
-        config_step1 = {
-            'audios_from_librivox_persistence': {
-                'book_name': params['librivox_book_name'],
-                'save_path': step1_path_audio + '/',
-                'chapter_path': step1_path_chapter
-            },
-            'step1_download_audio': {
-                'save_path': step1_path
-            }
-        }
-        DependencyInjection(config_step1).step1_download_audio.run()
-
-        log_step('Step2_SplitAudio')
-        config_step2 = {
-            'audio_split_transformer': {
-                'min_audio_duration': 5,
-                'max_audio_duration': 40
-            },
-            'audio_persistence': {
-                'load_path': step1_path_audio,
-                'save_path': step2_path_audio,
-                'file_extension': 'mp3'
-            },
-            'audio_loudness_transformer': {
-                'loudness': -20
-            },
-            'step2_split_audio': {
-                'book_name': params['title'],
-                'save_path': step2_path,
-                'remap_sort': params['remap_sort'] if 'remap_sort' in params else None
-            }
-        }
-        DependencyInjection(config_step2).step2_split_audio.run()
-
-        log_step('Step2_1_AudioStatistic')
-        config_step2_1 = {
-            'step2_1_audio_statistic': {
-                'save_path': step2_1_path,
-            },
-            'audio_persistence': {
-                'load_path': step2_path_audio
-            },
-            'plot': {
-                'show_duration': 1,
-                'save_path': step2_1_path
-            }
-        }
-        DependencyInjection(config_step2_1).step2_1_audio_statistic.run()
-
-    if workflow_config['prepare_text']:
-        log_step('Step3_DownloadText')
-        config_step3 = {
-            'gutenberg_book_persistence': {
-                'text_id': params['gutenberg_id'],
-                'save_path': step3_path_text
-            },
-            'step3_download_text': {
-                'save_path': step3_path
-            }
-        }
-        DependencyInjection(config_step3).step3_download_text.run()
-
-        log_step('Step3_1_PrepareText')
-        config_step3_1 = {
-            'step3_1_prepare_text': {
-                'save_path': step3_1_path,
-                'load_file': step3_path_text,
-                'save_file': step3_1_path_text,
-                'text_replacement': params['text_replacement'],
-                'start_sentence': params['gutenberg_start'],
-                'end_sentence': params['gutenberg_end'],
-                'moves': params['moves'] if 'moves' in params else [],
-                'remove': params['remove'] if 'remove' in params else []
-            }
-        }
-        DependencyInjection(config_step3_1).step3_1_prepare_text.run()
-
-    if workflow_config['transcript_text']:
-        log_step('Step4_TranscriptAudio')
-        config_step4 = {
-            'step4_transcript_audio': {
-                'save_path': step4_path,
-            },
-            'audio_persistence': {
-                'load_path': step2_path_audio
-            },
-            'transcripts_persistence': {
-                'load_path': step4_path,
-            }
-        }
-        DependencyInjection(config_step4).step4_transcript_audio.run()
-
-    if workflow_config['align_text']:
-        log_step('Step5_AlignText')
-        config_step5 = {
-            'step5_align_text': {
-                'save_path': step5_path,
-                'text_to_align_path': step3_1_path_text
-            },
-            'transcripts_persistence': {
-                'load_path': step4_path,
-                'save_path': step5_path
-            }
-        }
-        DependencyInjection(config_step5).step5_align_text.run()
-
-    if workflow_config['finalize']:
-        log_step('Step6_FinalizeDataset')
-        config_step6 = {
-            'step6_finalize_dataset': {
-                'save_path': step6_path,
-                'chapter_path': step1_path_chapter
-            },
-            'audio_persistence': {
-                'load_path': step2_path_audio,
-                'save_path': final_dataset_path
-            },
-            'transcripts_persistence': {
-                'load_path': step5_path,
-                'save_path': final_dataset_path
-            }
-        }
-        DependencyInjection(config_step6).step6_finalize_dataset.run()
 
 if __name__ == "__main__":
     summary = {}
@@ -391,74 +283,3 @@ if __name__ == "__main__":
         else:
             run_workflow(config, workflow_config)
     print(summary)
-
-    if workflow_config['audio_raw_statistic']:
-        log_step('audio_raw_statistic')
-        di_config_step7 = {
-            'step7_audio_raw_statistic': {
-                'save_path': step7_path,
-                'load_path': final_dataset_path
-            }
-        }
-        DependencyInjection(di_config_step7).step7_audio_raw_statistic.run()
-
-    if workflow_config['full_statistic']:
-        log_step('full_statistic')
-        di_config_step8 = {
-            'step8_dataset_statistic': {
-                'save_path': step8_path,
-                'load_path': step7_path + '/overview.csv',
-                'special_speakers': special_speakers,
-                'filter': None
-            },
-            'audio_persistence': {
-                'load_path': ''
-            },
-            'transcripts_persistence': {
-                'load_path': ''
-            },
-            'plot': {
-                'show_duration': 0
-            }
-        }
-        DependencyInjection(di_config_step8).step8_dataset_statistic.run()
-
-    if workflow_config['clean_statistic']:
-        log_step('clean_statistic')
-        di_config_clean_statistic = {
-            'step8_dataset_statistic': {
-                'save_path': step8_path_clean,
-                'load_path': step7_path + '/overview.csv',
-                'special_speakers': special_speakers,
-                'filter': clean_filter
-            },
-            'audio_persistence': {
-                'load_path': ''
-            },
-            'transcripts_persistence': {
-                'load_path': ''
-            },
-            'plot': {
-                'show_duration': 0
-            }
-        }
-        DependencyInjection(di_config_clean_statistic).step8_dataset_statistic.run()
-
-    if workflow_config['generate_clean']:
-        log_step('generate_clean')
-        di_config_step9 = {
-            'step9_generate_clean_dataset': {
-                'save_path': final_dataset_path,
-                'info_file': step7_path + '/overview.csv',
-                'filter': clean_filter
-            },
-            'transcripts_persistence': {
-                'load_path': final_dataset_path,
-                'save_path': final_dataset_path_clean
-            },
-            'audio_persistence': {
-                'load_path': final_dataset_path,
-                'save_path': final_dataset_path_clean
-            },
-        }
-        DependencyInjection(di_config_step9).step9_generate_clean_dataset.run()
