@@ -24,8 +24,8 @@ class Transcripts(ToString):
 
     @property
     def text(self)-> List[str]:
-        if 'aligned_text_sentence' in self.transcripts.columns:
-            return list(self.transcripts.aligned_text_sentence.values) # type:ignore
+        if 'source_text_sentence' in self.transcripts.columns:
+            return list(self.transcripts.source_text_sentence.values) # type:ignore
         elif 'asr_sentence' in self.transcripts.columns:
             return list(self.transcripts.asr_sentence.values) # type:ignore
         raise KeyError

@@ -35,8 +35,8 @@ class Step5_AlignText:
         for align in not_perfect_alignments:
             print('------------------')
             print(align.source_text.id)
-            print(f"Transcribed text which was aligned:\n{align.aligned_text.sentence}")
-            print(f"Source text: {align.source_text.sentence}")
+            print(f"Source text section which was aligned:\n{align.aligned_text.sentence}")
+            print(f"ASR-transcribed text: {align.source_text.sentence}")
             print(f"Left alignment perfect: {align.left_is_perfect}")
             print(f"Right alignment perfect: {align.right_is_perfect}")
             print(f"Distance: {align.distance}")
@@ -45,12 +45,12 @@ class Step5_AlignText:
 
         results = [[align.source_text.id, align.aligned_text.sentence, align.source_text.sentence, align.distance] for align in alignments if align.is_perfect]
         csv = DataFrame(results)
-        csv.columns = ['id', 'aligned_text_sentence', 'source_text_sentence', 'alignment_distance']      
+        csv.columns = ['id', 'source_text_sentence', 'asr_text_sentence', 'alignment_distance']      
         transcripts = Transcripts(csv, 'transcripts', 'transcripts')
         self.transcripts_persistence.save(transcripts)
 
         results_not_perfect = [[align.source_text.id, align.aligned_text.sentence, align.source_text.sentence, align.distance] for align in alignments if not align.is_perfect]
         csv = DataFrame(results_not_perfect)
-        csv.columns = ['id', 'aligned_text_sentence', 'source_text_sentence', 'alignment_distance']
+        csv.columns = ['id', 'source_text_sentence', 'asr_text_sentence', 'alignment_distance']
         transcripts = Transcripts(csv, 'transcripts_not_perfect', 'transcripts_not_perfect')
         self.transcripts_persistence.save(transcripts)

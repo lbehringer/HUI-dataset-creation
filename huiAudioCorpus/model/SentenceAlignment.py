@@ -3,8 +3,8 @@ from huiAudioCorpus.model.Sentence import Sentence
 
 class SentenceAlignment(ToString):
     def __init__(self, source_text: Sentence, aligned_text: Sentence, start: int, end: int, distance: float, left_is_perfect: bool = False, right_is_perfect: bool = False, is_first: bool = False, is_last: bool = False, is_perfect: bool = False, is_above_threshold: bool = False):
-        self.source_text = source_text
-        self.aligned_text = aligned_text
+        self.source_text = source_text # this refers to the ASR transcript
+        self.aligned_text = aligned_text # this refers to the section of the original book text that was aligned with the ASR transcript
         self.start = start
         self.end = end
         self.distance = distance

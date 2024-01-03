@@ -71,7 +71,7 @@ class Sentence(ToString):
         while len(toks) > 2:
             bigram = toks[:2]
             if (bigram[1][0] == "'" and bigram[1] in self.contractions_beginning_with_apostrophe_stripped) \
-            or bigram[1] == "n't":
+            or bigram[1] == "n't" or bigram[1] in self.contractions_beginning_with_apostrophe:
                 toks_out.append("".join(bigram))
                 toks = toks[2:]
             else:
@@ -80,7 +80,7 @@ class Sentence(ToString):
         toks_out.extend(toks)
         return toks_out                 
 
-    def generate_words(self, text_blob:TextBlob):
+    def generate_words(self, text_blob: TextBlob):
         """
         Generate a list of words from a TextBlob object.
 
@@ -142,7 +142,10 @@ class Sentence(ToString):
                     print(word_matching[-1])
                     print(f"words index: {idx}")
                     raise Exception("Problems during creation of word matchings.")
-                word_matching[-1]+=' ' + word
+                if word in self.contractions_beginning_with_apostrophe:
+                    word_matching[-1] += word
+                else:
+                    word_matching[-1] += ' ' + word
         return word_matching
 
 

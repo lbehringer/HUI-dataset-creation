@@ -133,7 +133,7 @@ class AlignSentencesIntoTextCalculator:
                     print('*****************')
                     print(f"ASR transcript:\n{asr_sent.sentence}")
                     print('___________________')
-                    print(f"Best alignment:\n{align.aligned_text.sentence}")                    
+                    print(f"Best alignment in source text:\n{align.aligned_text.sentence}")                    
                     print('___________________')
                     print(f"Original text search range:\n{original_text[range_start:range_end].sentence}")
                     print('########################')
@@ -182,7 +182,7 @@ class AlignSentencesIntoTextCalculator:
 
     def position_one_sentence(self, original_text: Sentence , sentence_to_align: Sentence, start: int, end: int):
         """
-        Calculate the distance between a part of the original sentence and the sentence to align.
+        Calculate the distance between a part of the original text and the sentence to align.
 
         Parameters:
             original_text (Sentence): original text
