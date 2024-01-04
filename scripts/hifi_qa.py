@@ -181,7 +181,7 @@ def run_workflow(params: Dict, workflow_config: Dict):
                 "loudness": hifi_qa_params["loudness"]
             },
             "qa1_hifi_bandwidth": {
-                "save_path": qa1_path_audio,
+                "save_path": qa1_path,
                 "book_name": params["title"],
                 "seconds_to_analyze": hifi_qa_params["seconds_to_analyze"],
                 "analysis_offset": hifi_qa_params["analysis_offset"],
@@ -196,9 +196,9 @@ def run_workflow(params: Dict, workflow_config: Dict):
         log_step("QA2_HifiSNR")
         config_qa2 = {
             "audio_persistence": {
-                "load_path": qa1_path_audio,
+                "load_path": step1_path_audio,
                 "save_path": qa2_path_audio,
-                "file_extension": "wav"
+                "file_extension": "mp3"
             },
             "audio_loudness_transformer": {
                 "loudness": -20
@@ -207,11 +207,13 @@ def run_workflow(params: Dict, workflow_config: Dict):
                 "target_sampling_rate": 16000
             },
             "qa2_hifi_snr": {
-                "save_path": qa2_path_audio,
+                "save_path": qa2_path,
                 'book_name': params['title'],
                 "seconds_to_analyze": 30,
                 "hifi_qa_load_path": qa1_path_hifi_qa,
                 "hifi_qa_save_path": qa2_path_hifi_qa,
+                "seconds_to_analyze": hifi_qa_params["seconds_to_analyze"],
+                "analysis_offset": hifi_qa_params["analysis_offset"],                
                 "vad_min_speech_duration_ms": hifi_qa_params["qa2_vad_min_speech_duration_ms"],
                 "vad_min_silence_duration_ms": hifi_qa_params["qa2_vad_min_silence_duration_ms"],
                 "vad_window_size_samples": hifi_qa_params["qa2_vad_window_size_samples"],
@@ -224,14 +226,16 @@ def run_workflow(params: Dict, workflow_config: Dict):
         log_step("QA3_WVMOS")
         config_qa3 = {
             "audio_persistence": {
-                "load_path": qa2_path_audio,
+                "load_path": step1_path_audio,
                 "save_path": qa3_path_audio,
-                "file_extension": "wav"
+                "file_extension": "mp3"
             },
             "qa3_wvmos": {
-                "save_path": qa3_path_audio,
+                "save_path": qa3_path,
                 "hifi_qa_load_path": qa2_path_hifi_qa,
                 "hifi_qa_save_path": qa3_path_hifi_qa,
+                "seconds_to_analyze": hifi_qa_params["seconds_to_analyze"],
+                "analysis_offset": hifi_qa_params["analysis_offset"],                
                 "vad_min_speech_duration_ms": hifi_qa_params["qa3_vad_min_speech_duration_ms"],
                 "vad_min_silence_duration_ms": hifi_qa_params["qa3_vad_min_silence_duration_ms"],
                 "vad_window_size_samples": hifi_qa_params["qa3_vad_window_size_samples"],

@@ -28,6 +28,7 @@ class QA2_HifiSNR:
             hifi_qa_load_path: str,
             hifi_qa_save_path: str,            
             seconds_to_analyze: int,
+            analysis_offset: float,
             vad_threshold: float,
             vad_min_speech_duration_ms: float,
             vad_min_silence_duration_ms: float,
@@ -40,6 +41,7 @@ class QA2_HifiSNR:
         self.hifi_qa_load_path = hifi_qa_load_path
         self.hifi_qa_save_path = hifi_qa_save_path        
         self.seconds_to_analyze = seconds_to_analyze
+        self.analysis_offset = analysis_offset        
         self.vad_threshold = vad_threshold
         self.vad_min_speech_duration_ms = vad_min_speech_duration_ms
         self.vad_min_silence_duration_ms = vad_min_silence_duration_ms
@@ -53,7 +55,7 @@ class QA2_HifiSNR:
         return DoneMarker(self.save_path).run(self.script)
     
     def script(self):
-        audios = self.audio_persistence.load_all(duration=self.seconds_to_analyze)
+        audios = self.audio_persistence.load_all(duration=self.seconds_to_analyze, offset=self.analysis_offset)
         hifi_qa_stat_dict = {}
 
         for idx, audio in enumerate(audios):
@@ -84,61 +86,61 @@ class QA2_HifiSNR:
                         sufficient_snr = True
                     hifi_qa_stat_dict[idx] = [audio.id, snr]
                     snr_label = f"snr_{lower_freq}_to_{upper_freq}_hz"
-            if sufficient_snr:
-                self.audio_persistence.save(audio)
-            else:
-                print(f"SNR {snr} is < required threshold ({snr_threshold}). Skipping {audio.id}")
+            # if sufficient_snr:
+            #     self.audio_persistence.save(audio)
+            # else:
+            #     print(f"SNR {snr} is < required threshold ({snr_threshold}). Skipping {audio.id}")
 
-            # save hifi_qa stats (reader specific)
-            loaded_df = pd.read_csv(self.hifi_qa_load_path, sep="|")
-            hifi_qa_df = pd.DataFrame.from_dict(hifi_qa_stat_dict, orient="index", columns=["id", snr_label])
-            hifi_qa_df = hifi_qa_df.merge(loaded_df, how="outer", on="id")
-            os.makedirs(self.save_path, exist_ok=True)
-            hifi_qa_df.to_csv(self.hifi_qa_save_path, sep="|", index=False)            
+        # save hifi_qa stats (reader specific)
+        loaded_df = pd.read_csv(self.hifi_qa_load_path, sep="|")
+        hifi_qa_df = pd.DataFrame.from_dict(hifi_qa_stat_dict, orient="index", columns=["id", snr_label])
+        hifi_qa_df = hifi_qa_df.merge(loaded_df, how="outer", on="id")
+        os.makedirs(self.save_path, exist_ok=True)
+        hifi_qa_df.to_csv(self.hifi_qa_save_path, sep="|", index=False)            
 
-            """
-            for now, we don't store the speech-only or silence-only audio because 
-            the "uncut" samples get the highest WVMOS score
-            upsample_factor = audio.sampling_rate / self.target_sr
-            speech_signal_segments = [audio.time_series[int(ts['start']*upsample_factor):int(ts['end']*upsample_factor)] for ts in speech_timestamps]
-            silence_signal_segments =  [audio.time_series[int(ts['start']*upsample_factor):int(ts['end']*upsample_factor)] for ts in silence_timestamps]
-            speech_signal = np.concatenate(speech_signal_segments)
-            silence_signal = np.concatenate(silence_signal_segments)
-            speech_audio = deepcopy(audio)
-            silence_audio = deepcopy(audio)
-            speech_audio.time_series, speech_audio.id = speech_signal, audio.id+"speech"
-            silence_audio.time_series, silence_audio.id = silence_signal, audio.id+"silence"
-            self.audio_persistenz.save(speech_audio)
-            self.audio_persistenz.save(silence_audio)
-            """
+        """
+        for now, we don't store the speech-only or silence-only audio because 
+        the "uncut" samples get the highest WVMOS score
+        upsample_factor = audio.sampling_rate / self.target_sr
+        speech_signal_segments = [audio.time_series[int(ts['start']*upsample_factor):int(ts['end']*upsample_factor)] for ts in speech_timestamps]
+        silence_signal_segments =  [audio.time_series[int(ts['start']*upsample_factor):int(ts['end']*upsample_factor)] for ts in silence_timestamps]
+        speech_signal = np.concatenate(speech_signal_segments)
+        silence_signal = np.concatenate(silence_signal_segments)
+        speech_audio = deepcopy(audio)
+        silence_audio = deepcopy(audio)
+        speech_audio.time_series, speech_audio.id = speech_signal, audio.id+"speech"
+        silence_audio.time_series, silence_audio.id = silence_signal, audio.id+"silence"
+        self.audio_persistenz.save(speech_audio)
+        self.audio_persistenz.save(silence_audio)
+        """
 
 
-            """
-            For now, we don't use a butterworth filter because
-            we can instead compute the SNR for different frequency bands.
-            # generate 4 time_series, one for each frequency band that we want to analyze
-            # TODO: Is it better to just compute the mel spectrogram, "cut off" all frequencies outside the passband, and then do an inverse mel transform and an inverse STFT?
-            # design band-pass Butterworth filter
-            lowcut = 300
-            highcut = 4000
-            nyquist = 0.5 * audio.sampling_rate
-            low = lowcut / nyquist
-            high = highcut / nyquist
-            b, a = butter(N=4, Wn=[low, high], btype="bandpass")
-            # apply filter to signal
-            filtered_signal = lfilter(b, a, audio.time_series)
-            t = np.linspace(0, 1, len(audio.time_series), endpoint=False)  # Time vector
-            # Plot the original and filtered signals
-            plt.figure(figsize=(10, 6))
-            plt.plot(t, audio.time_series, label='Original Signal')
-            plt.plot(t, filtered_signal, label='Filtered Signal')
-            plt.xlabel('Time (s)')
-            plt.ylabel('Amplitude')
-            plt.legend()
-            plt.savefig("butterworth.png")
-            sf.write("original_audio.wav", audio.time_series, audio.sampling_rate)
-            sf.write("filtered_audio.wav", filtered_signal, audio.sampling_rate)
-            """
+        """
+        For now, we don't use a butterworth filter because
+        we can instead compute the SNR for different frequency bands.
+        # generate 4 time_series, one for each frequency band that we want to analyze
+        # TODO: Is it better to just compute the mel spectrogram, "cut off" all frequencies outside the passband, and then do an inverse mel transform and an inverse STFT?
+        # design band-pass Butterworth filter
+        lowcut = 300
+        highcut = 4000
+        nyquist = 0.5 * audio.sampling_rate
+        low = lowcut / nyquist
+        high = highcut / nyquist
+        b, a = butter(N=4, Wn=[low, high], btype="bandpass")
+        # apply filter to signal
+        filtered_signal = lfilter(b, a, audio.time_series)
+        t = np.linspace(0, 1, len(audio.time_series), endpoint=False)  # Time vector
+        # Plot the original and filtered signals
+        plt.figure(figsize=(10, 6))
+        plt.plot(t, audio.time_series, label='Original Signal')
+        plt.plot(t, filtered_signal, label='Filtered Signal')
+        plt.xlabel('Time (s)')
+        plt.ylabel('Amplitude')
+        plt.legend()
+        plt.savefig("butterworth.png")
+        sf.write("original_audio.wav", audio.time_series, audio.sampling_rate)
+        sf.write("filtered_audio.wav", filtered_signal, audio.sampling_rate)
+        """
             
     def load_vad_model(self):
         """Load Silero VAD model and corresponding functions"""

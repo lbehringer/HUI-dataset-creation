@@ -45,9 +45,9 @@ class QA1_HifiBandwidth:
                 audio = self.audio_loudness_transformer.transform(audio)
             audio.bandwidth, lowest_hz, highest_hz = self.get_bandwidth(audio)
             hifi_qa_stat_dict[idx] = [audio.id, audio.bandwidth, lowest_hz, highest_hz]
-            # filter out audios which don't meet the minimum bandwidth threshold
-            if audio.bandwidth >= self.bandwidth_hz_threshold:
-                self.audio_persistence.save(audio)
+            # # filter out audios which don't meet the minimum bandwidth threshold
+            # if audio.bandwidth >= self.bandwidth_hz_threshold:
+            #     self.audio_persistence.save(audio)
 
         # save hifi_qa stats (reader specific)
         loaded_df = pd.read_csv(self.hifi_qa_load_path, sep="|")

@@ -21,6 +21,8 @@ class QA3_WVMOS:
             save_path: str, 
             hifi_qa_load_path: str,
             hifi_qa_save_path: str,
+            seconds_to_analyze: int,
+            analysis_offset: float,            
             vad_threshold: float,
             vad_min_speech_duration_ms: float,
             vad_min_silence_duration_ms: float,
@@ -31,7 +33,9 @@ class QA3_WVMOS:
         self.audio_sr_transformer = audio_sr_transformer
         self.save_path = save_path
         self.hifi_qa_load_path = hifi_qa_load_path
-        self.hifi_qa_save_path = hifi_qa_save_path        
+        self.hifi_qa_save_path = hifi_qa_save_path
+        self.seconds_to_analyze = seconds_to_analyze
+        self.analysis_offset = analysis_offset                        
         self.vad_threshold = vad_threshold
         self.vad_min_speech_duration_ms = vad_min_speech_duration_ms
         self.vad_min_silence_duration_ms = vad_min_silence_duration_ms
@@ -43,7 +47,7 @@ class QA3_WVMOS:
         return DoneMarker(self.save_path).run(self.script)
     
     def script(self):
-        audios = self.audio_persistence.load_all()
+        audios = self.audio_persistence.load_all(duration=self.seconds_to_analyze, offset=self.analysis_offset)
         hifi_qa_stat_dict = {}
 
         for idx, audio in enumerate(audios):
